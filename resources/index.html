@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moultrie Mobile – Career Match</title>
+  <style>
+    /* Yellow + blocky forest green */
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    .main-nav a.active {
+      background: var(--mm-yellow);
+      color: var(--mm-green);
+    }
+    .main-nav a.active:hover {
+      background: var(--mm-yellow-dark);
+      color: var(--mm-green);
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .hero {
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--mm-green) url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80') center/cover no-repeat;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(35,67,23,0.75) 0%, rgba(35,67,23,0.9) 100%);
+    }
+    .hero h1, .hero p { position: relative; z-index: 1; }
+    .hero h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--mm-yellow);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,0.95);
+      font-size: 1.1rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .option-card {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--mm-text);
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+    .option-card:hover {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .view-title {
+      font-size: 1.25rem;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem;
+      font-weight: 800;
+    }
+    .employer-placeholder {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 2rem;
+      color: var(--mm-muted);
+    }
+    .intro { margin-top: 0; }
+    .intro p { margin: 0 0 1rem; line-height: 1.6; color: var(--mm-text); }
+    .intro p:last-child { margin-bottom: 0; }
+    .intro-lead { font-size: 1.1rem; }
+    .intro-blocks {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .intro-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+    }
+    .intro-block h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .intro-block p { margin: 0; font-size: 0.95rem; }
+    .intro-cta {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      font-weight: 700;
+      text-align: center;
+    }
+    .intro-cta,
+    .intro-cta * { color: var(--mm-yellow) !important; }
+    .nature-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      border: 3px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .nature-strip img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+    .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo">Moultrie <span>Mobile</span></div>
+    <nav class="main-nav">
+      <a href="#home" data-view="home">Home</a>
+      <a href="#employee" data-view="employee">Employee</a>
+      <a href="#employer" data-view="employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <h1>Career Match</h1>
+      <p>Find your place at Moultrie — we’re here to help.</p>
+    </section>
+
+    <section id="home" class="view-section active">
+      <div class="intro">
+        <p class="intro-lead warm">Hey, welcome. Really glad you’re here. This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
+
+        <div class="nature-strip">
+          <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80" alt="Forest path" />
+          <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&q=80" alt="Mountain landscape" />
+          <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80" alt="Misty morning" />
+        </div>
+
+        <p class="warm">We care about <strong>transparency</strong> and <strong>authenticity</strong>. No hidden scoring, no bias — we listen to what you share and match you honestly. Upload your resume and answer a few human-centered questions. Then you get to choose: should we lean more on your experience and hard skills, or more on the human stuff — how you work, what you value, the kind of team you want? Your call.</p>
+        <p class="warm">Every suggestion we make comes with a clear, visual breakdown so you see exactly why we recommended it. No black box. And <strong>your privacy is non-negotiable</strong>: by default we don’t keep your data. When you leave, we forget it. If you want to save your progress, you can choose to keep it.</p>
+
+        <div class="intro-blocks">
+          <div class="intro-block">
+            <h3>How it works</h3>
+            <p>Upload a resume, answer a few questions, and choose whether matches lean toward skills or fit. We’ll show you roles and explain every decision — in plain language.</p>
+          </div>
+          <div class="intro-block">
+            <h3>You’re in control</h3>
+            <p>Pick Employee or Employer above whenever you’re ready. No pressure. We’re here.</p>
+          </div>
+        </div>
+
+        <p class="intro-cta">Choose <strong>Employee</strong> or <strong>Employer</strong> above when you’re ready to start.</p>
+      </div>
+    </section>
+
+    <section id="employee" class="view-section">
+      <h2 class="view-title">Employee</h2>
+      <div class="option-grid">
+        <a href="#personalized-questions" class="option-card">Personalized Questions</a>
+        <a href="#upload-resume" class="option-card">Upload Resume</a>
+        <a href="#training-match" class="option-card">Training & Courses Match</a>
+        <a href="#job-dashboard" class="option-card">Job Recommendation Dashboard</a>
+        <a href="#ai-breakdown" class="option-card">AI Decision Breakdown</a>
+      </div>
+    </section>
+
+    <section id="employer" class="view-section">
+      <h2 class="view-title">Employer</h2>
+      <div class="employer-placeholder">
+        Employer options coming soon.
+      </div>
+    </section>
+  </main>
+  <script>
+    function setView() {
+      const hash = location.hash.slice(1) || 'home';
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+      const section = document.getElementById(hash);
+      const link = document.querySelector(`.main-nav a[data-view="${hash}"]`);
+      if (section) section.classList.add('active');
+      if (link) link.classList.add('active');
+    }
+    window.addEventListener('hashchange', setView);
+    window.addEventListener('load', setView);
+  </script>
+</body>
+</html>
