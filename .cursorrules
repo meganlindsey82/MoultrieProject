@@ -1,0 +1,14 @@
+# Moultrie Career Match – header scan taxonomy
+
+When working on website or resume scanning, use these **key header categories** and their variants:
+
+- **Job experience**: job experience, work experience, employment, employment history, professional experience, career history, work history, experience, positions held, relevant experience, professional background, work background, career experience.
+- **Projects**: projects, project experience, key projects, selected projects, notable projects, project work, project portfolio, project history, major projects, project highlights, technical/side/personal/academic projects.
+- **Leadership**: leadership, leadership experience/roles, management, supervisory experience, team lead, leading teams, people management, mentorship, mentoring, direct reports, lead experience, executive, lead, headed, oversaw.
+- **Activities**: activities, extracurricular, volunteer/volunteering, community service, involvement, campus involvement, student activities, clubs, organizations, memberships, affiliations, hobbies, interests, professional development, continuing education, certifications.
+
+The API exposes:
+- `POST /api/scan/headers` – body `{ "content": "…" }` or `{ "html": "…" }`; returns `{ "detected": [{ "category", "matchedText", "position" }], "rawSnippet" }`.
+- `GET /api/scan/keywords` – returns the full keyword map.
+
+Keyword definitions live in `API /Services/HeaderScanKeywords.cs`; scanning logic in `API /Services/HeaderScanService.cs`.

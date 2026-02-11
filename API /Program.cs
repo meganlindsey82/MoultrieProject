@@ -1,7 +1,16 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("OpenPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+             .AllowAnyMethod()
+             .AllowAnyHeader();
+    });
+});
+builder.Services.AddSingleton<API.Services.HeaderScanService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -15,11 +24,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
 app.UseCors("OpenPolicy");
-
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

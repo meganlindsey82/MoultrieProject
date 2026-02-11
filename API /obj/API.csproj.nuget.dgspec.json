@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/addis/Documents/CURSOR/Understanding/API /API.csproj": {}
+    "/Users/meganlindsey/Documents/Spring-26/mis-321/group/project1/MoultrieProject-1/API /API.csproj": {}
   },
   "projects": {
-    "/Users/addis/Documents/CURSOR/Understanding/API /API.csproj": {
+    "/Users/meganlindsey/Documents/Spring-26/mis-321/group/project1/MoultrieProject-1/API /API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/addis/Documents/CURSOR/Understanding/API /API.csproj",
+        "projectUniqueName": "/Users/meganlindsey/Documents/Spring-26/mis-321/group/project1/MoultrieProject-1/API /API.csproj",
         "projectName": "API",
-        "projectPath": "/Users/addis/Documents/CURSOR/Understanding/API /API.csproj",
-        "packagesPath": "/Users/addis/.nuget/packages/",
-        "outputPath": "/Users/addis/Documents/CURSOR/Understanding/API /obj/",
+        "projectPath": "/Users/meganlindsey/Documents/Spring-26/mis-321/group/project1/MoultrieProject-1/API /API.csproj",
+        "packagesPath": "/var/folders/zp/_1ffk8r550b94sby5r47rf5c0000gn/T/cursor-sandbox-cache/7ee8e18802afd835494668b381aaedbf/nuget",
+        "outputPath": "/Users/meganlindsey/Documents/Spring-26/mis-321/group/project1/MoultrieProject-1/API /obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/addis/.nuget/NuGet/NuGet.Config"
+          "/Users/meganlindsey/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -38,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -64,20 +64,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[9.0.12, 9.0.12]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.osx-arm64",
-              "version": "[9.0.12, 9.0.12]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[9.0.12, 9.0.12]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -86,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
