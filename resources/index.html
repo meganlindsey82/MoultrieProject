@@ -185,6 +185,39 @@
       display: block;
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+    .role-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .role-card {
+      display: block;
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: var(--mm-text);
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .role-card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--mm-green);
+    }
+    .role-card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .role-card:hover {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      transform: translateY(-2px);
+    }
+    .role-card:hover h2 {
+      color: var(--mm-yellow);
+    }
   </style>
 </head>
 <body>
@@ -200,12 +233,25 @@
     <section class="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <h1>Career Match</h1>
-      <p>Find your place at Moultrie — we’re here to help.</p>
+      <p>Internal career assistant for Moultrie employees and hiring managers.</p>
     </section>
 
     <section id="home" class="view-section active">
       <div class="intro">
-        <p class="intro-lead warm">Hey, welcome. Really glad you’re here. This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
+        <p class="intro-lead warm">Welcome. This is Moultrie’s internal AI career dashboard, designed for employees and hiring managers — not the public web.</p>
+
+        <div class="role-selector">
+          <a href="#employee" class="role-card">
+            <h2>I’m an employee</h2>
+            <p>Get job matches, training suggestions, and a clear view of why each role fits you.</p>
+          </a>
+          <a href="#employer" class="role-card">
+            <h2>I’m an employer</h2>
+            <p>Review candidates, understand AI match scores, and explore internal talent.</p>
+          </a>
+        </div>
+
+        <p class="intro-lead warm">This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
 
         <div class="nature-strip">
           <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80" alt="Forest path" />
@@ -234,7 +280,7 @@
     <section id="employee" class="view-section">
       <h2 class="view-title">Employee</h2>
       <div class="option-grid">
-        <a href="#personalized-questions" class="option-card">Personalized Questions</a>
+        <a href="personalized-questions.html" class="option-card">Personalized Questions</a>
         <a href="#upload-resume" class="option-card">Upload Resume</a>
         <a href="#training-match" class="option-card">Training & Courses Match</a>
         <a href="#job-dashboard" class="option-card">Job Recommendation Dashboard</a>
@@ -245,7 +291,11 @@
     <section id="employer" class="view-section">
       <h2 class="view-title">Employer</h2>
       <div class="employer-placeholder">
-        Employer options coming soon.
+        This area is for hiring managers. You can open the dedicated employer dashboard to see candidates
+        who have explicitly chosen to make their profiles visible.
+        <div style="margin-top:1rem;">
+          <a href="employer-dashboard.html" class="option-card" style="display:inline-block;">Open employer dashboard</a>
+        </div>
       </div>
     </section>
   </main>
