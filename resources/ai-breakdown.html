@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Decision Breakdown – Moultrie Mobile Career Match</title>
+  <style>
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
+    .site-logo a { color: white; text-decoration: none; }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--mm-green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--mm-green-block); text-decoration: underline; }
+    .page-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .page-block h2 {
+      font-size: 1.1rem;
+      color: var(--mm-green);
+      margin: 0 0 0.75rem;
+      font-weight: 800;
+    }
+    .page-block p {
+      margin: 0 0 0.75rem;
+      line-height: 1.6;
+    }
+    .page-block p:last-child { margin-bottom: 0; }
+    .weight-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .weight-option {
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem;
+      cursor: pointer;
+      background: var(--mm-card);
+      transition: background 0.2s, color 0.2s;
+    }
+    .weight-option:hover {
+      background: var(--mm-bg);
+    }
+    .weight-option.selected {
+      background: var(--mm-green);
+      color: white;
+    }
+    .weight-option.selected .weight-option-title { color: var(--mm-yellow); }
+    .weight-option-title {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--mm-green);
+      margin: 0 0 0.35rem;
+    }
+    .weight-option p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+    .weight-option.selected .weight-option-title,
+    .weight-option.selected p { color: inherit; opacity: 1; }
+
+    .graph-block { margin-top: 1.5rem; }
+    .graph-block h3 {
+      font-size: 1rem;
+      color: var(--mm-green);
+      margin: 0 0 0.75rem;
+      font-weight: 800;
+    }
+    .graph-1-bars {
+      display: flex;
+      height: 2rem;
+      border: 2px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .graph-1-bar {
+      height: 100%;
+      transition: flex 0.4s ease;
+    }
+    .graph-1-bar.resume { background: var(--mm-green); }
+    .graph-1-bar.preferences { background: var(--mm-yellow); color: var(--mm-text); }
+    .graph-1-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--mm-muted);
+    }
+
+    .graph-2-bars { margin-top: 0.5rem; }
+    .graph-2-row {
+      margin-bottom: 0.75rem;
+    }
+    .graph-2-row:last-child { margin-bottom: 0; }
+    .graph-2-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+    .graph-2-bar-wrap {
+      height: 1.25rem;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .graph-2-bar {
+      height: 100%;
+      background: var(--mm-green);
+      transition: width 0.4s ease;
+    }
+    .graph-2-bar.alt { background: var(--mm-yellow); }
+
+    .graph-3-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .graph-3-item {
+      border: 2px solid var(--mm-green);
+      padding: 0.75rem 1rem;
+    }
+    .graph-3-item-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .graph-3-bar-wrap {
+      height: 0.75rem;
+      background: var(--mm-bg);
+      overflow: hidden;
+    }
+    .graph-3-bar {
+      height: 100%;
+      background: var(--mm-green);
+      transition: width 0.4s ease;
+    }
+
+    .top-jobs-intro { margin-bottom: 1rem; }
+    .top-jobs-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+    .job-match-card {
+      border: 3px solid var(--mm-green);
+      background: var(--mm-card);
+      padding: 1.25rem;
+    }
+    .job-match-card h4 {
+      margin: 0 0 0.25rem;
+      font-size: 1.1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .job-match-card .job-meta {
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      margin-bottom: 1rem;
+    }
+    .job-match-card .job-overall {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .job-match-card .job-overall-label { font-weight: 700; font-size: 0.9rem; }
+    .job-match-card .job-overall-bar {
+      flex: 1;
+      height: 1rem;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .job-match-card .job-overall-fill {
+      height: 100%;
+      background: var(--mm-green);
+      transition: width 0.4s ease;
+    }
+    .job-match-card .job-overall-pct { font-weight: 800; min-width: 3em; }
+    .job-breakdown-rows { display: flex; flex-direction: column; gap: 0.5rem; }
+    .job-breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .job-breakdown-row span:first-child { flex: 0 0 7rem; }
+    .job-breakdown-row .job-breakdown-bar-wrap {
+      flex: 1;
+      height: 0.65rem;
+      background: var(--mm-bg);
+      border: 1px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .job-breakdown-row .job-breakdown-bar {
+      height: 100%;
+      background: var(--mm-green);
+    }
+    .job-breakdown-row .job-breakdown-bar.alt { background: var(--mm-yellow); }
+    .job-breakdown-row .job-breakdown-pct { font-weight: 600; min-width: 2.5em; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="index.html#employee">Employee</a>
+      <a href="index.html#employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <a href="index.html#employee" class="back-link">← Back to Employee options</a>
+    <h1 class="page-title">AI Decision Breakdown</h1>
+    <p style="color:var(--mm-muted);margin:0">See exactly why we suggested each role. No black box.</p>
+
+    <div class="page-block">
+      <h2>How we use this</h2>
+      <p>After you get job recommendations, you can open this page to see a clear, visual breakdown of how the AI weighed your resume, answers, and preferences. Every factor is explained in plain language so you understand the match.</p>
+    </div>
+
+    <div class="page-block">
+      <h2>How should we weight your match?</h2>
+      <p>Choose whether job suggestions lean more on your resume and hard skills, or more on your answers and preferences.</p>
+      <div class="weight-options" role="radiogroup" aria-label="Match weighting">
+        <button type="button" class="weight-option" data-mode="resume" aria-pressed="true">
+          <span class="weight-option-title">Resume & hard skills</span>
+          <p>Prioritize experience, credentials, and skills from your resume. Best when you want roles that match your track record first.</p>
+        </button>
+        <button type="button" class="weight-option" data-mode="preferences" aria-pressed="false">
+          <span class="weight-option-title">My answers & preferences</span>
+          <p>Prioritize your working style, personality, and what you said you want. Best when fit and culture matter most.</p>
+        </button>
+      </div>
+    </div>
+
+    <div class="page-block">
+      <h2>Your breakdown</h2>
+      <p>These three views show how the AI uses your choice and your inputs to build recommendations.</p>
+
+      <div class="graph-block">
+        <h3>1. How your match is weighted</h3>
+        <p style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--mm-muted)">Share of influence: resume vs your answers and preferences.</p>
+        <div class="graph-1-bars">
+          <div class="graph-1-bar resume" id="g1-resume" style="flex:0.7"></div>
+          <div class="graph-1-bar preferences" id="g1-prefs" style="flex:0.3"></div>
+        </div>
+        <div class="graph-1-labels">
+          <span>Resume & skills</span>
+          <span>Answers & preferences</span>
+        </div>
+      </div>
+
+      <div class="graph-block">
+        <h3>2. Factor contribution</h3>
+        <p style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--mm-muted)">How much each factor contributes to your match score.</p>
+        <div class="graph-2-bars">
+          <div class="graph-2-row">
+            <div class="graph-2-label"><span>Skills match</span><span id="f1-pct">35%</span></div>
+            <div class="graph-2-bar-wrap"><div class="graph-2-bar" id="f1-bar" style="width:35%"></div></div>
+          </div>
+          <div class="graph-2-row">
+            <div class="graph-2-label"><span>Experience level</span><span id="f2-pct">25%</span></div>
+            <div class="graph-2-bar-wrap"><div class="graph-2-bar" id="f2-bar" style="width:25%"></div></div>
+          </div>
+          <div class="graph-2-row">
+            <div class="graph-2-label"><span>Working style</span><span id="f3-pct">20%</span></div>
+            <div class="graph-2-bar-wrap"><div class="graph-2-bar alt" id="f3-bar" style="width:20%"></div></div>
+          </div>
+          <div class="graph-2-row">
+            <div class="graph-2-label"><span>Preferences & goals</span><span id="f4-pct">20%</span></div>
+            <div class="graph-2-bar-wrap"><div class="graph-2-bar alt" id="f4-bar" style="width:20%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="graph-block">
+        <h3>3. Decision score breakdown</h3>
+        <p style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--mm-muted)">How a sample recommendation score is built from your inputs.</p>
+        <div class="graph-3-wrap">
+          <div class="graph-3-item">
+            <div class="graph-3-item-header"><span>Resume fit</span><span id="d1-pct">40%</span></div>
+            <div class="graph-3-bar-wrap"><div class="graph-3-bar" id="d1-bar" style="width:40%"></div></div>
+          </div>
+          <div class="graph-3-item">
+            <div class="graph-3-item-header"><span>Question answers</span><span id="d2-pct">35%</span></div>
+            <div class="graph-3-bar-wrap"><div class="graph-3-bar" id="d2-bar" style="width:35%"></div></div>
+          </div>
+          <div class="graph-3-item">
+            <div class="graph-3-item-header"><span>Stated preferences</span><span id="d3-pct">25%</span></div>
+            <div class="graph-3-bar-wrap"><div class="graph-3-bar" id="d3-bar" style="width:25%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-block">
+      <h2>Match breakdown for your top 3 jobs</h2>
+      <p class="top-jobs-intro">Once your profile is uploaded and matched, your top three job recommendations will appear here with a breakdown of how each match score was calculated.</p>
+      <div class="top-jobs-list" id="top-jobs-list">
+        <!-- Sample placeholders; replace with real data when profile is matched -->
+        <div class="job-match-card" data-job="1">
+          <h4>Job title will appear here</h4>
+          <p class="job-meta">Department · Location (filled when matched)</p>
+          <div class="job-overall">
+            <span class="job-overall-label">Match</span>
+            <div class="job-overall-bar"><div class="job-overall-fill" id="job1-overall" style="width:0%"></div></div>
+            <span class="job-overall-pct" id="job1-pct">—%</span>
+          </div>
+          <div class="job-breakdown-rows">
+            <div class="job-breakdown-row">
+              <span>Skills</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job1-skill" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job1-skill-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Experience</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job1-exp" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job1-exp-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Fit & preferences</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar alt" id="job1-fit" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job1-fit-pct">—%</span>
+            </div>
+          </div>
+        </div>
+        <div class="job-match-card" data-job="2">
+          <h4>Second job title</h4>
+          <p class="job-meta">Department · Location (filled when matched)</p>
+          <div class="job-overall">
+            <span class="job-overall-label">Match</span>
+            <div class="job-overall-bar"><div class="job-overall-fill" id="job2-overall" style="width:0%"></div></div>
+            <span class="job-overall-pct" id="job2-pct">—%</span>
+          </div>
+          <div class="job-breakdown-rows">
+            <div class="job-breakdown-row">
+              <span>Skills</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job2-skill" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job2-skill-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Experience</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job2-exp" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job2-exp-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Fit & preferences</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar alt" id="job2-fit" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job2-fit-pct">—%</span>
+            </div>
+          </div>
+        </div>
+        <div class="job-match-card" data-job="3">
+          <h4>Third job title</h4>
+          <p class="job-meta">Department · Location (filled when matched)</p>
+          <div class="job-overall">
+            <span class="job-overall-label">Match</span>
+            <div class="job-overall-bar"><div class="job-overall-fill" id="job3-overall" style="width:0%"></div></div>
+            <span class="job-overall-pct" id="job3-pct">—%</span>
+          </div>
+          <div class="job-breakdown-rows">
+            <div class="job-breakdown-row">
+              <span>Skills</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job3-skill" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job3-skill-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Experience</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" id="job3-exp" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job3-exp-pct">—%</span>
+            </div>
+            <div class="job-breakdown-row">
+              <span>Fit & preferences</span>
+              <div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar alt" id="job3-fit" style="width:0%"></div></div>
+              <span class="job-breakdown-pct" id="job3-fit-pct">—%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-size:0.9rem;color:var(--mm-muted)">Upload your resume and complete your profile to see your real top 3 matches and their breakdowns here.</p>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var mode = 'resume';
+      var resumeWeight = 0.7;
+      var prefsWeight = 0.3;
+
+      function setMode(m) {
+        mode = m;
+        resumeWeight = m === 'resume' ? 0.7 : 0.3;
+        prefsWeight = m === 'resume' ? 0.3 : 0.7;
+        document.querySelectorAll('.weight-option').forEach(function (btn) {
+          var isSelected = btn.getAttribute('data-mode') === m;
+          btn.classList.toggle('selected', isSelected);
+          btn.setAttribute('aria-pressed', isSelected);
+        });
+        updateGraphs();
+      }
+
+      function updateGraphs() {
+        document.getElementById('g1-resume').style.flex = String(resumeWeight);
+        document.getElementById('g1-prefs').style.flex = String(prefsWeight);
+
+        var f1 = mode === 'resume' ? 40 : 15;
+        var f2 = mode === 'resume' ? 30 : 15;
+        var f3 = mode === 'resume' ? 15 : 35;
+        var f4 = mode === 'resume' ? 15 : 35;
+        document.getElementById('f1-pct').textContent = f1 + '%';
+        document.getElementById('f2-pct').textContent = f2 + '%';
+        document.getElementById('f3-pct').textContent = f3 + '%';
+        document.getElementById('f4-pct').textContent = f4 + '%';
+        document.getElementById('f1-bar').style.width = f1 + '%';
+        document.getElementById('f2-bar').style.width = f2 + '%';
+        document.getElementById('f3-bar').style.width = f3 + '%';
+        document.getElementById('f4-bar').style.width = f4 + '%';
+
+        var d1 = mode === 'resume' ? 50 : 20;
+        var d2 = mode === 'resume' ? 30 : 40;
+        var d3 = mode === 'resume' ? 20 : 40;
+        document.getElementById('d1-pct').textContent = d1 + '%';
+        document.getElementById('d2-pct').textContent = d2 + '%';
+        document.getElementById('d3-pct').textContent = d3 + '%';
+        document.getElementById('d1-bar').style.width = d1 + '%';
+        document.getElementById('d2-bar').style.width = d2 + '%';
+        document.getElementById('d3-bar').style.width = d3 + '%';
+      }
+
+      document.querySelectorAll('.weight-option').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setMode(btn.getAttribute('data-mode'));
+        });
+      });
+
+      // Top 3 jobs: call fillTopJobs(topThree) with real data when profile is matched.
+      // Example shape: [{ title, meta, overall, skills, experience, fit }, ...]
+      window.fillTopJobs = function (jobs) {
+        if (!jobs || !jobs.length) return;
+        var list = document.getElementById('top-jobs-list');
+        list.innerHTML = '';
+        jobs.slice(0, 3).forEach(function (job, i) {
+          var idx = i + 1;
+          var card = document.createElement('div');
+          card.className = 'job-match-card';
+          card.setAttribute('data-job', idx);
+          card.innerHTML =
+            '<h4>' + (job.title || 'Job ' + idx) + '</h4>' +
+            '<p class="job-meta">' + (job.meta || 'Department · Location') + '</p>' +
+            '<div class="job-overall">' +
+              '<span class="job-overall-label">Match</span>' +
+              '<div class="job-overall-bar"><div class="job-overall-fill" style="width:' + (job.overall || 0) + '%"></div></div>' +
+              '<span class="job-overall-pct">' + (job.overall || 0) + '%</span>' +
+            '</div>' +
+            '<div class="job-breakdown-rows">' +
+              '<div class="job-breakdown-row"><span>Skills</span><div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" style="width:' + (job.skills || 0) + '%"></div></div><span class="job-breakdown-pct">' + (job.skills || 0) + '%</span></div>' +
+              '<div class="job-breakdown-row"><span>Experience</span><div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar" style="width:' + (job.experience || 0) + '%"></div></div><span class="job-breakdown-pct">' + (job.experience || 0) + '%</span></div>' +
+              '<div class="job-breakdown-row"><span>Fit & preferences</span><div class="job-breakdown-bar-wrap"><div class="job-breakdown-bar alt" style="width:' + (job.fit || 0) + '%"></div></div><span class="job-breakdown-pct">' + (job.fit || 0) + '%</span></div>' +
+            '</div>';
+          list.appendChild(card);
+        });
+      };
+      // Demo with sample data; replace with real match data when profile is uploaded
+      fillTopJobs([
+        { title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 },
+        { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 },
+        { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }
+      ]);
+    })();
+  </script>
+</body>
+</html>
