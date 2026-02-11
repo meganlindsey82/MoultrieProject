@@ -185,6 +185,100 @@
       display: block;
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+    .upload-resume-block { margin-top: 1rem; }
+    .upload-resume-btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .upload-resume-btn:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    .resume-file-name {
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+      color: var(--mm-muted);
+    }
+    .resume-scan-status {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--mm-text);
+    }
+    .resume-scan-results {
+      margin-top: 1.5rem;
+      border: 3px solid var(--mm-green);
+      background: var(--mm-card);
+      padding: 1.25rem;
+    }
+    .resume-scan-results h3 {
+      font-size: 1rem;
+      color: var(--mm-green);
+      margin: 0 0 1rem;
+      font-weight: 800;
+    }
+    .resume-section-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .resume-section-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--mm-bg);
+      border-left: 4px solid var(--mm-green);
+      font-size: 0.95rem;
+    }
+    .resume-section-list li.found { border-left-color: var(--mm-green); }
+    .resume-section-list li.missing { border-left-color: var(--mm-muted); opacity: 0.8; }
+    .resume-section-list .section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .resume-section-list li.found .section-dot { background: var(--mm-green); }
+    .resume-section-list li.missing .section-dot { background: var(--mm-muted); }
+    .job-matches-wrap { margin-top: 1.5rem; }
+    .job-matches-wrap h3 { font-size: 1rem; color: var(--mm-green); margin: 0 0 0.5rem; font-weight: 800; }
+    .job-matches-list { list-style: none; padding: 0; margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .job-matches-list li {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 0.5rem; padding: 0.75rem 1rem; background: var(--mm-bg); border: 2px solid var(--mm-green);
+      font-size: 0.95rem;
+    }
+    .job-matches-list .job-title { font-weight: 700; color: var(--mm-text); }
+    .job-matches-list .job-meta { font-size: 0.85rem; color: var(--mm-muted); }
+    .job-matches-list .job-pct { font-weight: 800; color: var(--mm-green); min-width: 3em; text-align: right; }
+    .job-matches-list.best-matches .job-pct { color: var(--mm-green); }
+    .job-matches-list.partial-matches .job-pct { color: var(--mm-yellow-dark); }
+    .match-by-box {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--mm-bg);
+      border: 3px solid var(--mm-green);
+    }
+    .match-by-box h3 { font-size: 0.95rem; color: var(--mm-green); margin: 0 0 0.5rem; font-weight: 800; }
+    .match-by-options {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .match-by-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .match-by-options input { accent-color: var(--mm-green); }
+    .job-matches-list.other-jobs .job-pct { color: var(--mm-muted); }
   </style>
 </head>
 <body>
@@ -242,6 +336,29 @@
       </div>
     </section>
 
+    <section id="upload-resume" class="view-section">
+      <h2 class="view-title">Upload Resume</h2>
+      <div class="intro">
+        <p class="intro-lead">Upload your resume (PDF, Word, or plain text). Our AI will scan it for key sections so we can match you to the right roles.</p>
+      </div>
+      <div class="upload-resume-block intro-block">
+        <div class="match-by-box">
+          <h3>Match by</h3>
+          <div class="match-by-options" role="radiogroup" aria-label="Match by experience or interests">
+            <label><input type="radio" name="match-by" value="experience" checked /> Experience</label>
+            <label><input type="radio" name="match-by" value="interests" /> Interests</label>
+          </div>
+          <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted)">Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
+        </div>
+        <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
+        <button type="button" id="upload-resume-btn" class="upload-resume-btn">Upload Resume</button>
+        <p id="resume-file-name" class="resume-file-name"></p>
+        <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
+        <div id="resume-scan-results" class="resume-scan-results" hidden></div>
+        <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
+      </div>
+    </section>
+
     <section id="employer" class="view-section">
       <h2 class="view-title">Employer</h2>
       <div class="employer-placeholder">
@@ -249,6 +366,9 @@
       </div>
     </section>
   </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>if (typeof pdfjsLib !== 'undefined') { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; }</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script>
     function setView() {
       const hash = location.hash.slice(1) || 'home';
@@ -261,6 +381,294 @@
     }
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
+
+    (function resumeUpload() {
+      var fileInput = document.getElementById('resume-file');
+      var uploadBtn = document.getElementById('upload-resume-btn');
+      var fileNameEl = document.getElementById('resume-file-name');
+      var statusEl = document.getElementById('resume-scan-status');
+      var resultsEl = document.getElementById('resume-scan-results');
+      var jobMatchesEl = document.getElementById('resume-job-matches');
+      var lastResumeText = null;
+
+      if (!fileInput || !uploadBtn) return;
+
+      function refreshJobMatches() {
+        if (!lastResumeText || !jobMatchesEl) return;
+        var matches = computeJobMatches(lastResumeText, null, getMatchBy());
+        renderJobMatches(jobMatchesEl, matches);
+      }
+
+      uploadBtn.addEventListener('click', function () { fileInput.click(); });
+
+      document.querySelectorAll('input[name="match-by"]').forEach(function (radio) {
+        radio.addEventListener('change', refreshJobMatches);
+      });
+
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files[0];
+        if (!file) return;
+        fileNameEl.textContent = 'File: ' + file.name;
+        statusEl.textContent = 'Scanning resume…';
+        resultsEl.hidden = true;
+        if (jobMatchesEl) jobMatchesEl.hidden = true;
+
+        readResumeText(file).then(function (text) {
+          if (!text || !text.trim()) {
+            statusEl.textContent = 'Could not extract text from this file. Try a PDF or Word document.';
+            return;
+          }
+          lastResumeText = text;
+          var found = scanResumeSections(text);
+          statusEl.textContent = 'Scan complete. Key sections detected:';
+          renderScanResults(resultsEl, found);
+          resultsEl.hidden = false;
+          refreshJobMatches();
+          jobMatchesEl.hidden = false;
+        }).catch(function (err) {
+          statusEl.textContent = 'Error: ' + (err.message || 'Could not read file.');
+        });
+      });
+
+      function readResumeText(file) {
+        var name = (file.name || '').toLowerCase();
+        if (name.endsWith('.txt')) {
+          return new Promise(function (resolve, reject) {
+            var r = new FileReader();
+            r.onload = function () { resolve(r.result || ''); };
+            r.onerror = function () { reject(new Error('Failed to read file')); };
+            r.readAsText(file);
+          });
+        }
+        if (name.endsWith('.pdf')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof pdfjsLib === 'undefined') return Promise.reject(new Error('PDF library not loaded'));
+            return pdfjsLib.getDocument(buf).promise.then(function (pdf) {
+              var pages = [];
+              for (var i = 1; i <= pdf.numPages; i++) {
+                pages.push(pdf.getPage(i).then(function (p) { return p.getTextContent(); }).then(function (c) {
+                  return c.items.map(function (it) { return it.str || ''; }).join(' ');
+                }));
+              }
+              return Promise.all(pages).then(function (arr) { return arr.join('\n'); });
+            });
+          });
+        }
+        if (name.endsWith('.docx') || name.endsWith('.doc')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof mammoth === 'undefined') return Promise.reject(new Error('Word library not loaded'));
+            return mammoth.extractRawText({ arrayBuffer: buf }).then(function (r) { return r.value; });
+          });
+        }
+        return Promise.reject(new Error('Unsupported format. Use .pdf, .docx, or .txt'));
+      }
+
+      var SECTION_DEFS = [
+        {
+          id: 'experience',
+          label: 'Job experience',
+          keywords: ['work experience', 'employment', 'professional experience', 'experience', 'career', 'job history', 'employment history', 'work history', 'positions held', 'employment experience', 'work experience', 'relevant experience', 'professional history']
+        },
+        {
+          id: 'projects',
+          label: 'Projects',
+          keywords: ['projects', 'project experience', 'key projects', 'selected projects', 'project work', 'project experience', 'notable projects', 'technical projects', 'personal projects']
+        },
+        {
+          id: 'leadership',
+          label: 'Leadership',
+          keywords: ['leadership', 'leadership experience', 'management', 'supervisory', 'led ', 'leading ', 'manager', 'supervised', 'team lead', 'lead experience', 'leadership roles']
+        },
+        {
+          id: 'activities',
+          label: 'Activities',
+          keywords: ['activities', 'extracurricular', 'volunteer', 'volunteering', 'community', 'involvement', 'campus involvement', 'clubs', 'organizations', 'membership', 'affiliations', 'community service', 'student organizations', 'professional associations']
+        }
+      ];
+
+      var MOULTRIE_JOBS = [
+        {
+          title: 'Field Operations Coordinator',
+          department: 'Operations',
+          location: 'Moultrie, GA',
+          skills: ['field operations', 'logistics', 'scheduling', 'coordination', 'inventory', 'documentation', 'safety compliance'],
+          qualifications: ['organization', 'communication', 'problem solving', 'experience in operations', 'teamwork', 'detail oriented'],
+          interests: ['organization', 'hands-on', 'logistics', 'safety', 'procedures', 'teamwork', 'outdoors', 'structure']
+        },
+        {
+          title: 'Customer Success Representative',
+          department: 'Customer Success',
+          location: 'Hybrid',
+          skills: ['customer service', 'customer support', 'phone', 'email', 'CRM', 'troubleshooting', 'onboarding'],
+          qualifications: ['communication', 'empathy', 'problem solving', 'experience with customers', 'listening', 'patience'],
+          interests: ['helping people', 'customer focus', 'listening', 'problem solving', 'teaching', 'relationship building']
+        },
+        {
+          title: 'Technical Project Lead',
+          department: 'Product & Technology',
+          location: 'Remote',
+          skills: ['project management', 'agile', 'scrum', 'technical', 'software', 'development', 'stakeholder', 'timeline', 'budget'],
+          qualifications: ['leadership', 'experience leading projects', 'cross-functional', 'communication', 'organization', 'problem solving'],
+          interests: ['technology', 'leading teams', 'building products', 'strategy', 'collaboration', 'problem solving']
+        },
+        {
+          title: 'HR & Training Specialist',
+          department: 'Human Resources',
+          location: 'Moultrie, GA',
+          skills: ['training', 'onboarding', 'recruiting', 'HR', 'human resources', 'policies', 'orientation', 'development programs'],
+          qualifications: ['communication', 'organization', 'experience in HR', 'facilitation', 'interpersonal', 'confidentiality'],
+          interests: ['teaching', 'helping people grow', 'organization', 'people', 'development', 'culture']
+        },
+        {
+          title: 'Sales & Outreach Associate',
+          department: 'Sales',
+          location: 'Hybrid',
+          skills: ['sales', 'outreach', 'lead generation', 'client', 'pipeline', 'negotiation', 'presentation', 'relationship'],
+          qualifications: ['communication', 'persuasion', 'goal oriented', 'experience in sales', 'networking', 'self motivated'],
+          interests: ['meeting people', 'persuasion', 'goals', 'networking', 'relationship building', 'growth']
+        },
+        {
+          title: 'Operations Manager',
+          department: 'Operations',
+          location: 'On-site',
+          skills: ['operations', 'management', 'process improvement', 'budget', 'planning', 'team leadership', 'KPIs', 'efficiency'],
+          qualifications: ['leadership', 'experience managing', 'analytical', 'decision making', 'organization', 'supervisory'],
+          interests: ['leading', 'efficiency', 'improvement', 'decision making', 'team leadership', 'results']
+        },
+        {
+          title: 'Junior Developer',
+          department: 'Product & Technology',
+          location: 'Remote',
+          skills: ['programming', 'coding', 'software development', 'javascript', 'python', 'web', 'API', 'git', 'debugging'],
+          qualifications: ['problem solving', 'projects', 'computer science', 'technical', 'learning', 'collaboration', 'code'],
+          interests: ['technology', 'building things', 'problem solving', 'learning', 'coding', 'projects', 'creativity']
+        },
+        {
+          title: 'Community Engagement Coordinator',
+          department: 'Community',
+          location: 'Moultrie, GA',
+          skills: ['community', 'engagement', 'outreach', 'events', 'volunteer', 'partnerships', 'social', 'programs'],
+          qualifications: ['communication', 'organization', 'volunteer experience', 'leadership', 'involvement', 'relationship building'],
+          interests: ['community', 'volunteer', 'events', 'helping others', 'partnerships', 'social impact', 'involvement']
+        }
+      ];
+
+      function getMatchBy() {
+        var r = document.querySelector('input[name="match-by"]:checked');
+        return (r && r.value) || 'experience';
+      }
+
+      function computeJobMatches(resumeText, sectionResults, matchMode) {
+        matchMode = matchMode || getMatchBy();
+        var normalizedResume = '\n' + (resumeText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        var scored = MOULTRIE_JOBS.map(function (job) {
+          var allCriteria;
+          if (matchMode === 'interests') {
+            allCriteria = job.interests || [];
+          } else {
+            allCriteria = (job.skills || []).concat(job.qualifications || []);
+          }
+          if (allCriteria.length === 0) return { title: job.title, department: job.department, location: job.location, matchPct: 0 };
+          var matched = 0;
+          for (var i = 0; i < allCriteria.length; i++) {
+            var phrase = allCriteria[i].toLowerCase().trim();
+            if (phrase.length && normalizedResume.indexOf(phrase) !== -1) matched++;
+          }
+          var pct = Math.round((matched / allCriteria.length) * 100);
+          return { title: job.title, department: job.department, location: job.location, matchPct: pct };
+        });
+        scored.sort(function (a, b) { return b.matchPct - a.matchPct; });
+        var best = scored.filter(function (j) { return j.matchPct >= 70; });
+        var other = scored.filter(function (j) { return j.matchPct < 70; });
+        return { best: best, other: other };
+      }
+
+      function renderJobMatches(container, matches) {
+        container.innerHTML = '';
+        if (matches.best.length) {
+          var h3Best = document.createElement('h3');
+          h3Best.textContent = 'Best matches (70%+)';
+          container.appendChild(h3Best);
+          var ulBest = document.createElement('ul');
+          ulBest.className = 'job-matches-list best-matches';
+          matches.best.forEach(function (j) {
+            var li = document.createElement('li');
+            li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = j.department + ' · ' + j.location;
+            meta.style.width = '100%';
+            li.appendChild(meta);
+            ulBest.appendChild(li);
+          });
+          container.appendChild(ulBest);
+        }
+        if (matches.other.length) {
+          var h3Other = document.createElement('h3');
+          h3Other.textContent = 'Listed jobs';
+          container.appendChild(h3Other);
+          var ulOther = document.createElement('ul');
+          ulOther.className = 'job-matches-list other-jobs';
+          matches.other.forEach(function (j) {
+            var li = document.createElement('li');
+            li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = j.department + ' · ' + j.location;
+            meta.style.width = '100%';
+            li.appendChild(meta);
+            ulOther.appendChild(li);
+          });
+          container.appendChild(ulOther);
+        }
+      }
+
+      function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function scanResumeSections(text) {
+        var normalized = '\n' + text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        return SECTION_DEFS.map(function (def) {
+          var found = false;
+          var matchedKeyword = null;
+          for (var k = 0; k < def.keywords.length; k++) {
+            var kw = def.keywords[k].toLowerCase();
+            var asHeader = '\n' + kw;
+            var withColon = '\n' + kw + ':';
+            if (normalized.indexOf(asHeader) !== -1 || normalized.indexOf(withColon) !== -1 || normalized.indexOf(kw) !== -1) {
+              found = true;
+              matchedKeyword = def.keywords[k];
+              break;
+            }
+          }
+          return { id: def.id, label: def.label, found: found, matchedKeyword: matchedKeyword };
+        });
+      }
+
+      function renderScanResults(container, found) {
+        container.innerHTML = '';
+        var h3 = document.createElement('h3');
+        h3.textContent = 'Sections detected by AI';
+        container.appendChild(h3);
+        var ul = document.createElement('ul');
+        ul.className = 'resume-section-list';
+        found.forEach(function (item) {
+          var li = document.createElement('li');
+          li.className = item.found ? 'found' : 'missing';
+          var dot = document.createElement('span');
+          dot.className = 'section-dot';
+          li.appendChild(dot);
+          var label = document.createElement('span');
+          label.textContent = item.found ? (item.label + (item.matchedKeyword ? ' (“' + item.matchedKeyword + '”)' : '')) : item.label + ' (not detected)';
+          li.appendChild(label);
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
+    })();
   </script>
 </body>
 </html>
