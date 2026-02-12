@@ -296,14 +296,14 @@
 
         emptyEl.style.display = 'none';
 
-        visible.forEach(function (c) {
-          var initial = (c.name.split(' ').map(function (w) { return w[0]; }).join('') || '?').slice(0, 2);
+        visible.forEach(function (c, idx) {
+          var label = 'Candidate ' + String.fromCharCode(65 + idx);
           var card = document.createElement('div');
           card.className = 'candidate-card';
           card.innerHTML =
             '<div class="candidate-header">' +
-              '<div class="candidate-avatar" aria-hidden="true">' + initial + '</div>' +
-              '<div><div class="candidate-name">' + c.name + '</div><div class="candidate-role">' + c.role + '</div></div>' +
+              '<div class="candidate-avatar" aria-hidden="true">' + String.fromCharCode(65 + idx) + '</div>' +
+              '<div><div class="candidate-name">' + label + '</div><div class="candidate-role">' + c.role + '</div></div>' +
             '</div>' +
             '<div class="candidate-match-row">' +
               '<div class="match-ring" style="--pct: ' + c.match + '" aria-hidden="true">' +

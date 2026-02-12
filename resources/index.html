@@ -271,10 +271,8 @@
       object-fit: cover;
       object-position: center;
       display: block;
-      vertical-align: bottom;
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; color: var(--mm-text); }
-    .intro .warm { font-size: 1.05rem; line-height: 1.7; }
     .back-link {
       display: inline-block;
       margin-bottom: 1rem;
@@ -877,6 +875,9 @@
           </div>
           <p>Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
         </div>
+        <p class="upload-bias-note" style="margin:0;color:var(--mm-muted);font-size:0.9rem;line-height:1.55;">
+          <strong>Bias-free resume reviewer:</strong> we focus on skills and experience only. We do not use school, graduation year, age, name, location, race, gender, or other personal details to score your matches.
+        </p>
         <div class="upload-zone">
           <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
           <button type="button" id="upload-resume-btn" class="upload-resume-btn">Choose resume file</button>
@@ -886,21 +887,6 @@
         <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
         <div id="resume-scan-results" class="resume-scan-results" hidden></div>
         <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
-      </div>
-
-      <div id="upload-resume-paste" class="personalized-section">
-        <h3>Upload Resume (bias-free)</h3>
-        <p class="intro" style="margin-bottom: 1.5rem;">Upload your resume or paste its text below. For fair, unbiased matching, we <strong>remove name, location, graduation date, school, race, gender</strong> and similar details before analysis. Only skills, experience, and qualifications are used.</p>
-        <div class="question-block">
-          <label>Resume (text or PDF)</label>
-          <input type="file" id="resume-bias-file" accept=".txt,.pdf" aria-label="Choose resume file">
-        </div>
-        <div class="question-block">
-          <label for="resume-bias-paste">Or paste resume text here</label>
-          <textarea id="resume-bias-paste" placeholder="Paste your resume content..." rows="8" aria-label="Paste resume text"></textarea>
-        </div>
-        <button type="button" id="resume-bias-submit" class="personalized-submit">Analyze resume</button>
-        <p id="resume-bias-status" style="margin-top:1rem;font-size:0.9rem;color:var(--mm-muted);" aria-live="polite"></p>
       </div>
     </section>
 
@@ -1019,6 +1005,21 @@
           </div>
 
           <div class="question-block">
+            <label>Can we use your name to save your profile?</label>
+            <span class="hint">If Yes, employers can see your name when reviewing potential candidates who match their roles. If No, your profile is saved without your name for anonymity.</span>
+            <div class="choice-row">
+              <label><input type="radio" name="save-name" value="yes" id="save-name-yes"> Yes — use my name so employers can review me</label>
+              <label><input type="radio" name="save-name" value="no" id="save-name-no"> No — save my profile without my name</label>
+            </div>
+            <div id="save-name-contact" class="question-block" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--mm-border);">
+              <label for="profile-name">Your name</label>
+              <input type="text" id="profile-name" name="profile_name" placeholder="e.g. Jordan Smith" aria-label="Your name">
+              <label for="profile-email" style="margin-top:0.75rem; display:block;">Email</label>
+              <input type="email" id="profile-email" name="profile_email" placeholder="you@example.com" aria-label="Email">
+            </div>
+          </div>
+
+          <div class="question-block">
             <label for="anything-else">Anything else we should know?</label>
             <span class="hint">Goals, constraints, preferences, or what matters most to you</span>
             <textarea id="anything-else" name="anything_else" placeholder="e.g. career goals, schedule needs, must-haves in a team..."></textarea>
@@ -1092,83 +1093,267 @@
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
 
-    function formatWhen(iso) {
-      if (!iso) return null;
-      try {
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return null;
-        return d.toLocaleString();
-      } catch (e) { return null; }
-    }
+    (function likedJobs() {
+      var LIKED_KEY = 'moultrie_liked_jobs';
+      function getLikedJobs() {
+        try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); }
+        catch (e) { return []; }
+      }
+      function setLikedJobs(arr) { try { localStorage.setItem(LIKED_KEY, JSON.stringify(arr)); } catch (e) {} }
+      function jobKey(j) { return (j.title || '') + '|' + (j.department || '') + '|' + (j.location || ''); }
+      function isJobLiked(j) {
+        var key = jobKey(j);
+        return getLikedJobs().some(function (l) { return jobKey(l) === key; });
+      }
+      window.toggleJobLike = function (j) {
+        var list = getLikedJobs();
+        var key = jobKey(j);
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) { if (jobKey(list[i]) === key) { idx = i; break; } }
+        if (idx >= 0) list.splice(idx, 1);
+        else list.push({ title: j.title, department: j.department, location: j.location });
+        setLikedJobs(list);
+        if (window.refreshJobMatches) window.refreshJobMatches();
+      };
+      window.getLikedJobs = getLikedJobs;
+      window.isJobLiked = isJobLiked;
+    })();
 
-    function renderSavedProfile() {
-      const wrap = document.getElementById('progress-status');
-      if (!wrap) return;
+    (function resumeUpload() {
+      var fileInput = document.getElementById('resume-file');
+      var uploadBtn = document.getElementById('upload-resume-btn');
+      var fileNameEl = document.getElementById('resume-file-name');
+      var statusEl = document.getElementById('resume-scan-status');
+      var resultsEl = document.getElementById('resume-scan-results');
+      var jobMatchesEl = document.getElementById('resume-job-matches');
+      var lastResumeText = null;
 
-      let resumeAt = null, hasResume = false;
-      let answersAt = null, hasAnswers = false;
-      let matchCount = 0;
-      let likedCount = 0;
+      if (!fileInput || !uploadBtn || !fileNameEl || !statusEl || !resultsEl || !jobMatchesEl) return;
 
-      try {
-        const sanitized = localStorage.getItem('moultrie_resume_sanitized');
-        const at = localStorage.getItem('moultrie_resume_at');
-        hasResume = !!(sanitized && sanitized.trim());
-        resumeAt = formatWhen(at);
-      } catch (e) {}
+      function getMatchBy() {
+        var r = document.querySelector('input[name="match-by"]:checked');
+        return (r && r.value) || 'experience';
+      }
 
-      try {
-        const raw = localStorage.getItem('moultrie_personalized');
-        const at = localStorage.getItem('moultrie_personalized_at');
-        hasAnswers = !!raw;
-        answersAt = formatWhen(at);
-      } catch (e) {}
+      function refreshJobMatches() {
+        if (!lastResumeText) return;
+        var matches = computeJobMatches(lastResumeText, getMatchBy());
+        renderJobMatches(jobMatchesEl, matches);
+        var all = (matches.best || []).concat(matches.other || []);
+        var top3 = all.slice(0, 3).map(function (j) {
+          return { id: j.id, title: j.title, department: j.department, location: j.location, matchPct: j.matchPct };
+        });
+        try { sessionStorage.setItem('mmJobMatches', JSON.stringify(top3)); } catch (e) {}
+      }
+      window.refreshJobMatches = refreshJobMatches;
 
-      try {
-        const raw = sessionStorage.getItem('mmJobMatches');
-        const parsed = raw ? JSON.parse(raw) : [];
-        matchCount = Array.isArray(parsed) ? parsed.length : 0;
-      } catch (e) { matchCount = 0; }
+      uploadBtn.addEventListener('click', function () { fileInput.click(); });
+      document.querySelectorAll('input[name="match-by"]').forEach(function (radio) {
+        radio.addEventListener('change', refreshJobMatches);
+      });
 
-      try {
-        const raw = localStorage.getItem('moultrie_liked_jobs');
-        const parsed = raw ? JSON.parse(raw) : [];
-        likedCount = Array.isArray(parsed) ? parsed.length : 0;
-      } catch (e) { likedCount = 0; }
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        fileNameEl.textContent = 'File: ' + file.name;
+        statusEl.textContent = 'Scanning resume…';
+        resultsEl.hidden = true;
+        jobMatchesEl.hidden = true;
 
-      const rows = [
-        { label: 'Resume', ok: hasResume, detail: hasResume ? ('Saved' + (resumeAt ? ' • ' + resumeAt : '')) : 'Not saved yet' },
-        { label: 'Personalized answers', ok: hasAnswers, detail: hasAnswers ? ('Saved' + (answersAt ? ' • ' + answersAt : '')) : 'Not saved yet' },
-        { label: 'Job matches', ok: matchCount > 0, detail: matchCount > 0 ? (matchCount + ' saved this session') : 'None yet (upload resume + answer questions)' },
-        { label: 'Liked jobs', ok: likedCount > 0, detail: likedCount > 0 ? (likedCount + ' liked') : 'None yet' }
+        readResumeText(file).then(function (text) {
+          if (!text || !text.trim()) {
+            statusEl.textContent = 'Could not extract text from this file. Try a PDF or Word document.';
+            return;
+          }
+          lastResumeText = text;
+          try { sessionStorage.setItem('mmResumeText', text); } catch (e) {}
+
+          var found = scanResumeSections(text);
+          statusEl.textContent = 'Scan complete. Key sections detected:';
+          renderScanResults(resultsEl, found);
+          resultsEl.hidden = false;
+
+          refreshJobMatches();
+          jobMatchesEl.hidden = false;
+        }).catch(function (err) {
+          statusEl.textContent = 'Error: ' + (err && err.message ? err.message : 'Could not read file.');
+        });
+      });
+
+      function readResumeText(file) {
+        var name = (file.name || '').toLowerCase();
+        if (name.endsWith('.txt')) {
+          return new Promise(function (resolve, reject) {
+            var r = new FileReader();
+            r.onload = function () { resolve(r.result || ''); };
+            r.onerror = function () { reject(new Error('Failed to read file')); };
+            r.readAsText(file);
+          });
+        }
+        if (name.endsWith('.pdf')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof pdfjsLib === 'undefined') return Promise.reject(new Error('PDF library not loaded'));
+            return pdfjsLib.getDocument(buf).promise.then(function (pdf) {
+              var pages = [];
+              for (var i = 1; i <= pdf.numPages; i++) {
+                pages.push(pdf.getPage(i).then(function (p) { return p.getTextContent(); }).then(function (c) {
+                  return c.items.map(function (it) { return it.str || ''; }).join(' ');
+                }));
+              }
+              return Promise.all(pages).then(function (arr) { return arr.join('\n'); });
+            });
+          });
+        }
+        if (name.endsWith('.docx') || name.endsWith('.doc')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof mammoth === 'undefined') return Promise.reject(new Error('Word library not loaded'));
+            return mammoth.extractRawText({ arrayBuffer: buf }).then(function (r) { return r.value; });
+          });
+        }
+        return Promise.reject(new Error('Unsupported format. Use .pdf, .docx, or .txt'));
+      }
+
+      var SECTION_DEFS = [
+        { id: 'experience', label: 'Job experience', keywords: ['work experience', 'employment', 'professional experience', 'experience', 'career', 'job history', 'employment history', 'work history'] },
+        { id: 'projects', label: 'Projects', keywords: ['projects', 'project experience', 'selected projects', 'project work', 'notable projects'] },
+        { id: 'leadership', label: 'Leadership', keywords: ['leadership', 'management', 'supervisory', 'team lead', 'manager', 'supervised'] },
+        { id: 'activities', label: 'Activities', keywords: ['activities', 'extracurricular', 'volunteer', 'volunteering', 'community', 'clubs', 'organizations'] }
       ];
 
-      wrap.innerHTML = rows.map(r => (
-        '<div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;">' +
-          '<div style="font-weight:700;color:var(--mm-green);">' + r.label + '</div>' +
-          '<div style="text-align:right;color:' + (r.ok ? 'var(--mm-text)' : 'var(--mm-muted)') + ';">' +
-            (r.ok ? '✓ ' : '— ') + r.detail +
-          '</div>' +
-        '</div>'
-      )).join('');
+      var MOULTRIE_JOBS = [
+        { title: 'Field Operations Coordinator', department: 'Operations', location: 'Moultrie, GA', skills: ['field operations', 'logistics', 'scheduling', 'coordination', 'inventory', 'documentation', 'safety compliance'], qualifications: ['organization', 'communication', 'problem solving', 'experience in operations', 'teamwork', 'detail oriented'], interests: ['organization', 'hands-on', 'logistics', 'safety', 'procedures', 'teamwork', 'outdoors', 'structure'] },
+        { title: 'Customer Success Representative', department: 'Customer Success', location: 'Hybrid', skills: ['customer service', 'customer support', 'phone', 'email', 'CRM', 'troubleshooting', 'onboarding'], qualifications: ['communication', 'empathy', 'problem solving', 'experience with customers', 'listening', 'patience'], interests: ['helping people', 'customer focus', 'listening', 'problem solving', 'teaching', 'relationship building'] },
+        { title: 'Technical Project Lead', department: 'Product & Technology', location: 'Remote', skills: ['project management', 'agile', 'scrum', 'technical', 'software', 'development', 'stakeholder', 'timeline', 'budget'], qualifications: ['leadership', 'experience leading projects', 'cross-functional', 'communication', 'organization', 'problem solving'], interests: ['technology', 'leading teams', 'building products', 'strategy', 'collaboration', 'problem solving'] },
+        { title: 'HR & Training Specialist', department: 'Human Resources', location: 'Moultrie, GA', skills: ['training', 'onboarding', 'recruiting', 'HR', 'human resources', 'policies', 'orientation', 'development programs'], qualifications: ['communication', 'organization', 'experience in HR', 'facilitation', 'interpersonal', 'confidentiality'], interests: ['teaching', 'helping people grow', 'organization', 'people', 'development', 'culture'] },
+        { title: 'Sales & Outreach Associate', department: 'Sales', location: 'Hybrid', skills: ['sales', 'outreach', 'lead generation', 'client', 'pipeline', 'negotiation', 'presentation', 'relationship'], qualifications: ['communication', 'persuasion', 'goal oriented', 'experience in sales', 'networking', 'self motivated'], interests: ['meeting people', 'persuasion', 'goals', 'networking', 'relationship building', 'growth'] },
+        { title: 'Operations Manager', department: 'Operations', location: 'On-site', skills: ['operations', 'management', 'process improvement', 'budget', 'planning', 'team leadership', 'KPIs', 'efficiency'], qualifications: ['leadership', 'experience managing', 'analytical', 'decision making', 'organization', 'supervisory'], interests: ['leading', 'efficiency', 'improvement', 'decision making', 'team leadership', 'results'] },
+        { title: 'Junior Developer', department: 'Product & Technology', location: 'Remote', skills: ['programming', 'coding', 'software development', 'javascript', 'python', 'web', 'API', 'git', 'debugging'], qualifications: ['problem solving', 'projects', 'computer science', 'technical', 'learning', 'collaboration', 'code'], interests: ['technology', 'building things', 'problem solving', 'learning', 'coding', 'projects', 'creativity'] },
+        { title: 'Community Engagement Coordinator', department: 'Community', location: 'Moultrie, GA', skills: ['community', 'engagement', 'outreach', 'events', 'volunteer', 'partnerships', 'social', 'programs'], qualifications: ['communication', 'organization', 'volunteer experience', 'leadership', 'involvement', 'relationship building'], interests: ['community', 'volunteer', 'events', 'helping others', 'partnerships', 'social impact', 'involvement'] }
+      ];
 
-      const clearBtn = document.getElementById('clear-saved-profile');
-      if (clearBtn && !clearBtn.__bound) {
-        clearBtn.__bound = true;
-        clearBtn.addEventListener('click', function() {
-          try {
-            localStorage.removeItem('moultrie_personalized');
-            localStorage.removeItem('moultrie_personalized_at');
-            localStorage.removeItem('moultrie_resume_sanitized');
-            localStorage.removeItem('moultrie_resume_at');
-            localStorage.removeItem('moultrie_liked_jobs');
-            sessionStorage.removeItem('mmJobMatches');
-            sessionStorage.removeItem('mmResumeText');
-          } catch (e) {}
-          renderSavedProfile();
+      function computeJobMatches(resumeText, matchMode) {
+        var normalizedResume = '\n' + (resumeText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        var scored = MOULTRIE_JOBS.map(function (job, idx) {
+          var allCriteria = matchMode === 'interests' ? (job.interests || []) : (job.skills || []).concat(job.qualifications || []);
+          if (allCriteria.length === 0) return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: 0 };
+          var matched = 0;
+          for (var i = 0; i < allCriteria.length; i++) {
+            var phrase = allCriteria[i].toLowerCase().trim();
+            if (phrase.length && normalizedResume.indexOf(phrase) !== -1) matched++;
+          }
+          var pct = Math.round((matched / allCriteria.length) * 100);
+          return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: pct };
+        });
+        scored.sort(function (a, b) { return b.matchPct - a.matchPct; });
+        return { best: scored.filter(function (j) { return j.matchPct >= 70; }), other: scored.filter(function (j) { return j.matchPct < 70; }) };
+      }
+
+      function renderJobMatches(container, matches) {
+        container.innerHTML = '';
+        if (matches.best && matches.best.length) {
+          var h3Best = document.createElement('h3');
+          h3Best.textContent = 'Best matches (70%+)';
+          container.appendChild(h3Best);
+          var ulBest = document.createElement('ul');
+          ulBest.className = 'job-matches-list best-matches';
+          matches.best.forEach(function (j) {
+            var li = document.createElement('li');
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
+            li.appendChild(likeBtn);
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = (j.department || '') + ' · ' + (j.location || '');
+            li.appendChild(meta);
+            ulBest.appendChild(li);
+          });
+          container.appendChild(ulBest);
+        }
+        if (matches.other && matches.other.length) {
+          var h3Other = document.createElement('h3');
+          h3Other.textContent = 'Listed jobs';
+          container.appendChild(h3Other);
+          var ulOther = document.createElement('ul');
+          ulOther.className = 'job-matches-list other-jobs';
+          matches.other.forEach(function (j) {
+            var li = document.createElement('li');
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
+            li.appendChild(likeBtn);
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = (j.department || '') + ' · ' + (j.location || '');
+            li.appendChild(meta);
+            ulOther.appendChild(li);
+          });
+          container.appendChild(ulOther);
+        }
+      }
+
+      function scanResumeSections(text) {
+        var normalized = '\n' + (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        return SECTION_DEFS.map(function (def) {
+          var found = false;
+          var matchedKeyword = null;
+          for (var k = 0; k < def.keywords.length; k++) {
+            var kw = def.keywords[k].toLowerCase();
+            var asHeader = '\n' + kw;
+            var withColon = '\n' + kw + ':';
+            if (normalized.indexOf(asHeader) !== -1 || normalized.indexOf(withColon) !== -1 || normalized.indexOf(kw) !== -1) {
+              found = true;
+              matchedKeyword = def.keywords[k];
+              break;
+            }
+          }
+          return { id: def.id, label: def.label, found: found, matchedKeyword: matchedKeyword };
         });
       }
-    }
+
+      function renderScanResults(container, found) {
+        container.innerHTML = '';
+        var h3 = document.createElement('h3');
+        h3.textContent = 'Sections detected by AI';
+        container.appendChild(h3);
+        var ul = document.createElement('ul');
+        ul.className = 'resume-section-list';
+        found.forEach(function (item) {
+          var li = document.createElement('li');
+          li.className = item.found ? 'found' : 'missing';
+          var dot = document.createElement('span');
+          dot.className = 'section-dot';
+          li.appendChild(dot);
+          var label = document.createElement('span');
+          label.textContent = item.found ? (item.label + (item.matchedKeyword ? ' (“' + item.matchedKeyword + '”)' : '')) : item.label + ' (not detected)';
+          li.appendChild(label);
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
+    })();
 
     function initChat() {
       var AUTO_OPEN_KEY = 'mmChatAutoOpened';
@@ -1374,6 +1559,19 @@
       initChat();
     }
 
+    (function () {
+      var contactBlock = document.getElementById('save-name-contact');
+      var yesRadio = document.getElementById('save-name-yes');
+      var noRadio = document.getElementById('save-name-no');
+      function toggleContact() {
+        if (!contactBlock) return;
+        contactBlock.style.display = (yesRadio && yesRadio.checked) ? 'block' : 'none';
+      }
+      if (yesRadio) yesRadio.addEventListener('change', toggleContact);
+      if (noRadio) noRadio.addEventListener('change', toggleContact);
+      toggleContact();
+    })();
+
     document.getElementById('personalized-form')?.addEventListener('submit', function(e) {
       e.preventDefault();
       const data = new FormData(this);
@@ -1383,6 +1581,27 @@
         if (out[k] === undefined) out[k] = v;
         else out[k] = [].concat(out[k], v);
       }
+      var saveName = [].concat(out['save-name'] || []).filter(Boolean)[0];
+      if (saveName === 'yes') {
+        var profileName = (out['profile_name'] || '').toString().trim();
+        var profileEmail = (out['profile_email'] || '').toString().trim();
+        if (!profileName || !profileEmail) {
+          alert('Please enter your name and email so we can save your profile for employers.');
+          return;
+        }
+      }
+      if (saveName !== 'yes') {
+        try {
+          localStorage.removeItem('moultrie_personalized');
+          localStorage.removeItem('moultrie_personalized_at');
+        } catch (err) { console.warn(err); }
+        if (saveName === 'no') {
+          alert('Your profile was not saved. Your answers will not be stored or shared with employers. You can change your answer above and save again if you\'d like your preferences used for matching.');
+        } else {
+          alert('Please choose whether we may use your name to save your profile (Yes or No) before saving.');
+        }
+        return;
+      }
       try {
         localStorage.setItem('moultrie_personalized', JSON.stringify(out));
         localStorage.setItem('moultrie_personalized_at', new Date().toISOString());
@@ -1390,108 +1609,7 @@
       alert('Thanks! Your answers have been saved. They\'ll be used when we analyze which roles suit you best.');
     });
 
-    // Bias-free resume sanitization: remove name, location, dates, school, race, gender, etc.
-    function sanitizeResumeForAnalysis(text) {
-      if (!text || typeof text !== 'string') return '';
-      var t = text;
-      // Phone numbers (US/international patterns)
-      t = t.replace(/\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g, '[REDACTED]');
-      t = t.replace(/[0-9]{3}[-.\s][0-9]{3}[-.\s][0-9]{4}/g, '[REDACTED]');
-      // Email addresses
-      t = t.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED]');
-      // URLs (LinkedIn, personal sites, etc.)
-      t = t.replace(/https?:\/\/[^\s]+/g, '[REDACTED]');
-      // Street addresses (number + street name patterns)
-      t = t.replace(/\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl)[.,]?\s*(?:Apt|Suite|Ste|#)?\s*\d*/gi, '[REDACTED]');
-      // City, State ZIP (e.g. "Atlanta, GA 30301" or "New York, NY 10001")
-      t = t.replace(/[A-Za-z\s]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?/g, '[REDACTED]');
-      t = t.replace(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}\b/g, '[REDACTED]');
-      // Graduation / education dates (May 2020, 2018-2022, Class of 2020, Expected 2024, etc.)
-      t = t.replace(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi, '[DATE]');
-      t = t.replace(/\b\d{4}\s*[-–—]\s*\d{4}\b/g, '[DATE RANGE]');
-      t = t.replace(/\b(?:Class of|Graduated|Grad\.?|Expected)\s*\d{4}\b/gi, '[DATE]');
-      t = t.replace(/\b(?:Spring|Fall|Winter|Summer)\s+\d{4}\b/gi, '[DATE]');
-      // School / university names (common patterns)
-      t = t.replace(/\b(?:University|College|School|Institute|Academy)\s+of\s+[\w\s]+/gi, '[INSTITUTION]');
-      t = t.replace(/\b[\w\s]+(?:University|College|State University|Community College)\b/gi, '[INSTITUTION]');
-      t = t.replace(/\b(?:High School|High Sch\.?)\s*[:\-]?\s*[\w\s]+/gi, '[INSTITUTION]');
-      // Remove typical "name" header line (often first line: 2-4 capitalized words)
-      var lines = t.split(/\r?\n/);
-      if (lines.length > 1) {
-        var first = lines[0].trim();
-        if (/^[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?$/.test(first) && first.length < 50) lines[0] = '[NAME]';
-        t = lines.join('\n');
-      }
-      // Explicit race, gender, age, marital status (if ever listed)
-      t = t.replace(/\b(?:Male|Female|Non-binary|Man|Woman|M\/F|Gender:)\b/gi, '[REDACTED]');
-      t = t.replace(/\b(?:Race|Ethnicity|Nationality)\s*:?\s*[^\n]+/gi, '[REDACTED]');
-      t = t.replace(/\b(?:Age|DOB|Date of Birth|Born)\s*:?\s*[\d\-\/\.]+/gi, '[REDACTED]');
-      t = t.replace(/\b(?:Married|Single|Marital status)\s*:?\s*[^\n]+/gi, '[REDACTED]');
-      // Photos / headshots mention
-      t = t.replace(/\b(?:Photo|Headshot|Picture)\s*(?:attached|included)?/gi, '[REDACTED]');
-      return t.replace(/\s+/g, ' ').replace(/\s*\[REDACTED\]\s*/g, ' ').replace(/\s*\[DATE\]\s*/g, ' ').replace(/\s*\[DATE RANGE\]\s*/g, ' ').replace(/\s*\[INSTITUTION\]\s*/g, ' ').replace(/\s*\[NAME\]\s*/g, ' ').trim();
-    }
-
-    function handleResumeSubmit() {
-      var fileInput = document.getElementById('resume-bias-file');
-      var pasteArea = document.getElementById('resume-bias-paste');
-      var status = document.getElementById('resume-bias-status');
-      var text = pasteArea?.value?.trim() || '';
-      if (!text && fileInput?.files?.length) {
-        var f = fileInput.files[0];
-        if (f.name.toLowerCase().endsWith('.pdf')) {
-          status.textContent = 'Extracting text from PDF…';
-          var reader = new FileReader();
-          reader.onload = function() {
-            var pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf'];
-            if (!pdfjsLib) { status.textContent = 'PDF library not loaded. Try again or paste your resume text.'; return; }
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            pdfjsLib.getDocument({ data: reader.result }).promise.then(function(doc) {
-              var pages = [];
-              function next(pageNum) {
-                if (pageNum > doc.numPages) {
-                  var fullText = pages.join('\n');
-                  processResume(fullText, status);
-                  return;
-                }
-                doc.getPage(pageNum).then(function(page) {
-                  return page.getTextContent();
-                }).then(function(content) {
-                  pages.push(content.items.map(function(i) { return i.str || ''; }).join(' '));
-                  next(pageNum + 1);
-                }).catch(function(err) {
-                  status.textContent = 'Could not read PDF. Try pasting your resume text instead.';
-                });
-              }
-              next(1);
-            }).catch(function(err) {
-              status.textContent = 'Could not open PDF. Try pasting your resume text instead.';
-            });
-          };
-          reader.readAsArrayBuffer(f);
-          return;
-        }
-        var r = new FileReader();
-        r.onload = function() { processResume(r.result || '', status); };
-        r.readAsText(f);
-        return;
-      }
-      if (!text) { status.textContent = 'Please upload a .txt or .pdf file or paste your resume text.'; return; }
-      processResume(text, status);
-    }
-
-    function processResume(rawText, statusEl) {
-      var sanitized = sanitizeResumeForAnalysis(rawText);
-      try {
-        localStorage.setItem('moultrie_resume_sanitized', sanitized);
-        localStorage.setItem('moultrie_resume_at', new Date().toISOString());
-      } catch (e) { console.warn(e); }
-      statusEl.textContent = 'Resume saved for bias-free analysis. PII and bias-inducing details have been removed; only skills and qualifications are used.';
-      document.getElementById('resume-bias-file').value = '';
-      document.getElementById('resume-bias-paste').value = '';
-    }
-
-    document.getElementById('resume-bias-submit')?.addEventListener('click', handleResumeSubmit);
+    // (Removed) Extra bias-free resume upload flow used by #upload-resume-paste
   </script>
 </body>
 </html>
