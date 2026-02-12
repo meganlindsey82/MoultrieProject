@@ -265,6 +265,15 @@
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; color: var(--mm-text); }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: var(--mm-green);
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .back-link:hover { color: var(--mm-green-block); text-decoration: underline; }
     /* Personalized Questions */
     .personalized-section {
       margin-top: 2.5rem;
@@ -333,7 +342,29 @@
       cursor: pointer;
     }
     .choice-row input[type="checkbox"],
-    .choice-row input[type="radio"] 
+    .choice-row input[type="radio"] {
+      width: 1.1em;
+      height: 1.1em;
+      accent-color: var(--mm-green);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .choice-row.sector-chips label {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--mm-green);
+      border-radius: var(--radius-sm);
+      transition: background 0.2s, color 0.2s;
+    }
+    .choice-row.sector-chips label:has(input:checked) {
+      background: var(--mm-green);
+      color: var(--mm-yellow-bright);
+    }
+    .choice-row.sector-chips label:hover {
+      background: #e8f0e4;
+    }
+    .choice-row.sector-chips label:has(input:checked):hover {
+      background: var(--mm-green-block);
+    }
     .role-selector {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -826,15 +857,32 @@
         <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
       </div>
 
-      <div id="personalized-questions" class="personalized-section">
-        <h3>Personalized Questions</h3>
-        <p class="intro" style="margin-bottom: 1.5rem;">Help us match you with the right roles. Your answers stay private and shape your recommendations.</p>
+      <div id="upload-resume-paste" class="personalized-section">
+        <h3>Upload Resume (bias-free)</h3>
+        <p class="intro" style="margin-bottom: 1.5rem;">Upload your resume or paste its text below. For fair, unbiased matching, we <strong>remove name, location, graduation date, school, race, gender</strong> and similar details before analysis. Only skills, experience, and qualifications are used.</p>
+        <div class="question-block">
+          <label>Resume (text or PDF)</label>
+          <input type="file" id="resume-bias-file" accept=".txt,.pdf" aria-label="Choose resume file">
+        </div>
+        <div class="question-block">
+          <label for="resume-bias-paste">Or paste resume text here</label>
+          <textarea id="resume-bias-paste" placeholder="Paste your resume content..." rows="8" aria-label="Paste resume text"></textarea>
+        </div>
+        <button type="button" id="resume-bias-submit" class="personalized-submit">Analyze resume</button>
+        <p id="resume-bias-status" style="margin-top:1rem;font-size:0.9rem;color:var(--mm-muted);" aria-live="polite"></p>
+      </div>
+    </section>
 
-        <form id="personalized-form" class="personalized-form">
+    <section id="personalized-questions" class="view-section">
+      <a href="#employee" class="back-link">← Back to options</a>
+      <h2 class="view-title">Personalized Questions</h2>
+      <p class="intro" style="margin-bottom: 1.5rem;">Help us match you with the right roles. Your answers stay private and shape your recommendations.</p>
+
+      <form id="personalized-form" class="personalized-form">
           <div class="question-block">
-            <label for="sectors">What sectors are you interested in?</label>
-            <span class="hint">Select all that apply</span>
-            <div class="choice-row">
+            <label>What sectors are you interested in?</label>
+            <span class="hint">Select all that apply — click to toggle multiple</span>
+            <div class="choice-row sector-chips" role="group" aria-label="Sectors (multi-select)">
               <label><input type="checkbox" name="sectors" value="tech"> Tech & IT</label>
               <label><input type="checkbox" name="sectors" value="operations"> Operations</label>
               <label><input type="checkbox" name="sectors" value="hr"> HR & People</label>
@@ -858,8 +906,8 @@
 
           <div class="question-block">
             <label>Personality & work style</label>
-            <span class="hint">Introvert / extrovert / workaholic / etc. — select what fits you</span>
-            <div class="choice-row">
+            <span class="hint">Select all that apply — click to toggle multiple</span>
+            <div class="choice-row sector-chips" role="group" aria-label="Personality and work style (multi-select)">
               <label><input type="checkbox" name="traits" value="introvert"> Introvert</label>
               <label><input type="checkbox" name="traits" value="extrovert"> Extrovert</label>
               <label><input type="checkbox" name="traits" value="workaholic"> Workaholic</label>
@@ -947,22 +995,6 @@
 
           <button type="submit" class="personalized-submit">Save my answers</button>
         </form>
-      </div>
-
-      <div id="upload-resume" class="personalized-section">
-        <h3>Upload Resume</h3>
-        <p class="intro" style="margin-bottom: 1.5rem;">Upload your resume or paste its text below. For fair, unbiased matching, we <strong>remove name, location, graduation date, school, race, gender</strong> and similar details before analysis. Only skills, experience, and qualifications are used.</p>
-        <div class="question-block">
-          <label>Resume (text or PDF)</label>
-          <input type="file" id="resume-file" accept=".txt,.pdf" aria-label="Choose resume file">
-        </div>
-        <div class="question-block">
-          <label for="resume-paste">Or paste resume text here</label>
-          <textarea id="resume-paste" placeholder="Paste your resume content..." rows="8" aria-label="Paste resume text"></textarea>
-        </div>
-        <button type="button" id="resume-submit" class="personalized-submit">Analyze resume</button>
-        <p id="resume-status" style="margin-top:1rem;font-size:0.9rem;color:var(--mm-muted);" aria-live="polite"></p>
-      </div>
     </section>
 
     <section id="employer" class="view-section">
@@ -996,7 +1028,9 @@
     function setView() {
       const hash = location.hash.slice(1) || 'home';
       let activeView;
-      if (hash === 'personalized-questions' || hash === 'upload-resume') {
+      if (hash === 'personalized-questions') {
+        activeView = 'personalized-questions';
+      } else if (hash === 'upload-resume') {
         activeView = 'upload-resume';
       } else if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
         activeView = 'employee';
@@ -1008,7 +1042,7 @@
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
       const section = document.getElementById(activeView);
-      const link = document.querySelector(`.main-nav a[data-view="${activeView}"]`) || (activeView === 'upload-resume' ? document.querySelector('.main-nav a[data-view="employee"]') : null);
+      const link = document.querySelector(`.main-nav a[data-view="${activeView}"]`) || (activeView === 'upload-resume' || activeView === 'personalized-questions' ? document.querySelector('.main-nav a[data-view="employee"]') : null);
       if (section) section.classList.add('active');
       if (link) link.classList.add('active');
       if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
@@ -1161,9 +1195,9 @@
     }
 
     function handleResumeSubmit() {
-      var fileInput = document.getElementById('resume-file');
-      var pasteArea = document.getElementById('resume-paste');
-      var status = document.getElementById('resume-status');
+      var fileInput = document.getElementById('resume-bias-file');
+      var pasteArea = document.getElementById('resume-bias-paste');
+      var status = document.getElementById('resume-bias-status');
       var text = pasteArea?.value?.trim() || '';
       if (!text && fileInput?.files?.length) {
         var f = fileInput.files[0];
@@ -1215,11 +1249,11 @@
         localStorage.setItem('moultrie_resume_at', new Date().toISOString());
       } catch (e) { console.warn(e); }
       statusEl.textContent = 'Resume saved for bias-free analysis. PII and bias-inducing details have been removed; only skills and qualifications are used.';
-      document.getElementById('resume-file').value = '';
-      document.getElementById('resume-paste').value = '';
+      document.getElementById('resume-bias-file').value = '';
+      document.getElementById('resume-bias-paste').value = '';
     }
 
-    document.getElementById('resume-submit')?.addEventListener('click', handleResumeSubmit);
+    document.getElementById('resume-bias-submit')?.addEventListener('click', handleResumeSubmit);
   </script>
 </body>
 </html>
