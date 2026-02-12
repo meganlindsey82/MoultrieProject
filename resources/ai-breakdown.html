@@ -267,13 +267,14 @@
   <header class="site-header">
     <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
     <nav class="main-nav">
+      <a href="about.html">About</a>
       <a href="index.html">Home</a>
-      <a href="index.html#employee">Employee</a>
+      <a href="index.html#employee">Prospective employee</a>
       <a href="index.html#employer">Employer</a>
     </nav>
   </header>
   <main>
-    <a href="index.html#employee" class="back-link">← Back to Employee options</a>
+    <a href="index.html#employee" class="back-link">← Back to Prospective employee options</a>
     <h1 class="page-title">AI Decision Breakdown</h1>
     <p style="color:var(--mm-muted);margin:0">See exactly why we suggested each role. No black box.</p>
 
@@ -582,11 +583,19 @@
         return jobs.slice(0, 3);
       }
 
+      // Top 3 jobs: use session data from resume upload when available.
+      // Accepts either: [{ title, meta, overall, skills, experience, fit }] or [{ id, title, department, location, matchPct }]
       window.fillTopJobs = function (jobs) {
         if (!jobs || !jobs.length) jobs = buildTopJobs();
         var list = document.getElementById('top-jobs-list');
         list.innerHTML = '';
-        jobs.slice(0, 3).forEach(function (job, i) {
+        var normalized = jobs.slice(0, 3).map(function (job) {
+          if (job.overall != null || job.meta != null) return job;
+          var pct = job.matchPct != null ? job.matchPct : 0;
+          var meta = (job.department || '') + (job.department && job.location ? ' · ' : '') + (job.location || '');
+          return { title: job.title, meta: meta || 'Department · Location', overall: pct, skills: pct, experience: Math.max(0, pct - 5), fit: Math.min(100, pct + 3) };
+        });
+        normalized.forEach(function (job, i) {
           var idx = i + 1;
           var card = document.createElement('div');
           card.className = 'job-match-card';
@@ -610,6 +619,18 @@
 
       fillTopJobs(buildTopJobs());
       updateGraphs();
+      try {
+        var stored = sessionStorage.getItem('mmJobMatches');
+        if (stored) {
+          var parsed = JSON.parse(stored);
+          if (parsed && parsed.length) { fillTopJobs(parsed); }
+          else { fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]); }
+        } else {
+          fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]);
+        }
+      } catch (e) {
+        fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]);
+      }
     })();
   </script>
 </body>
