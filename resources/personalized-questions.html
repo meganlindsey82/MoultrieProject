@@ -301,7 +301,12 @@
             var out = JSON.parse(localStorage.getItem('moultrie_personalized') || '{}');
             diagnostic = { sectors: out.sectors, workMode: out['work-mode'], traits: out.traits, priorities: out.priorities };
           } catch (e) {}
+          function generateInboxToken() {
+            return 'mm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+          }
           var list = getStoredCandidates();
+          var existing = list.filter(function (c) { return (c.email || '').toLowerCase() === (email || '').toLowerCase(); })[0];
+          var inboxToken = (existing && existing.inboxToken) || generateInboxToken();
           list = list.filter(function (c) { return (c.email || '').toLowerCase() !== (email || '').toLowerCase(); });
           list.push({
             name: name || 'Candidate',
@@ -314,9 +319,13 @@
             resumeText: resumeText,
             jobKey: 'general',
             public: true,
-            diagnostic: diagnostic
+            diagnostic: diagnostic,
+            inboxToken: inboxToken
           });
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            localStorage.setItem('moultrie_my_inbox_token', inboxToken);
+          } catch (e) {}
         }
 
         window.location.href = 'index.html#employee';

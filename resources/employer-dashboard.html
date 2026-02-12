@@ -128,11 +128,16 @@
       box-shadow: var(--shadow-hover);
       transform: translateY(-2px);
     }
+    .candidate-star-btn { background: none; border: none; cursor: pointer; padding: 0.25rem; font-size: 1.25rem; line-height: 1; color: var(--mm-muted); transition: color 0.15s; }
+    .candidate-star-btn:hover { color: var(--mm-green); }
+    .candidate-star-btn.starred { color: #e6b800; }
     .candidate-header {
       display: flex;
       align-items: flex-start;
       gap: 1rem;
+      justify-content: space-between;
     }
+    .candidate-header-inner { display: flex; align-items: flex-start; gap: 1rem; flex: 1; min-width: 0; }
     .candidate-avatar {
       width: 48px;
       height: 48px;
@@ -258,22 +263,42 @@
       background: var(--mm-card);
       border-radius: var(--radius);
       box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-      max-width: 640px;
+      max-width: 900px;
       width: 100%;
-      max-height: 85vh;
+      max-height: 95vh;
+      height: 95vh;
       display: flex;
       flex-direction: column;
     }
     .resume-modal h3 { margin: 0; padding: 1rem 1.25rem; border-bottom: 1px solid var(--mm-border); font-size: 1.1rem; color: var(--mm-green); }
     .resume-modal-content {
-      padding: 1.25rem;
-      overflow: auto;
+      padding: 0;
+      overflow: hidden;
       flex: 1;
-      white-space: pre-wrap;
-      font-family: system-ui, sans-serif;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-modal-content iframe,
+    .resume-modal-content embed {
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border: none;
+      flex: 1;
+    }
+    .resume-modal-content .resume-fallback {
+      padding: 2rem;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 600px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.7;
       color: var(--mm-text);
+      background: #fafafa;
+      white-space: pre-wrap;
     }
     .resume-modal-close {
       margin: 0 1.25rem 1rem;
@@ -286,9 +311,327 @@
       cursor: pointer;
     }
     .resume-modal-close:hover { background: var(--mm-green-block); }
+    .contact-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 2px solid var(--mm-border);
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem;
+    }
+    .section-intro {
+      color: var(--mm-muted);
+      margin: 0 0 1.5rem;
+      font-size: 0.95rem;
+    }
+    .contact-form-wrapper {
+      background: var(--mm-card);
+      border: 1px solid var(--mm-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .selected-candidates-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: rgba(45,90,26,0.08);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--mm-green);
+      font-weight: 600;
+    }
+    .clear-selection-btn {
+      padding: 0.4rem 0.8rem;
+      background: transparent;
+      border: 1px solid var(--mm-green);
+      color: var(--mm-green);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .clear-selection-btn:hover {
+      background: var(--mm-green);
+      color: white;
+    }
+    .contact-form {
+      display: grid;
+      gap: 1.25rem;
+    }
+    .form-group {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .form-group label {
+      font-weight: 600;
+      color: var(--mm-green);
+      font-size: 0.9rem;
+    }
+    .form-group input,
+    .form-group textarea {
+      padding: 0.75rem;
+      border: 2px solid var(--mm-border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--mm-green);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .preview-btn,
+    .send-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .preview-btn {
+      background: var(--mm-bg);
+      color: var(--mm-green);
+      border: 2px solid var(--mm-green);
+    }
+    .preview-btn:hover {
+      background: rgba(45,90,26,0.05);
+      transform: translateY(-1px);
+    }
+    .send-btn {
+      background: var(--mm-green);
+      color: white;
+    }
+    .send-btn:hover {
+      background: var(--mm-green-block);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-hover);
+    }
+    .email-preview {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--mm-card);
+      border: 1px solid var(--mm-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .email-preview h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.2rem;
+      color: var(--mm-green);
+    }
+    .preview-note {
+      color: var(--mm-muted);
+      font-size: 0.9rem;
+      margin: 0 0 1rem;
+    }
+    .email-links-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .email-link-item {
+      padding: 0.75rem;
+      background: var(--mm-bg);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .email-link-item a {
+      color: var(--mm-green);
+      font-weight: 600;
+      text-decoration: none;
+      flex: 1;
+    }
+    .email-link-item a:hover {
+      text-decoration: underline;
+    }
+    .email-link-item .candidate-label {
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      font-weight: 500;
+    }
+    .candidate-checkbox {
+      margin-right: 0.5rem;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--mm-green);
+    }
+    .employer-login-gate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      padding: 2rem;
+      background: var(--mm-bg);
+    }
+    .employer-login-gate.hidden { display: none !important; }
+    .employer-login-box {
+      background: var(--mm-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-hover);
+      padding: 2rem;
+      max-width: 380px;
+      width: 100%;
+      border: 1px solid var(--mm-border);
+    }
+    .employer-login-box h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.35rem;
+      color: var(--mm-green);
+    }
+    .employer-login-box p {
+      margin: 0 0 1.25rem;
+      font-size: 0.95rem;
+      color: var(--mm-muted);
+    }
+    .employer-login-box input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--mm-border);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+    .employer-login-box input:focus {
+      outline: none;
+      border-color: var(--mm-green);
+    }
+    .employer-login-box button[type="submit"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--mm-green);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .employer-login-box button[type="submit"]:hover {
+      background: var(--mm-green-block);
+    }
+    .employer-login-error {
+      font-size: 0.9rem;
+      color: #c00;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+    .employer-login-error.visible { display: block; }
+    .employer-login-back {
+      display: block;
+      margin-top: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--mm-muted);
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+    .employer-login-back:hover { color: var(--mm-green); }
+    #employer-dashboard-main { display: block; }
+    #employer-dashboard-main.hidden { display: none !important; }
+    .employer-inbox {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--mm-border);
+    }
+    .employer-inbox h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.5rem;
+      color: var(--mm-green);
+    }
+    .employer-inbox .inbox-intro {
+      margin: 0 0 1.5rem;
+      color: var(--mm-muted);
+      font-size: 0.95rem;
+    }
+    .conversation-card {
+      background: var(--mm-card);
+      border: 1px solid var(--mm-border);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .conversation-header {
+      padding: 1rem 1.25rem;
+      background: rgba(30,61,18,0.06);
+      font-weight: 600;
+      color: var(--mm-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .conversation-header .recipient { font-size: 1.05rem; }
+    .conversation-header .meta { font-size: 0.85rem; font-weight: 500; color: var(--mm-muted); }
+    .conversation-header { cursor: pointer; user-select: none; }
+    .conversation-header .expand-icon { font-size: 0.9rem; transition: transform 0.2s; }
+    .conversation-card.expanded .expand-icon { transform: rotate(90deg); }
+    .conversation-body { display: none; padding: 0 1.25rem 1.25rem; }
+    .conversation-card.expanded .conversation-body { display: block; }
+    .conversation-messages {
+      padding: 0.75rem 0 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+    .inbox-reply-row { margin-top: 1rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+    .inbox-reply-row textarea { flex: 1; min-height: 80px; padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--mm-border); }
+    .inbox-reply-row button { padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-weight: 600; white-space: nowrap; }
+    .inbox-delete-btn { margin-top: 0.75rem; padding: 0.4rem 0.75rem; font-size: 0.85rem; color: var(--mm-muted); background: transparent; border: 1px solid var(--mm-border); border-radius: var(--radius-sm); cursor: pointer; }
+    .inbox-delete-btn:hover { color: #c00; border-color: #c00; }
+    .inbox-message {
+      padding: 1rem 1.25rem;
+      background: var(--mm-bg);
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--mm-green);
+    }
+    .inbox-message .msg-from { font-size: 0.85rem; color: var(--mm-muted); margin-bottom: 0.35rem; }
+    .inbox-message .msg-subject { font-weight: 600; color: var(--mm-text); margin-bottom: 0.5rem; }
+    .inbox-message .msg-body { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+    .inbox-message .msg-date { font-size: 0.8rem; color: var(--mm-muted); margin-top: 0.5rem; }
+    .inbox-empty { color: var(--mm-muted); font-size: 0.95rem; padding: 1.5rem 0; }
   </style>
 </head>
 <body>
+  <div class="employer-login-gate" id="employer-login-gate">
+    <div class="employer-login-box">
+      <h2>Employer login</h2>
+      <p>Enter the password to access the employer dashboard.</p>
+      <p class="employer-login-error" id="employer-login-error">Incorrect password. Try again.</p>
+      <form id="employer-login-form">
+        <input type="password" id="employer-login-password" placeholder="Password" autocomplete="current-password" />
+        <button type="submit">Sign in</button>
+      </form>
+      <a href="index.html" class="employer-login-back" id="employer-login-back">← Back</a>
+    </div>
+  </div>
+  <div id="employer-dashboard-main" class="hidden">
   <header class="site-header">
     <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
     <nav class="main-nav">
@@ -296,14 +639,19 @@
       <a href="index.html#home">Home</a>
       <a href="index.html#employee">Prospective employee</a>
       <a href="employer-dashboard.html" class="active">Employer</a>
+      <a href="#employer-inbox" class="employer-inbox-nav" aria-label="Inbox"><span aria-hidden="true">✉</span></a>
+      <a href="index.html#home" id="employee-signout-nav" style="display:none;">Sign out</a>
     </nav>
   </header>
   <main>
-    <div class="page-hero">
-      <h1>Employer dashboard</h1>
-      <p class="page-intro">
-        This view only shows candidates who chose to make their profile and matches public to employers. Filter by role below.
-      </p>
+    <div class="page-hero" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:1rem;">
+      <div>
+        <h1>Employer dashboard</h1>
+        <p class="page-intro">
+          This view only shows candidates who chose to make their profile and matches public to employers. Filter by role below.
+        </p>
+      </div>
+      <button type="button" id="employer-signout" style="flex-shrink:0;background:transparent;border:1px solid rgba(255,255,255,0.6);color:white;padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.9rem;font-weight:500;cursor:pointer;">Sign out</button>
     </div>
 
     <div class="filters">
@@ -311,12 +659,66 @@
       <select id="job-filter">
         <option value="">All jobs</option>
       </select>
+      <label for="favorites-filter" style="margin-left:1rem;">Show</label>
+      <select id="favorites-filter">
+        <option value="">All candidates</option>
+        <option value="starred">Favorites only</option>
+      </select>
     </div>
 
     <div class="candidates" id="candidate-list"></div>
     <p class="empty" id="empty-state" style="display:none;">
       No public candidates match this job yet. Candidates must opt in on their side before you can view their details.
     </p>
+
+    <section id="contact-section" class="contact-section" style="display:none;">
+      <h2 class="section-title">Contact Potential Employees</h2>
+      <p class="section-intro">Select candidates and send a message through the site—they’ll see it in My Saved Profile. No email needed. You can also open your email client for candidates who shared an email.</p>
+      
+      <div class="contact-form-wrapper">
+        <div class="selected-candidates-summary" id="selected-summary" style="display:none;">
+          <strong id="selected-count">0</strong> candidate(s) selected
+          <button type="button" id="clear-selection" class="clear-selection-btn">Clear selection</button>
+        </div>
+        
+        <form id="contact-form" class="contact-form">
+          <div class="form-group">
+            <label for="contact-from-name">Your name or company</label>
+            <input type="text" id="contact-from-name" placeholder="e.g., Moultrie Mobile HR" />
+          </div>
+          <div class="form-group">
+            <label for="contact-subject">Subject</label>
+            <input type="text" id="contact-subject" placeholder="e.g., Opportunity at Moultrie Mobile" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" rows="6" placeholder="Write your message here..." required></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" id="preview-emails" class="preview-btn">Preview email links</button>
+            <button type="submit" id="send-contacts" class="preview-btn">Open email client</button>
+          </div>
+        </form>
+        <div class="form-actions" style="margin-top:0.75rem;">
+          <button type="button" id="send-via-website" class="send-btn" onclick="typeof employerSendViaWebsite==='function'&&employerSendViaWebsite(event)">Send through website</button>
+        </div>
+      </div>
+      
+      <div id="email-preview" class="email-preview" style="display:none;">
+        <h3>Email Links Generated</h3>
+        <p class="preview-note">Click the links below to open your email client with pre-filled messages:</p>
+        <div id="email-links-list" class="email-links-list"></div>
+      </div>
+    </section>
+
+    <section id="employer-inbox" class="employer-inbox">
+      <h2>Inbox</h2>
+      <p class="inbox-intro">Sent messages and conversations with candidates. Messages you send through the site appear here, grouped by recipient.</p>
+      <div id="employer-inbox-list"></div>
+      <p id="employer-inbox-empty" class="inbox-empty" style="display:none;">No messages sent yet. Select candidates above and use “Send through website” to start a conversation.</p>
+    </section>
 
     <div class="resume-modal-overlay" id="resume-modal" aria-hidden="true">
       <div class="resume-modal">
@@ -326,7 +728,127 @@
       </div>
     </div>
   </main>
+  </div>
   <script>
+    (function employerAuth() {
+      var AUTH_KEY = 'employerAuth';
+      var PASSWORD = 'password';
+      var gate = document.getElementById('employer-login-gate');
+      var main = document.getElementById('employer-dashboard-main');
+      var form = document.getElementById('employer-login-form');
+      var passwordInput = document.getElementById('employer-login-password');
+      var errorEl = document.getElementById('employer-login-error');
+      var signout = document.getElementById('employer-signout');
+      if (signout) {
+        signout.addEventListener('click', function() {
+          try { sessionStorage.removeItem(AUTH_KEY); } catch (e) {}
+          location.reload();
+        });
+      }
+      try {
+        if (sessionStorage.getItem(AUTH_KEY)) {
+          if (gate) gate.classList.add('hidden');
+          if (main) main.classList.remove('hidden');
+          return;
+        }
+      } catch (e) {}
+      if (gate) gate.classList.remove('hidden');
+      if (main) main.classList.add('hidden');
+      if (form && passwordInput) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (errorEl) errorEl.classList.remove('visible');
+          if (passwordInput.value === PASSWORD) {
+            try { sessionStorage.setItem(AUTH_KEY, '1'); } catch (err) {}
+            if (gate) gate.classList.add('hidden');
+            if (main) main.classList.remove('hidden');
+          } else {
+            if (errorEl) errorEl.classList.add('visible');
+            passwordInput.value = '';
+            passwordInput.focus();
+          }
+        });
+      }
+    })();
+
+    window.employerSendViaWebsite = function(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      var MESSAGES_KEY = 'moultrie_employer_messages';
+      var subjectEl = document.getElementById('contact-subject');
+      var messageEl = document.getElementById('contact-message');
+      var fromEl = document.getElementById('contact-from-name');
+      var subject = subjectEl ? String(subjectEl.value || '').trim() : '';
+      var message = messageEl ? String(messageEl.value || '').trim() : '';
+      var fromName = fromEl ? String(fromEl.value || '').trim() : '';
+      if (!fromName) fromName = 'An employer';
+      if (!subject || !message) {
+        alert('Please fill in both subject and message.');
+        return;
+      }
+      var listEl = document.getElementById('candidate-list');
+      var checked = listEl ? listEl.querySelectorAll('.candidate-checkbox:checked') : [];
+      if (!checked.length) {
+        alert('Please select at least one candidate first.');
+        return;
+      }
+      var visible = (typeof window._getEmployerVisibleCandidates === 'function') ? window._getEmployerVisibleCandidates() : [];
+      if (!visible.length) {
+        var raw = [];
+        try { raw = JSON.parse(localStorage.getItem('moultrie_opted_in_candidates') || '[]'); } catch (err) {}
+        visible = Array.isArray(raw) ? raw.filter(function(c) { return c.public === true || c.public === 'true'; }) : [];
+        var filterEl = document.getElementById('job-filter');
+        var job = filterEl && filterEl.value ? String(filterEl.value).trim().toLowerCase() : '';
+        if (job && visible.length) {
+          visible.sort(function(a, b) {
+            var aj = (a.desiredJob || '').toLowerCase() === job ? 1 : 0;
+            var bj = (b.desiredJob || '').toLowerCase() === job ? 1 : 0;
+            return bj - aj;
+          });
+        }
+      }
+      if (!visible.length) {
+        alert('No candidates available. Candidates must opt in on the main site first (same browser).');
+        return;
+      }
+      var list = [];
+      try { var raw = localStorage.getItem(MESSAGES_KEY); if (raw) list = JSON.parse(raw); } catch (err) {}
+      if (!Array.isArray(list)) list = [];
+      var sent = 0, noInbox = 0;
+      for (var i = 0; i < checked.length; i++) {
+        var idx = parseInt(checked[i].getAttribute('data-idx'), 10);
+        if (isNaN(idx) || idx < 0 || idx >= visible.length) continue;
+        var cand = visible[idx];
+        if (!cand) continue;
+        if (!cand.inboxToken) noInbox++;
+        var threadId = (cand.email || '').trim().toLowerCase() || ('token_' + (cand.inboxToken || ''));
+        list.push({
+          id: 'msg_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7),
+          threadId: threadId,
+          fromRole: 'employer',
+          toToken: cand.inboxToken || null,
+          toEmail: threadId.indexOf('@') !== -1 ? threadId : null,
+          toName: cand.name || ('Candidate ' + (idx + 1)),
+          fromName: fromName,
+          subject: subject,
+          body: message,
+          createdAt: new Date().toISOString()
+        });
+        sent++;
+      }
+      if (sent === 0) {
+        alert('No valid candidates selected. Please select at least one candidate from the list above.');
+        return;
+      }
+      try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(list)); } catch (err) {
+        alert('Could not save messages. Storage may be full.');
+        return;
+      }
+      if (typeof window._refreshEmployerInbox === 'function') window._refreshEmployerInbox();
+      var msg = 'Message sent to ' + sent + ' candidate(s). They\'ll see it in My Saved Profile → Messages.';
+      if (noInbox > 0) msg += ' (' + noInbox + ' without inbox token; they can still see it by email.)';
+      alert(msg);
+    };
+
     (function () {
       var STORAGE_KEY = 'moultrie_opted_in_candidates';
       var MOULTRIE_JOB_TITLES = [
@@ -351,17 +873,127 @@
         return getOptedInCandidates();
       }
 
+      var FAVORITES_KEY = 'moultrie_employer_favorites';
+      function getFavorites() {
+        try {
+          var raw = localStorage.getItem(FAVORITES_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) { return []; }
+      }
+      function toggleFavorite(email) {
+        var e = (email || '').trim().toLowerCase();
+        if (!e) return;
+        var list = getFavorites();
+        var i = list.indexOf(e);
+        if (i === -1) list.push(e); else list.splice(i, 1);
+        try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(list)); } catch (err) {}
+      }
       var listEl = document.getElementById('candidate-list');
       var emptyEl = document.getElementById('empty-state');
       var filterEl = document.getElementById('job-filter');
+      var favoritesFilterEl = document.getElementById('favorites-filter');
       var currentVisible = [];
       var resumeModal = document.getElementById('resume-modal');
       var resumeModalContent = document.getElementById('resume-modal-content');
       var resumeModalClose = document.getElementById('resume-modal-close');
+      var contactSection = document.getElementById('contact-section');
+      var selectedCandidates = new Set();
+      var selectedSummary = document.getElementById('selected-summary');
+      var selectedCount = document.getElementById('selected-count');
+      var clearSelectionBtn = document.getElementById('clear-selection');
+      var contactForm = document.getElementById('contact-form');
+      var previewEmailsBtn = document.getElementById('preview-emails');
+      var emailPreview = document.getElementById('email-preview');
+      var emailLinksList = document.getElementById('email-links-list');
 
-      function showResumeModal(text) {
+      function showResumeModal(candidate) {
         if (!resumeModalContent || !resumeModal) return;
-        resumeModalContent.textContent = (text && text.trim()) ? text : 'This candidate has not attached a resume to their profile.';
+
+        // Always reset content first
+        resumeModalContent.innerHTML = '';
+
+        // Prefer file data from the candidate object; if missing, fall back to latest stored file in this browser.
+        var fileData = candidate.resumeFileData;
+        var fileName = candidate.resumeFileName;
+        var fileType = candidate.resumeFileType;
+
+        try {
+          if (!fileData) {
+            var lsData = localStorage.getItem('moultrie_resume_file_data');
+            var lsName = localStorage.getItem('moultrie_resume_file_name');
+            var lsType = localStorage.getItem('moultrie_resume_file_type');
+            if (lsData) {
+              fileData = lsData;
+              fileName = fileName || lsName;
+              fileType = fileType || lsType;
+            }
+          }
+        } catch (e) {}
+
+        if (fileData && (fileType || fileName)) {
+          var isPdf = (fileType === 'application/pdf') ||
+            (fileName && fileName.toLowerCase().endsWith('.pdf'));
+          var isWord = (fileType && fileType.indexOf('word') !== -1) ||
+            (fileName && (fileName.toLowerCase().endsWith('.docx') || fileName.toLowerCase().endsWith('.doc')));
+
+          if (isPdf) {
+            // Display PDF in iframe
+            var iframe = document.createElement('iframe');
+            iframe.src = fileData;
+            iframe.title = 'Resume PDF';
+            resumeModalContent.appendChild(iframe);
+          } else if (isWord) {
+            // Try to display Word doc via embed and also provide a download link
+            var embed = document.createElement('embed');
+            embed.src = fileData;
+            embed.type = fileType || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            embed.style.width = '100%';
+            embed.style.height = '100%';
+            resumeModalContent.appendChild(embed);
+
+            var downloadLink = document.createElement('a');
+            downloadLink.href = fileData;
+            downloadLink.download = fileName || 'resume.docx';
+            downloadLink.textContent = 'Download resume file';
+            downloadLink.style.display = 'block';
+            downloadLink.style.padding = '1rem';
+            downloadLink.style.textAlign = 'center';
+            downloadLink.style.color = 'var(--mm-green)';
+            downloadLink.style.fontWeight = '600';
+            downloadLink.style.textDecoration = 'none';
+            resumeModalContent.appendChild(downloadLink);
+          } else {
+            // Unknown type: just expose a download link and fallback text
+            var linkOnly = document.createElement('a');
+            linkOnly.href = fileData;
+            linkOnly.download = fileName || 'resume';
+            linkOnly.textContent = 'Download resume file';
+            linkOnly.style.display = 'block';
+            linkOnly.style.padding = '1rem';
+            linkOnly.style.textAlign = 'center';
+            linkOnly.style.color = 'var(--mm-green)';
+            linkOnly.style.fontWeight = '600';
+            linkOnly.style.textDecoration = 'none';
+            resumeModalContent.appendChild(linkOnly);
+
+            var fallbackUnknown = document.createElement('div');
+            fallbackUnknown.className = 'resume-fallback';
+            fallbackUnknown.textContent = candidate.resumeText || 'This candidate has not attached a readable resume to their profile.';
+            resumeModalContent.appendChild(fallbackUnknown);
+          }
+        } else if (candidate.resumeText) {
+          // Fallback to text display if no file data
+          var fallback = document.createElement('div');
+          fallback.className = 'resume-fallback';
+          fallback.textContent = candidate.resumeText;
+          resumeModalContent.appendChild(fallback);
+        } else {
+          var fallbackEmpty = document.createElement('div');
+          fallbackEmpty.className = 'resume-fallback';
+          fallbackEmpty.textContent = 'This candidate has not attached a resume to their profile.';
+          resumeModalContent.appendChild(fallbackEmpty);
+        }
+
         resumeModal.classList.add('open');
         resumeModal.setAttribute('aria-hidden', 'false');
       }
@@ -438,16 +1070,35 @@
           visible.sort(function (a, b) { return getMatchForJob(b, selectedJob) - getMatchForJob(a, selectedJob); });
         }
 
+        var favoritesOnly = favoritesFilterEl && favoritesFilterEl.value === 'starred';
+        if (favoritesOnly) {
+          var favEmails = getFavorites();
+          visible = visible.filter(function (c) {
+            var e = (c.email || '').trim().toLowerCase();
+            return e && favEmails.indexOf(e) !== -1;
+          });
+        }
+
         if (!visible.length) {
           emptyEl.style.display = 'block';
-          emptyEl.textContent = selectedJob
-            ? 'No candidates with a match for this job yet. Candidates who upload a resume and save their profile will appear here for every job they match.'
-            : 'No public candidates yet. Candidates must opt in on their side before you can view their details.';
+          if (favoritesOnly) {
+            emptyEl.textContent = 'No favorite candidates. Star candidates from the list to see them here.';
+          } else {
+            emptyEl.textContent = selectedJob
+              ? 'No candidates with a match for this job yet. Candidates who upload a resume and save their profile will appear here for every job they match.'
+              : 'No public candidates yet. Candidates must opt in on their side before you can view their details.';
+          }
           return;
         }
 
         emptyEl.style.display = 'none';
         currentVisible = visible;
+        
+        // Show/hide contact section based on whether there are candidates
+        if (contactSection) {
+          contactSection.style.display = visible.length > 0 ? 'block' : 'none';
+        }
+        updateSelectedSummary();
 
         var sectorLabels = { tech: 'Tech & IT', operations: 'Operations', hr: 'HR & People', finance: 'Finance', sales: 'Sales & Marketing', engineering: 'Engineering' };
         visible.forEach(function (c, idx) {
@@ -476,10 +1127,24 @@
             : (c.bestJobTitle ? ('Best fit: ' + c.bestJobTitle + ' (' + (c.match || 0) + '%)') : ((c.match || 0) + '% match (upload resume for job-specific match)'));
           var card = document.createElement('div');
           card.className = 'candidate-card';
+          var checkboxId = 'candidate-' + idx;
+          var isSelected = selectedCandidates.has(idx);
+          var candidateEmail = (c.email || '').trim().toLowerCase();
+          var isFav = candidateEmail && getFavorites().indexOf(candidateEmail) !== -1;
+          var starClass = 'candidate-star-btn' + (isFav ? ' starred' : '');
+          var starChar = isFav ? '★' : '☆';
+          var safeEmail = (candidateEmail || '').replace(/"/g, '&quot;');
           card.innerHTML =
+            '<div style="display:flex;align-items:flex-start;gap:0.5rem;margin-bottom:0.75rem;">' +
+              '<input type="checkbox" id="' + checkboxId + '" class="candidate-checkbox" data-idx="' + idx + '" ' + (isSelected ? 'checked' : '') + ' />' +
+              '<label for="' + checkboxId + '" style="flex:1;cursor:pointer;margin:0;"><strong style="color:var(--mm-green);font-size:0.85rem;">Select for contact</strong></label>' +
+            '</div>' +
             '<div class="candidate-header">' +
-              '<div class="candidate-avatar" aria-hidden="true">' + String.fromCharCode(65 + idx) + '</div>' +
-              '<div><div class="candidate-name">' + label + '</div><div class="candidate-role">' + c.role + '</div></div>' +
+              '<div class="candidate-header-inner">' +
+                '<div class="candidate-avatar" aria-hidden="true">' + String.fromCharCode(65 + idx) + '</div>' +
+                '<div><div class="candidate-name">' + label + '</div><div class="candidate-role">' + c.role + '</div></div>' +
+              '</div>' +
+              (candidateEmail ? ('<button type="button" class="' + starClass + ' candidate-star-btn" data-email="' + safeEmail + '" aria-label="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '" title="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' + starChar + '</button>') : '') +
             '</div>' +
             '<div class="candidate-match-row">' +
               '<div class="match-ring" style="--pct: ' + displayPct + '" aria-hidden="true">' +
@@ -499,17 +1164,302 @@
         });
       }
 
+      function updateSelectedSummary() {
+        if (!selectedSummary || !selectedCount) return;
+        var count = selectedCandidates.size;
+        if (count > 0) {
+          selectedSummary.style.display = 'flex';
+          selectedCount.textContent = count;
+        } else {
+          selectedSummary.style.display = 'none';
+        }
+      }
+
+      function handleCandidateSelection(idx, checked) {
+        if (checked) {
+          selectedCandidates.add(idx);
+        } else {
+          selectedCandidates.delete(idx);
+        }
+        updateSelectedSummary();
+      }
+
       listEl.addEventListener('click', function (e) {
         var link = e.target.closest('.view-resume-link');
-        if (!link) return;
-        e.preventDefault();
-        var idx = parseInt(link.getAttribute('data-idx'), 10);
-        var cand = currentVisible[idx];
-        if (cand) showResumeModal(cand.resumeText);
+        if (link) {
+          e.preventDefault();
+          var idx = parseInt(link.getAttribute('data-idx'), 10);
+          var cand = currentVisible[idx];
+          if (cand) showResumeModal(cand);
+          return;
+        }
+        
+        var checkbox = e.target.closest('.candidate-checkbox');
+        if (checkbox) {
+          var idx = parseInt(checkbox.getAttribute('data-idx'), 10);
+          handleCandidateSelection(idx, checkbox.checked);
+          return;
+        }
+        var starBtn = e.target.closest('.candidate-star-btn');
+        if (starBtn) {
+          e.preventDefault();
+          var email = starBtn.getAttribute('data-email');
+          if (email) {
+            toggleFavorite(email);
+            render();
+          }
+        }
       });
 
+      if (clearSelectionBtn) {
+        clearSelectionBtn.addEventListener('click', function() {
+          selectedCandidates.clear();
+          updateSelectedSummary();
+          // Uncheck all checkboxes
+          listEl.querySelectorAll('.candidate-checkbox').forEach(function(cb) {
+            cb.checked = false;
+          });
+        });
+      }
+
+      function generateEmailLinks() {
+        if (!emailLinksList) return;
+        emailLinksList.innerHTML = '';
+        
+        var subject = document.getElementById('contact-subject')?.value || '';
+        var message = document.getElementById('contact-message')?.value || '';
+        
+        if (!subject || !message) {
+          alert('Please fill in both subject and message before generating email links.');
+          return;
+        }
+        
+        var hasEmails = false;
+        selectedCandidates.forEach(function(idx) {
+          var cand = currentVisible[idx];
+          if (!cand || !cand.email) return;
+          
+          hasEmails = true;
+          var label = 'Candidate ' + String.fromCharCode(65 + idx);
+          var encodedSubject = encodeURIComponent(subject);
+          var encodedBody = encodeURIComponent(message + '\n\n---\nSent via Moultrie Mobile Career Match');
+          var mailtoLink = 'mailto:' + cand.email + '?subject=' + encodedSubject + '&body=' + encodedBody;
+          
+          var item = document.createElement('div');
+          item.className = 'email-link-item';
+          item.innerHTML =
+            '<span class="candidate-label">' + label + '</span>' +
+            '<a href="' + mailtoLink + '">' + cand.email + '</a>';
+          emailLinksList.appendChild(item);
+        });
+        
+        if (hasEmails) {
+          emailPreview.style.display = 'block';
+          emailPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          alert('No selected candidates have email addresses.');
+        }
+      }
+
+      if (previewEmailsBtn) {
+        previewEmailsBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (selectedCandidates.size === 0) {
+            alert('Please select at least one candidate first.');
+            return;
+          }
+          generateEmailLinks();
+        });
+      }
+
+      if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (selectedCandidates.size === 0) {
+            alert('Please select at least one candidate first.');
+            return;
+          }
+          generateEmailLinks();
+        });
+      }
+
+      var MESSAGES_KEY = 'moultrie_employer_messages';
+      var inboxListEl = document.getElementById('employer-inbox-list');
+      var inboxEmptyEl = document.getElementById('employer-inbox-empty');
+
+      function normalizeMsg(m) {
+        if (!m.threadId) m.threadId = ((m.toEmail || m.to_email) || '').trim().toLowerCase() || ('token_' + (m.toToken || ''));
+        if (!m.fromRole) m.fromRole = 'employer';
+        return m;
+      }
+      function renderEmployerInbox() {
+        if (!inboxListEl || !inboxEmptyEl) return;
+        var list = [];
+        try {
+          var raw = localStorage.getItem(MESSAGES_KEY);
+          if (raw) list = JSON.parse(raw);
+        } catch (e) {}
+        if (!Array.isArray(list)) list = [];
+        list = list.map(normalizeMsg);
+        try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(list)); } catch (e) {}
+        if (list.length === 0) {
+          inboxListEl.innerHTML = '';
+          inboxEmptyEl.style.display = 'block';
+          return;
+        }
+        inboxEmptyEl.style.display = 'none';
+        var byThread = {};
+        list.forEach(function(m) {
+          var tid = m.threadId || 'unknown';
+          if (!byThread[tid]) byThread[tid] = [];
+          byThread[tid].push(m);
+        });
+        Object.keys(byThread).forEach(function(tid) {
+          byThread[tid].sort(function(a, b) {
+            var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return ta - tb;
+          });
+        });
+        var threadIds = Object.keys(byThread).sort(function(a, b) {
+          var msgsA = byThread[a], msgsB = byThread[b];
+          var lastA = msgsA.length ? (msgsA[msgsA.length - 1].createdAt || '') : '';
+          var lastB = msgsB.length ? (msgsB[msgsB.length - 1].createdAt || '') : '';
+          return lastB.localeCompare(lastA);
+        });
+        var fromEl = document.getElementById('contact-from-name');
+        var fromName = (fromEl && fromEl.value) ? String(fromEl.value).trim() : 'An employer';
+        inboxListEl.innerHTML = threadIds.map(function(tid) {
+          var msgs = byThread[tid];
+          var first = msgs[0];
+          var toName = first.toName || first.to_name || tid;
+          var toEmail = (first.toEmail || first.to_email || '').trim().toLowerCase();
+          var toToken = first.toToken || first.to_token || '';
+          var msgHtml = msgs.map(function(m) {
+            var dateStr = '';
+            if (m.createdAt) {
+              try { var d = new Date(m.createdAt); dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString(); } catch (err) { dateStr = String(m.createdAt); }
+            }
+            var fromLabel = (m.fromRole === 'employee' ? (m.fromName || 'Candidate') : (m.fromName || 'You'));
+            var subj = (m.subject && m.fromRole === 'employer') ? ('<div class="msg-subject">' + (m.subject || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>') : '';
+            return '<div class="inbox-message">' +
+              '<div class="msg-from">' + fromLabel + '</div>' + subj +
+              '<div class="msg-body">' + (m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+              '<div class="msg-date">' + dateStr + '</div></div>';
+          }).join('');
+          var safeTid = tid.replace(/"/g, '&quot;');
+          var safeToken = String(toToken).replace(/"/g, '&quot;');
+          var safeEmail = String(toEmail).replace(/"/g, '&quot;');
+          var safeToName = String(toName).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          return '<div class="conversation-card" data-thread-id="' + safeTid + '" data-to-token="' + safeToken + '" data-to-email="' + safeEmail + '" data-to-name="' + safeToName + '">' +
+            '<div class="conversation-header" role="button" tabindex="0" aria-expanded="false">' +
+              '<span class="recipient">' + (toName || tid) + (toEmail ? ' <span style="font-weight:400;color:var(--mm-muted);">(' + toEmail + ')</span>' : '') + '</span>' +
+              '<span class="meta"><span class="expand-icon">▶</span> ' + msgs.length + ' message' + (msgs.length !== 1 ? 's' : '') + '</span>' +
+            '</div>' +
+            '<div class="conversation-body">' +
+              '<div class="conversation-messages">' + msgHtml + '</div>' +
+              '<div class="inbox-reply-row">' +
+                '<textarea class="employer-reply-text" placeholder="Reply..." rows="3"></textarea>' +
+                '<button type="button" class="employer-reply-btn">Reply</button>' +
+              '</div>' +
+              '<button type="button" class="inbox-delete-btn employer-delete-thread-btn">Delete conversation</button>' +
+            '</div></div>';
+        }).join('');
+        inboxListEl.querySelectorAll('.conversation-header').forEach(function(h) {
+          h.addEventListener('click', function() {
+            var card = h.closest('.conversation-card');
+            if (card) card.classList.toggle('expanded');
+            h.setAttribute('aria-expanded', card && card.classList.contains('expanded'));
+          });
+        });
+        inboxListEl.querySelectorAll('.employer-reply-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.conversation-card');
+            if (!card) return;
+            var textarea = card.querySelector('.employer-reply-text');
+            var body = textarea && textarea.value ? String(textarea.value).trim() : '';
+            if (!body) return;
+            var threadId = card.getAttribute('data-thread-id');
+            var toToken = card.getAttribute('data-to-token') || '';
+            var toEmail = card.getAttribute('data-to-email') || '';
+            var toName = card.getAttribute('data-to-name') || '';
+            var fromInput = document.getElementById('contact-from-name');
+            var fromName = (fromInput && fromInput.value) ? String(fromInput.value).trim() : 'An employer';
+            var list2 = [];
+            try { var r = localStorage.getItem(MESSAGES_KEY); if (r) list2 = JSON.parse(r); } catch (err) {}
+            if (!Array.isArray(list2)) list2 = [];
+            list2.push({
+              id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+              threadId: threadId,
+              fromRole: 'employer',
+              toToken: toToken || null,
+              toEmail: toEmail || null,
+              toName: toName,
+              fromName: fromName,
+              body: body,
+              createdAt: new Date().toISOString()
+            });
+            try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(list2)); } catch (err) { alert('Could not save.'); return; }
+            if (textarea) textarea.value = '';
+            renderEmployerInbox();
+          });
+        });
+        inboxListEl.querySelectorAll('.employer-delete-thread-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.conversation-card');
+            if (!card || !confirm('Delete this entire conversation? This cannot be undone.')) return;
+            var threadId = card.getAttribute('data-thread-id');
+            var list2 = [];
+            try { var r = localStorage.getItem(MESSAGES_KEY); if (r) list2 = JSON.parse(r); } catch (err) {}
+            if (!Array.isArray(list2)) list2 = [];
+            list2 = list2.filter(function(m) {
+              var tid = m.threadId || ((m.toEmail || m.to_email) || '').trim().toLowerCase();
+              return tid !== threadId;
+            });
+            try { localStorage.setItem(MESSAGES_KEY, JSON.stringify(list2)); } catch (err) { alert('Could not delete.'); return; }
+            renderEmployerInbox();
+          });
+        });
+      }
+
+      window._refreshEmployerInbox = renderEmployerInbox;
+      window._getEmployerVisibleCandidates = function() { return (currentVisible && currentVisible.length) ? currentVisible.slice() : []; };
+
       filterEl.addEventListener('change', render);
+      if (favoritesFilterEl) favoritesFilterEl.addEventListener('change', render);
       render();
+      renderEmployerInbox();
+    })();
+
+    (function() {
+      var inboxNav = document.querySelector('.employer-inbox-nav');
+      if (inboxNav) {
+        inboxNav.addEventListener('click', function(e) {
+          var el = document.getElementById('employer-inbox');
+          if (el) {
+            e.preventDefault();
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      }
+    })();
+    (function() {
+      window.moultrieEmployeeSignOut = function() {
+        try {
+          localStorage.removeItem('moultrie_logged_in_email');
+          localStorage.removeItem('moultrie_logged_in_name');
+          localStorage.removeItem('moultrie_my_inbox_token');
+        } catch (e) {}
+      };
+      var link = document.getElementById('employee-signout-nav');
+      if (link && localStorage.getItem('moultrie_logged_in_email')) {
+        link.style.display = '';
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.moultrieEmployeeSignOut();
+          window.location.href = 'index.html#home';
+        });
+      }
     })();
   </script>
 </body>
