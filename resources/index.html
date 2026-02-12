@@ -982,6 +982,12 @@
           <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted);">Clears saved answers, sanitized resume text, match list, and liked jobs from local/session storage.</p>
         </div>
       </div>
+
+      <div id="saved-answers-section" style="display:none;margin-top:2rem;">
+        <h3 style="font-size:1.2rem;font-weight:700;color:var(--mm-green);margin-bottom:1rem;">Your Saved Answers</h3>
+        <div id="saved-answers-content" style="background:var(--mm-card);border:1px solid var(--mm-border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;"></div>
+        <a href="#personalized-questions" class="option-card" style="display:inline-block;padding:0.9rem 1.1rem;min-height:auto;">Edit Answers</a>
+      </div>
     </section>
 
     <section id="upload-resume" class="view-section">
@@ -1250,6 +1256,9 @@
       if (hash === 'training-match') {
         try { renderTrainingCourses(); } catch (e) {}
       }
+      if (activeView === 'personalized-questions') {
+        try { prefillPersonalizedForm(); } catch (e) {}
+      }
     }
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
@@ -1335,6 +1344,90 @@
           } catch (e) {}
           renderSavedProfile();
         });
+      }
+
+      // Display saved answers
+      var savedAnswersSection = document.getElementById('saved-answers-section');
+      var savedAnswersContent = document.getElementById('saved-answers-content');
+      if (savedAnswersSection && savedAnswersContent) {
+        try {
+          var raw = localStorage.getItem('moultrie_personalized');
+          var visibleToEmployers = localStorage.getItem('moultrie_visible_to_employers');
+          var hasAnswers = !!raw;
+          var hasVisibility = !!visibleToEmployers;
+          
+          if (hasAnswers || hasVisibility) {
+            var answers = raw ? JSON.parse(raw) : {};
+            var labels = {
+              'work-mode': { remote: 'Remote', 'in-person': 'In person', hybrid: 'Hybrid' },
+              'employment-type': { fulltime: 'Full-time', parttime: 'Part-time', contract: 'Contract / Freelance', flexible: 'Flexible / open' },
+              'start-date': { immediate: 'Immediately', '2weeks': 'Within 2 weeks', '1month': 'Within 1 month', '2months': '2+ months' },
+              'team-size': { small: 'Small (<10)', mid: 'Mid-size (10–50)', large: 'Large (50+)', nopref: 'No preference' },
+              'relocate': { yes: 'Yes', no: 'No', 'prefer-not': 'Prefer not to say' },
+              'save-name': { yes: 'Yes', no: 'No' },
+              'priorities': { salary: 'Salary & compensation', benefits: 'Benefits', worklife: 'Work-life balance', growth: 'Growth & learning', culture: 'Company culture', flexibility: 'Flexibility' },
+              'traits': { introvert: 'Introvert', extrovert: 'Extrovert', workaholic: 'Workaholic', balanced: 'Balanced boundaries', collaborative: 'Collaborative' },
+              'sectors': { tech: 'Tech & IT', operations: 'Operations', hr: 'HR & People', finance: 'Finance', sales: 'Sales & Marketing', engineering: 'Engineering' }
+            };
+            var html = '<div style="display:grid;gap:1rem;">';
+            if (answers['work-mode']) {
+              html += '<div><strong style="color:var(--mm-green);">Work Mode:</strong> ' + (labels['work-mode'][answers['work-mode']] || answers['work-mode']) + '</div>';
+            }
+            if (answers['employment-type']) {
+              html += '<div><strong style="color:var(--mm-green);">Employment Type:</strong> ' + (labels['employment-type'][answers['employment-type']] || answers['employment-type']) + '</div>';
+            }
+            if (answers['start-date']) {
+              html += '<div><strong style="color:var(--mm-green);">Start Date:</strong> ' + (labels['start-date'][answers['start-date']] || answers['start-date']) + '</div>';
+            }
+            if (answers['team-size']) {
+              html += '<div><strong style="color:var(--mm-green);">Team Size:</strong> ' + (labels['team-size'][answers['team-size']] || answers['team-size']) + '</div>';
+            }
+            if (answers['relocate']) {
+              html += '<div><strong style="color:var(--mm-green);">Willing to Relocate:</strong> ' + (labels['relocate'][answers['relocate']] || answers['relocate']) + '</div>';
+            }
+            if (answers['priorities']) {
+              var priorities = [].concat(answers['priorities']).filter(Boolean);
+              if (priorities.length) {
+                html += '<div><strong style="color:var(--mm-green);">Priorities:</strong> ' + priorities.map(function(p) { return labels['priorities'][p] || p; }).join(', ') + '</div>';
+              }
+            }
+            if (answers['traits']) {
+              var traits = [].concat(answers['traits']).filter(Boolean);
+              if (traits.length) {
+                html += '<div><strong style="color:var(--mm-green);">Traits:</strong> ' + traits.map(function(t) { return labels['traits'][t] || t; }).join(', ') + '</div>';
+              }
+            }
+            if (answers['sectors']) {
+              var sectors = [].concat(answers['sectors']).filter(Boolean);
+              if (sectors.length) {
+                html += '<div><strong style="color:var(--mm-green);">Sectors:</strong> ' + sectors.map(function(s) { return labels['sectors'][s] || s; }).join(', ') + '</div>';
+              }
+            }
+            if (answers['anything_else']) {
+              html += '<div><strong style="color:var(--mm-green);">Additional Notes:</strong> ' + answers['anything_else'] + '</div>';
+            }
+            if (answers['profile_name']) {
+              html += '<div><strong style="color:var(--mm-green);">Name:</strong> ' + answers['profile_name'] + '</div>';
+            }
+            if (answers['profile_email']) {
+              html += '<div><strong style="color:var(--mm-green);">Email:</strong> ' + answers['profile_email'] + '</div>';
+            }
+            // Always show visibility status
+            var visibilityText = visibleToEmployers === 'public' ? 'Yes (opted in)' : (visibleToEmployers === 'private' ? 'No (opted out)' : 'Not set');
+            html += '<div><strong style="color:var(--mm-green);">Visible to Employers:</strong> ' + visibilityText + '</div>';
+            html += '</div>';
+            savedAnswersContent.innerHTML = html;
+            savedAnswersSection.style.display = 'block';
+          } else {
+            // Show visibility status even if no other answers
+            var visibilityText = visibleToEmployers === 'public' ? 'Yes (opted in)' : (visibleToEmployers === 'private' ? 'No (opted out)' : 'Not set');
+            savedAnswersContent.innerHTML = '<div style="display:grid;gap:1rem;"><div><strong style="color:var(--mm-green);">Visible to Employers:</strong> ' + visibilityText + '</div></div>';
+            savedAnswersSection.style.display = 'block';
+          }
+        } catch (e) {
+          console.warn('Error rendering saved answers:', e);
+          savedAnswersSection.style.display = 'none';
+        }
       }
     }
 
@@ -2190,6 +2283,58 @@
       toggleContact();
     })();
 
+    function prefillPersonalizedForm() {
+      try {
+        var raw = localStorage.getItem('moultrie_personalized');
+        if (!raw) return;
+        var answers = JSON.parse(raw);
+        var form = document.getElementById('personalized-form');
+        if (!form) return;
+
+        // Pre-fill radio buttons
+        ['work-mode', 'employment-type', 'start-date', 'team-size', 'relocate', 'save-name'].forEach(function(name) {
+          if (answers[name]) {
+            var value = [].concat(answers[name])[0];
+            var input = form.querySelector('input[name="' + name + '"][value="' + value + '"]');
+            if (input) input.checked = true;
+          }
+        });
+
+        // Pre-fill checkboxes
+        ['priorities', 'traits', 'sectors'].forEach(function(name) {
+          if (answers[name]) {
+            var values = [].concat(answers[name]).filter(Boolean);
+            values.forEach(function(value) {
+              var input = form.querySelector('input[name="' + name + '"][value="' + value + '"]');
+              if (input) input.checked = true;
+            });
+          }
+        });
+
+        // Pre-fill text inputs
+        if (answers['profile_name']) {
+          var nameInput = document.getElementById('profile-name');
+          if (nameInput) nameInput.value = answers['profile_name'];
+        }
+        if (answers['profile_email']) {
+          var emailInput = document.getElementById('profile-email');
+          if (emailInput) emailInput.value = answers['profile_email'];
+        }
+        if (answers['anything_else']) {
+          var textarea = document.getElementById('anything-else');
+          if (textarea) textarea.value = answers['anything_else'];
+        }
+
+        // Show contact fields if save-name is yes
+        if (answers['save-name'] === 'yes') {
+          var contactDiv = document.getElementById('save-name-contact');
+          if (contactDiv) contactDiv.style.display = 'block';
+        }
+      } catch (e) {
+        console.warn('Could not pre-fill form:', e);
+      }
+    }
+
     document.getElementById('personalized-form')?.addEventListener('submit', function(e) {
       e.preventDefault();
       const data = new FormData(this);
@@ -2212,9 +2357,17 @@
         try {
           localStorage.removeItem('moultrie_personalized');
           localStorage.removeItem('moultrie_personalized_at');
+          // Set visibility to private if they chose no
+          if (saveName === 'no') {
+            localStorage.setItem('moultrie_visible_to_employers', 'private');
+          }
         } catch (err) { console.warn(err); }
         if (saveName === 'no') {
           alert('Your profile was not saved. Your answers will not be stored or shared with employers. You can change your answer above and save again if you\'d like your preferences used for matching.');
+          // Refresh saved profile if we're on that page
+          if (location.hash === '#my-progress') {
+            try { renderSavedProfile(); } catch (e) {}
+          }
         } else {
           alert('Please choose whether we may use your name to save your profile (Yes or No) before saving.');
         }
@@ -2223,6 +2376,8 @@
       try {
         localStorage.setItem('moultrie_personalized', JSON.stringify(out));
         localStorage.setItem('moultrie_personalized_at', new Date().toISOString());
+        // Save visibility preference
+        localStorage.setItem('moultrie_visible_to_employers', saveName === 'yes' ? 'public' : 'private');
       } catch (err) { console.warn('Could not save to localStorage:', err); }
 
       var OPTED_IN_KEY = 'moultrie_opted_in_candidates';
@@ -2279,6 +2434,11 @@
       } catch (err) { console.warn('Could not add to employer list:', err); }
 
       alert('Thanks! Your answers have been saved. They\'ll be used when we analyze which roles suit you best. Your profile will appear for employers when they view the dashboard.');
+      
+      // Refresh saved profile if we're on that page
+      if (location.hash === '#my-progress') {
+        try { renderSavedProfile(); } catch (e) {}
+      }
     });
 
     // (Removed) Extra bias-free resume upload flow used by #upload-resume-paste
