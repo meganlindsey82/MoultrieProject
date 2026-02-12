@@ -182,16 +182,18 @@
       color: var(--mm-text);
     }
     #employee .option-grid {
-      gap: 1.25rem;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
     }
     #employee .option-card {
-      padding: 2rem 1.75rem;
-      min-height: 100px;
+      padding: 2.25rem 2rem;
+      min-height: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
+      font-size: 1.05rem;
       border: 3px solid var(--mm-green);
       background: #e8f0e4;
       box-shadow: var(--shadow);
@@ -201,6 +203,14 @@
       background: #dcead8;
       box-shadow: var(--shadow-hover);
       transform: translateY(-2px);
+    }
+
+    @media (max-width: 980px) {
+      #employee .option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 620px) {
+      #employee .option-grid { grid-template-columns: 1fr; }
+      #employee .option-card { min-height: 120px; padding: 2rem 1.5rem; }
     }
     .employer-placeholder {
       background: var(--mm-card-soft);
@@ -827,6 +837,27 @@
         <a href="#training-match" class="option-card">Training & Courses Match</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
         <a href="liked-jobs.html" class="option-card">Liked jobs</a>
+        <a href="#my-progress" class="option-card">My Saved Profile</a>
+      </div>
+    </section>
+
+    <section id="my-progress" class="view-section">
+      <a href="#employee" class="back-link">← Back to options</a>
+      <h2 class="view-title">My saved profile</h2>
+      <p class="intro" style="margin-bottom: 1.5rem;">A quick snapshot of what you’ve saved in this browser (resume, answers, matches, liked jobs) — plus shortcuts to keep moving.</p>
+
+      <div class="intro-block" style="margin-bottom: 1.5rem;">
+        <div id="progress-status" style="display:grid;gap:0.75rem;"></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <a href="#upload-resume" class="option-card" style="display:inline-block;padding:0.9rem 1.1rem;min-height:auto;">Upload Resume</a>
+          <a href="#personalized-questions" class="option-card" style="display:inline-block;padding:0.9rem 1.1rem;min-height:auto;">Personalized Questions</a>
+          <a href="ai-breakdown.html" class="option-card" style="display:inline-block;padding:0.9rem 1.1rem;min-height:auto;">AI Decision Breakdown</a>
+          <a href="liked-jobs.html" class="option-card" style="display:inline-block;padding:0.9rem 1.1rem;min-height:auto;">Liked jobs</a>
+        </div>
+        <div style="margin-top:1rem;">
+          <button type="button" id="clear-saved-profile" class="upload-resume-btn" style="padding:0.7rem 1.1rem;">Clear saved data (this browser)</button>
+          <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted);">Clears saved answers, sanitized resume text, match list, and liked jobs from local/session storage.</p>
+        </div>
       </div>
     </section>
 
@@ -1025,12 +1056,14 @@
     </div>
   </div>
   <script>
-    const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'training-match', 'job-dashboard'];
+    const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'training-match', 'job-dashboard', 'my-progress'];
     function setView() {
       const hash = location.hash.slice(1) || 'home';
       let activeView;
       if (hash === 'personalized-questions') {
         activeView = 'personalized-questions';
+      } else if (hash === 'my-progress') {
+        activeView = 'my-progress';
       } else if (hash === 'upload-resume') {
         activeView = 'upload-resume';
       } else if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
@@ -1051,6 +1084,10 @@
           const el = document.getElementById(hash);
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 50);
+      }
+
+      if (activeView === 'my-progress') {
+        try { renderSavedProfile(); } catch (e) {}
       }
     }
     window.addEventListener('hashchange', setView);
@@ -1327,9 +1364,11 @@
       var inputEl = document.getElementById('chat-input');
       var sendBtn = document.getElementById('chat-send');
       if (!panel || !toggle) return;
+      var chatState = { lastIntent: null, lastReply: null };
 
       function openPanel() {
         panel.classList.add('open');
+        ensureHello();
         if (inputEl) inputEl.focus();
       }
       function closePanel() {
@@ -1351,47 +1390,140 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }
 
+      function ensureHello() {
+        if (!messagesEl) return;
+        if (messagesEl.children && messagesEl.children.length) return;
+        addMsg("Hey — ask me anything about resume upload, matches, the AI breakdown, or the employer dashboard.", true);
+        addMsg("If you tell me what you're trying to do (e.g. “upload resume”, “see my top 3 matches”, “opt in to employers”), I’ll point you to the exact spot.", true);
+      }
+
+      function pickAnswer(intentId, answers) {
+        if (!answers || !answers.length) return '';
+        if (answers.length === 1) return answers[0];
+        var start = Math.floor(Math.random() * answers.length);
+        for (var i = 0; i < answers.length; i++) {
+          var idx = (start + i) % answers.length;
+          var candidate = answers[idx];
+          if (intentId !== chatState.lastIntent || candidate !== chatState.lastReply) return candidate;
+        }
+        return answers[0];
+      }
+
       function getBotReply(userText) {
-        var t = (userText || '').toLowerCase().trim();
+        var t = (userText || '').toLowerCase().trim().replace(/\s+/g, ' ');
         if (!t) return "Type a question and I'll try to help.";
-        if (/hello|hi|hey|howdy|good morning|good afternoon|good evening/.test(t)) return "Hi! Ask me about this career site — resume upload, job matches, the employer dashboard, or how we use your data.";
-        if (/where do i upload|where can i upload|upload my resume|where to upload/.test(t)) return "Go to the Prospective employee section (click \"I'm a prospective employee\" on the home page), then choose \"Upload Resume.\" You can paste text or upload a PDF or .txt file.";
-        if (/can i paste|paste my resume|paste resume|paste text/.test(t)) return "Yes. In the Upload Resume section there's a text area where you can paste your resume content. We accept pasted text, PDF, or .txt files.";
-        if (/what file|file format|file type|pdf|\.txt/.test(t)) return "We accept PDF and plain text (.txt) files, or you can paste your resume directly into the text box. We extract or use the text for matching only — we don't store the original file.";
-        if (/what do you use from my resume|use my resume|resume analysis|analyze my resume/.test(t)) return "We use skills, experience, and qualifications from your resume. We remove PII (name, contact, location, school names, dates, race, gender, etc.) so matching is bias-free. Only job-relevant content is used.";
-        if (/remove|strip|redact|pii|personal information/.test(t)) return "We strip out name, email, phone, address, school names, graduation dates, race, gender, age, and similar details before matching. That helps keep recommendations fair and skills-based.";
-        if (/how do i get job matches|get matches|see recommendations|job recommendations/.test(t)) return "Upload your resume and complete the Personalized Questions. Then you'll see job recommendations. Your top matches also appear on the AI Decision Breakdown page (with a pie breakdown per job).";
-        if (/top 3|top three|best matches/.test(t)) return "Your top three job matches are shown on the AI Decision Breakdown page. Each has an overall match % and a pie chart showing how Skills, Experience, and Fit & preferences contributed. Upload a resume and complete your profile to see them.";
-        if (/liked jobs|save jobs|bookmark|favorite jobs/.test(t)) return "You can save jobs you like — look for the option to \"like\" or save a job from the job recommendations. Liked jobs are listed under \"Liked jobs\" in the Prospective employee section.";
-        if (/how do i apply|apply for|application process|submit application/.test(t)) return "This tool is for matching and transparency. Applying for a specific role would happen through Moultrie Mobile's normal hiring process (e.g. job posting or HR). Use your match results and the AI breakdown to prepare.";
-        if (/employer dashboard|employer view|hiring manager/.test(t)) return "Click \"I'm an employer\" on the home page, then \"Open employer dashboard.\" You'll only see candidates who opted in to be visible to employers. You can filter by job type.";
-        if (/who can see me|employers see|visible to employer|opt in|opt.in/.test(t)) return "By default you're not visible to employers. If you opt in (e.g. on the Personalized Questions flow when you choose to be visible), your name, contact, role, and match info can be seen on the Employer dashboard.";
-        if (/personalized questions|personalized form|questions form/.test(t)) return "The Personalized Questions step lets you share how you like to work, your preferences, and what you value. Your answers help us weight matches — more resume-based or more fit-based. You can update them later.";
-        if (/change my answers|update answers|edit my preferences|change preferences/.test(t)) return "You can go back to the Personalized Questions page and submit again to update your answers. Your new answers will be used for future matching.";
-        if (/weight|weigh|resume vs|experience vs|preferences vs/.test(t)) return "On the AI Decision Breakdown page you can choose: \"Resume & hard skills\" (we lean more on experience and skills) or \"My answers & preferences\" (we lean more on fit and what you said you want). The first three bar charts show how that affects the breakdown.";
-        if (/ai breakdown|decision breakdown|why did you recommend|why this job/.test(t)) return "The AI Decision Breakdown page shows how we build your match: (1) how much resume vs preferences count, (2) factor contribution (skills, experience, working style, goals), (3) decision score breakdown. Your top 3 jobs appear there with a pie chart per job (skills, experience, fit).";
-        if (/pie chart|pie graph|charts|graphs/.test(t)) return "On the AI Decision Breakdown page, your top 3 job matches each have a pie chart showing how Skills, Experience, and Fit & preferences make up that job's score. The first three sections on that page use bar charts to show how we weight your inputs.";
-        if (/privacy|my data|keep my data|store my data/.test(t)) return "By default we don't keep your data; when you leave we forget it. If you opt in to save progress, we may store it. We're transparent about what we use for matching and what we remove (PII).";
-        if (/delete my data|remove my data|forget my data/.test(t)) return "By default we don't persist your data after you leave. If you've opted in to save progress, clearing site data or not saving in the future stops new storage. For exact deletion steps, check with your IT or the team that runs this tool.";
-        if (/bias|fair|fairness|unbiased|discrimination/.test(t)) return "We reduce bias by stripping name, location, school, dates, race, gender, and similar info from resumes before matching. Only skills and qualifications are used. The AI Decision Breakdown shows why each role was recommended so it's transparent.";
-        if (/about moultrie|about the company|who is moultrie|what does moultrie do/.test(t)) return "Moultrie Mobile makes trail cameras and hunting/scouting tools. This career site is our internal AI dashboard for employees and hiring managers — not the public. See the About page for more on our history and products.";
-        if (/internal|public|who is this for/.test(t)) return "This is Moultrie Mobile's internal career match tool for employees and hiring managers. It's not the public job site. It helps match people to roles and explains how the AI recommendations work.";
-        if (/training|courses|learning|development/.test(t)) return "There's a \"Training & Courses Match\" option in the Prospective employee section that can connect you to relevant learning. Check that section for how it uses your profile.";
-        if (/contact|support|help me|talk to someone|human/.test(t)) return "I'm the in-page assistant. For HR, hiring, or technical support, use your usual internal channels (e.g. HR contact, IT, or the team that runs this dashboard).";
-        if (/salary|pay|compensation|benefits/.test(t)) return "This tool focuses on role matching and transparency, not salary or benefits details. Those would come from the specific job posting or HR when you apply.";
-        if (/remote|hybrid|location|work from home|onsite/.test(t)) return "You can indicate work mode (remote, hybrid, in-person, flexible) in the Personalized Questions. We use that to improve fit. Specific job locations and arrangements are in the role details when you look at recommendations.";
-        if (/how long|how soon|when will i see|timing/.test(t)) return "After you upload your resume and complete the Personalized Questions, recommendations and the AI breakdown update quickly. You can open the AI Decision Breakdown and Liked jobs right away to see your top matches.";
-        if (/what roles|what jobs|types of jobs|kinds of roles/.test(t)) return "The roles we suggest depend on your resume and answers. There’s no fixed list here — the AI matches you to roles that fit your skills, experience, and preferences. Check the job recommendations and AI breakdown after you complete your profile.";
-        if (/internship|intern|part time|part-time|full time|full-time|contract/.test(t)) return "You can indicate employment type (full-time, part-time, contract, flexible) in the Personalized Questions. We use that to weight matches. Available role types depend on what’s in the system.";
-        if (/low score|improve my match|better match|why low/.test(t)) return "Match scores come from skills, experience, and fit. Updating your resume (skills, experience) and your Personalized Questions (preferences, work style) can improve matches. The AI Breakdown shows which factors drive each score so you can see what to emphasize.";
-        if (/transparent|transparency|black box|explain/.test(t)) return "We're big on transparency. The AI Decision Breakdown page shows how we weight resume vs preferences, how each factor contributes, and for your top 3 jobs a pie chart of skills, experience, and fit. No hidden scoring.";
-        if (/help|what can you|how do i start|where do i start/.test(t)) return "Start by choosing \"I'm a prospective employee\" on the home page, then: (1) Upload your resume, (2) Answer the Personalized Questions, (3) Check job recommendations and the AI Decision Breakdown. I can answer questions about any of those steps.";
-        if (/resume|upload|paste|pdf/.test(t)) return "You can upload your resume from the \"Upload Resume\" option in the Prospective employee section. We accept PDF or pasted text. We strip out PII and bias-related info and only use skills and experience for matching.";
-        if (/job|role|match|position|openings/.test(t)) return "After you upload a resume and answer the personalized questions, you'll see job recommendations. Use \"AI Decision Breakdown\" to see why each role was suggested (including pie charts per job). You can also browse \"Liked jobs\" if you've saved any.";
-        if (/employer|hire|hiring|manager|candidate/.test(t)) return "Employers and hiring managers can use the \"Employer\" path on the home page, then open the Employer dashboard. You'll only see candidates who chose to make their profile visible to employers.";
-        if (/personalized|questions|survey|form/.test(t)) return "The \"Personalized Questions\" step lets you share how you like to work and what you value. Your answers help us weight matches — more experience-based or more values-based. You can change this later.";
-        if (/about|moultrie|company|what is this/.test(t)) return "This is Moultrie Mobile's internal AI career dashboard — for employees and hiring managers, not the public. Check the About page for more on who we are and our products.";
-        return "I'm not sure about that. Try asking about resume upload, job matches, the employer dashboard, personalized questions, privacy, or the AI breakdown. You can also use the nav to jump to Upload Resume, AI Decision Breakdown, or About.";
+
+        var KB = [
+          { id: 'greeting', patterns: [/^(hi|hello|hey|howdy)\b/, /\bgood (morning|afternoon|evening)\b/], answers: [
+            "Hey — ask me anything about resume upload, matches, the AI breakdown, or the employer dashboard.",
+            "Hi. Tell me what you’re trying to do and I’ll point you to the exact spot in the app."
+          ]},
+          { id: 'start', patterns: [/\bwhere do i start\b/, /\bhow do i start\b/, /\bwhat do i do\b/], answers: [
+            "Start: (1) Home → “I’m a prospective employee”, (2) “Upload Resume”, (3) “Personalized Questions”, (4) open “AI Decision Breakdown”.",
+            "Fast path: upload resume → answer personalized questions → open AI Decision Breakdown for the top 3 + the why."
+          ]},
+          { id: 'upload_where', patterns: [/\bwhere .*upload\b/, /\bupload (my )?resume\b/, /\badd (my )?resume\b/], answers: [
+            "Home → “I’m a prospective employee” → “Upload Resume”. Paste text or upload a PDF/.txt.",
+            "Prospective employee → “Upload Resume”. Paste is fine too."
+          ]},
+          { id: 'upload_formats', patterns: [/\bfile (type|format)\b/, /\b(pdf|\.pdf)\b/, /\b(txt|\.txt)\b/, /\bcan i paste\b/, /\bpaste (my )?resume\b/], answers: [
+            "Supported: PDF, .txt, or pasted text.",
+            "PDF or .txt works, and you can also paste your resume text directly into the box."
+          ]},
+          { id: 'resume_usage', patterns: [/\bwhat.*use.*resume\b/, /\bresume (analysis|analyze)\b/, /\bwhat do you extract\b/], answers: [
+            "We use skills, experience, and qualifications. We strip PII and bias-adjacent signals (name/contact/location/school/dates/etc.).",
+            "Only job-relevant content (skills/experience/quals) is used. Identifying info gets redacted before scoring."
+          ]},
+          { id: 'pii', patterns: [/\bpii\b/, /\bredact\b/, /\bremove (my )?(name|email|phone|address|location)\b/, /\bpersonal information\b/], answers: [
+            "Yep — we redact name, email/phone, address/location, school names, graduation dates, and demographic info before matching.",
+            "We strip identifying + bias-inducing details first, then score on skills/experience/fit."
+          ]},
+          { id: 'matches_how', patterns: [/\b(job )?matches\b/, /\brecommendations\b/, /\bbest matches\b/, /\btop (3|three)\b/], answers: [
+            "Upload resume + complete Personalized Questions. Then open “AI Decision Breakdown” to see your top 3 and the breakdown.",
+            "Matches appear after resume + questions. The breakdown page shows the ‘why’."
+          ]},
+          { id: 'liked', patterns: [/\bliked jobs\b/, /\bfavorit(e|es)\b/, /\bsave (a )?job\b/, /\bbookmark\b/], answers: [
+            "Use “Liked jobs” under the Prospective employee options.",
+            "Saved roles show up under “Liked jobs”."
+          ]},
+          { id: 'apply', patterns: [/\bapply\b/, /\bapplication process\b/, /\bsubmit application\b/], answers: [
+            "This dashboard is for matching + transparency. Applying happens through the standard internal hiring flow for that role.",
+            "Use this tool to understand fit; then apply via the normal HR/job-posting process."
+          ]},
+          { id: 'employer_dash', patterns: [/\bemployer dashboard\b/, /\bhiring manager\b/, /\bsee candidates\b/], answers: [
+            "Home → “I’m an employer” → “Open employer dashboard”. Only opted-in candidates show.",
+            "Employer view is separate: open the Employer dashboard; only opted-in profiles appear there."
+          ]},
+          { id: 'visibility', patterns: [/\bwho can see me\b/, /\bvisible to employers\b/, /\bopt ?in\b/, /\bemployer(s)? see\b/], answers: [
+            "By default you’re not visible. If you opt in, your profile can appear on the Employer dashboard.",
+            "Opt-in controls visibility. No opt-in = employers don’t see you here."
+          ]},
+          { id: 'personalized', patterns: [/\bpersonalized questions\b/, /\bchange (my )?answers\b/, /\bedit (my )?preferences\b/, /\bworking style\b/], answers: [
+            "Personalized Questions captures work mode, traits, priorities, etc. Submit again anytime to update.",
+            "Update your answers by resubmitting Personalized Questions — that feeds the fit scoring."
+          ]},
+          { id: 'weighting', patterns: [/\bweight\b/, /\bweigh\b/, /\bresume vs\b/, /\bhard skills\b/, /\bpreferences mode\b/], answers: [
+            "On AI Decision Breakdown you can switch between “Resume & hard skills” vs “My answers & preferences”. The bar charts update immediately.",
+            "Use the weighting toggle on the breakdown page to decide what matters more (resume vs preferences)."
+          ]},
+          { id: 'breakdown', patterns: [/\bai\b.*\bbreakdown\b/, /\bdecision breakdown\b/, /\bwhy (this|that) job\b/, /\bexplain (the )?score\b/], answers: [
+            "AI Decision Breakdown shows weights + factor contributions (bars), and your top 3 jobs each with a pie breakdown (skills/experience/fit).",
+            "Open “AI Decision Breakdown” to see exactly how the score was built."
+          ]},
+          { id: 'privacy', patterns: [/\bprivacy\b/, /\bstore\b/, /\bkeep\b/, /\bdelete\b/, /\bforget\b/], answers: [
+            "Employer visibility is opt-in. Resume text is sanitized before analysis. You can clear browser storage to wipe saved state.",
+            "Privacy-wise: PII is redacted; opt-in controls employer visibility; clearing site data removes stored state."
+          ]},
+          { id: 'bias', patterns: [/\bbias\b/, /\bfair(ness)?\b/, /\bunbiased\b/, /\bdiscrimination\b/], answers: [
+            "We reduce bias via redaction + transparency: strip identifiers, then show factor contributions in the breakdown.",
+            "Bias mitigation here is primarily removing PII/demographic signals before scoring."
+          ]},
+          { id: 'training', patterns: [/\btraining\b/, /\bcourses?\b/, /\blearning\b/, /\bdevelopment\b/], answers: [
+            "Check “Training & Courses Match” under Prospective employee options.",
+            "Training suggestions live under “Training & Courses Match”."
+          ]},
+          { id: 'about', patterns: [/\babout\b/, /\bmoultrie\b/, /\bwhat is this\b/, /\bwho is this for\b/, /\binternal\b/], answers: [
+            "This is Moultrie Mobile’s internal career match dashboard (employees + hiring managers). About page has company/product context.",
+            "Internal tool: match people to roles, then explain the scoring. About page covers Moultrie Mobile."
+          ]},
+          { id: 'comp', patterns: [/\bsalary\b/, /\bpay\b/, /\bcompensation\b/, /\bbenefits\b/], answers: [
+            "This tool doesn’t include comp/benefits details — that’s in the role posting/HR channel.",
+            "Comp/benefits aren’t modeled here. Use the official role listing or HR."
+          ]},
+          { id: 'remote', patterns: [/\bremote\b/, /\bhybrid\b/, /\b(on[ -]?site|in[- ]person)\b/, /\bwork from home\b/, /\blocation\b/], answers: [
+            "Set your work-mode preference in Personalized Questions (remote/hybrid/in-person/flexible).",
+            "Work mode is captured in Personalized Questions and used to adjust matches."
+          ]},
+          { id: 'improve', patterns: [/\blow score\b/, /\bimprove\b/, /\bbetter match\b/, /\bwhy (is|so) low\b/], answers: [
+            "Use the breakdown to see what’s dragging the score (skills vs experience vs fit), then update resume or preferences accordingly.",
+            "If a match is low, it’s usually missing skills/experience signals or a preference conflict. The breakdown shows which."
+          ]}
+        ];
+
+        function scoreIntent(item) {
+          var score = 0;
+          for (var i = 0; i < item.patterns.length; i++) {
+            if (item.patterns[i].test(t)) score += 10;
+          }
+          if (score) score += Math.min(10, Math.floor(t.length / 15));
+          return score;
+        }
+
+        var best = null;
+        var bestScore = 0;
+        for (var i = 0; i < KB.length; i++) {
+          var s = scoreIntent(KB[i]);
+          if (s > bestScore) { bestScore = s; best = KB[i]; }
+        }
+
+        if (best && bestScore > 0) {
+          var reply = pickAnswer(best.id, best.answers);
+          chatState.lastIntent = best.id;
+          chatState.lastReply = reply;
+          return reply;
+        }
+
+        return "Tell me what you’re trying to do (upload resume, see matches, AI breakdown, employer visibility) and I’ll point you to the exact step.";
       }
 
       function sendMessage() {
