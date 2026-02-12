@@ -862,6 +862,7 @@
     </section>
 
     <section id="upload-resume" class="view-section">
+      <a href="#employee" class="back-link">← Back to options</a>
       <h2 class="view-title">Upload Resume to Find Next Job</h2>
       <div class="intro">
         <p class="intro-lead">Upload your resume (PDF, Word, or plain text). Our AI will scan it for key sections so we can match you to the right roles.</p>
@@ -884,6 +885,9 @@
           <p class="upload-hint">PDF, Word (.docx, .doc), or plain text</p>
         </div>
         <p id="resume-file-name" class="resume-file-name"></p>
+        <button type="button" id="remove-resume-btn" class="upload-resume-btn" style="margin-top:0.75rem;padding:0.4rem 0.9rem;font-size:0.85rem;border-width:2px;background:transparent;color:var(--mm-green);">
+          Remove saved resume
+        </button>
         <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
         <div id="resume-scan-results" class="resume-scan-results" hidden></div>
         <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
@@ -1203,6 +1207,54 @@
       window.isJobLiked = isJobLiked;
     })();
 
+    // Bias-free resume sanitization: strip PII (name, school, dates, location, etc.)
+    function sanitizeResumeForAnalysis(text) {
+      if (!text || typeof text !== 'string') return '';
+      var t = text;
+      // Phone numbers (US/international patterns)
+      t = t.replace(/\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g, '[REDACTED]');
+      t = t.replace(/[0-9]{3}[-.\s][0-9]{3}[-.\s][0-9]{4}/g, '[REDACTED]');
+      // Email addresses
+      t = t.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED]');
+      // URLs (LinkedIn, personal sites, etc.)
+      t = t.replace(/https?:\/\/[^\s]+/g, '[REDACTED]');
+      // Street addresses (number + street name patterns)
+      t = t.replace(/\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl)[.,]?\s*(?:Apt|Suite|Ste|#)?\s*\d*/gi, '[REDACTED]');
+      // City, State ZIP (e.g. "Atlanta, GA 30301" or "New York, NY 10001")
+      t = t.replace(/[A-Za-z\s]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?/g, '[REDACTED]');
+      t = t.replace(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}\b/g, '[REDACTED]');
+      // Graduation / education dates (May 2020, 2018-2022, Class of 2020, Expected 2024, etc.)
+      t = t.replace(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi, '[DATE]');
+      t = t.replace(/\b\d{4}\s*[-–—]\s*\d{4}\b/g, '[DATE RANGE]');
+      t = t.replace(/\b(?:Class of|Graduated|Grad\.?|Expected)\s*\d{4}\b/gi, '[DATE]');
+      t = t.replace(/\b(?:Spring|Fall|Winter|Summer)\s+\d{4}\b/gi, '[DATE]');
+      // School / university names (common patterns)
+      t = t.replace(/\b(?:University|College|School|Institute|Academy)\s+of\s+[\w\s]+/gi, '[INSTITUTION]');
+      t = t.replace(/\b[\w\s]+(?:University|College|State University|Community College)\b/gi, '[INSTITUTION]');
+      t = t.replace(/\b(?:High School|High Sch\.?)\s*[:\-]?\s*[\w\s]+/gi, '[INSTITUTION]');
+      // Remove typical "name" header line (often first line: 2–4 capitalized words)
+      var lines = t.split(/\r?\n/);
+      if (lines.length > 1) {
+        var first = lines[0].trim();
+        if (/^[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?$/.test(first) && first.length < 50) lines[0] = '[NAME]';
+        t = lines.join('\n');
+      }
+      // Explicit race, gender, age, marital status (if ever listed)
+      t = t.replace(/\b(?:Male|Female|Non-binary|Man|Woman|M\/F|Gender:)\b/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Race|Ethnicity|Nationality)\s*:?\s*[^\n]+/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Age|DOB|Date of Birth|Born)\s*:?\s*[\d\-\/\.]+/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Married|Single|Marital status)\s*:?\s*[^\n]+/gi, '[REDACTED]');
+      // Photos / headshots mention
+      t = t.replace(/\b(?:Photo|Headshot|Picture)\s*(?:attached|included)?/gi, '[REDACTED]');
+      return t.replace(/\s+/g, ' ')
+              .replace(/\s*\[REDACTED\]\s*/g, ' ')
+              .replace(/\s*\[DATE\]\s*/g, ' ')
+              .replace(/\s*\[DATE RANGE\]\s*/g, ' ')
+              .replace(/\s*\[INSTITUTION\]\s*/g, ' ')
+              .replace(/\s*\[NAME\]\s*/g, ' ')
+              .trim();
+    }
+
     (function resumeUpload() {
       var fileInput = document.getElementById('resume-file');
       var uploadBtn = document.getElementById('upload-resume-btn');
@@ -1210,6 +1262,7 @@
       var statusEl = document.getElementById('resume-scan-status');
       var resultsEl = document.getElementById('resume-scan-results');
       var jobMatchesEl = document.getElementById('resume-job-matches');
+      var removeBtn = document.getElementById('remove-resume-btn');
       var lastResumeText = null;
 
       if (!fileInput || !uploadBtn || !fileNameEl || !statusEl || !resultsEl || !jobMatchesEl) return;
@@ -1221,17 +1274,76 @@
 
       function refreshJobMatches() {
         if (!lastResumeText) return;
-        var matches = computeJobMatches(lastResumeText, getMatchBy());
-        renderJobMatches(jobMatchesEl, matches);
-        var all = (matches.best || []).concat(matches.other || []).map(function (j) {
-          return { id: j.id, title: j.title, department: j.department, location: j.location, matchPct: j.matchPct };
+        // Compute matches for both hard skills (resume) and preferences so AI breakdown
+        // can show different weights without requiring another upload.
+        var matchesResume = computeJobMatches(lastResumeText, 'experience');
+        var matchesPrefs = computeJobMatches(lastResumeText, 'interests');
+
+        // Choose which set to render here based on current toggle.
+        var modeNow = getMatchBy();
+        var activeMatches = modeNow === 'interests' ? matchesPrefs : matchesResume;
+        renderJobMatches(jobMatchesEl, activeMatches);
+
+        // Merge both sets into a single list so AI breakdown can see per-job
+        // resume vs preferences scores and show all jobs.
+        var allResume = (matchesResume.best || []).concat(matchesResume.other || []);
+        var allPrefs = (matchesPrefs.best || []).concat(matchesPrefs.other || []);
+        var combined = allResume.map(function (jr) {
+          var jp = allPrefs.find(function (p) { return p.id === jr.id; }) || { matchPct: 0 };
+          return {
+            id: jr.id,
+            title: jr.title,
+            department: jr.department,
+            location: jr.location,
+            matchPct: jr.matchPct,
+            resumePct: jr.matchPct,
+            prefsPct: jp.matchPct
+          };
         });
         try {
-          sessionStorage.setItem('mmJobMatches', JSON.stringify(all));
-          localStorage.setItem('moultrie_resume_job_matches', JSON.stringify(all));
+          sessionStorage.setItem('mmJobMatches', JSON.stringify(combined));
+          localStorage.setItem('moultrie_resume_job_matches', JSON.stringify(combined));
         } catch (e) {}
       }
       window.refreshJobMatches = refreshJobMatches;
+
+      // If a sanitized resume was previously saved, reuse it so user
+      // doesn’t have to re-upload and it appears under \"My saved profile\".
+      try {
+        var savedSanitized = localStorage.getItem('moultrie_resume_sanitized');
+        var savedAt = localStorage.getItem('moultrie_resume_at');
+        if (savedSanitized && savedSanitized.trim()) {
+          lastResumeText = savedSanitized;
+          fileNameEl.textContent = 'Using saved resume';
+          var when = typeof formatWhen === 'function' ? formatWhen(savedAt) : null;
+          statusEl.textContent = when
+            ? 'Using your saved, bias-free resume from ' + when + '.'
+            : 'Using your saved, bias-free resume.';
+          var foundSaved = scanResumeSections(savedSanitized);
+          renderScanResults(resultsEl, foundSaved);
+          resultsEl.hidden = false;
+          refreshJobMatches();
+          jobMatchesEl.hidden = false;
+        }
+      } catch (e) {}
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+          lastResumeText = null;
+          fileInput.value = '';
+          fileNameEl.textContent = '';
+          statusEl.textContent = 'Resume removed. Upload a new one to see matches.';
+          resultsEl.hidden = true;
+          jobMatchesEl.hidden = true;
+          try {
+            localStorage.removeItem('moultrie_resume_sanitized');
+            localStorage.removeItem('moultrie_resume_at');
+            sessionStorage.removeItem('mmResumeText');
+            sessionStorage.removeItem('mmJobMatches');
+          } catch (e) {}
+          try { renderSavedProfile(); } catch (e) {}
+        });
+      }
 
       uploadBtn.addEventListener('click', function () { fileInput.click(); });
       document.querySelectorAll('input[name="match-by"]').forEach(function (radio) {
@@ -1251,14 +1363,17 @@
             statusEl.textContent = 'Could not extract text from this file. Try a PDF or Word document.';
             return;
           }
-          lastResumeText = text;
-          try { sessionStorage.setItem('mmResumeText', text); } catch (e) {}
-          try {
-            var capped = text.length > 80000 ? text.slice(0, 80000) : text;
-            localStorage.setItem('moultrie_resume_text', capped);
-          } catch (e2) {}
 
-          var found = scanResumeSections(text);
+          // Sanitize to remove PII and store as part of \"My saved profile\"
+          var sanitized = sanitizeResumeForAnalysis(text);
+          lastResumeText = sanitized;
+          try {
+            localStorage.setItem('moultrie_resume_sanitized', sanitized);
+            localStorage.setItem('moultrie_resume_at', new Date().toISOString());
+            sessionStorage.setItem('mmResumeText', text);
+          } catch (e) {}
+
+          var found = scanResumeSections(sanitized);
           statusEl.textContent = 'Scan complete. Key sections detected:';
           renderScanResults(resultsEl, found);
           resultsEl.hidden = false;
