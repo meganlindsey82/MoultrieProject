@@ -763,6 +763,129 @@
       color: var(--mm-muted);
       margin-top: 0.15rem;
     }
+    .course-card {
+      background: var(--mm-card);
+      border: 1px solid var(--mm-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .course-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .course-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--mm-green);
+      margin: 0;
+      line-height: 1.3;
+    }
+    .course-provider {
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .course-skill {
+      display: inline-block;
+      background: #e8f0e4;
+      color: var(--mm-green);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+    .course-meta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      margin-top: 0.25rem;
+    }
+    .course-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .course-link {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: #e8f0e4;
+      color: var(--mm-green);
+      border: 2px solid var(--mm-green);
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+      display: block;
+      transition: background 0.2s;
+    }
+    .course-link:hover {
+      background: #dcead8;
+    }
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .difficulty-badge.beginner { background: #e8f0e4; color: var(--mm-green); }
+    .difficulty-badge.intermediate { background: #fff4d6; color: #b8860b; }
+    .difficulty-badge.advanced { background: #ffe8e8; color: #c53030; }
+    .job-gap-card {
+      background: var(--mm-card);
+      border: 1px solid var(--mm-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .job-gap-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem 0;
+    }
+    .job-gap-card .job-meta-info {
+      font-size: 0.9rem;
+      color: var(--mm-muted);
+      margin-bottom: 1rem;
+    }
+    .job-gap-card .gap-label {
+      font-weight: 600;
+      color: var(--mm-text);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .job-gap-card .gap-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .gap-skill-tag {
+      background: #ffe8e8;
+      color: #c53030;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .no-gaps {
+      color: var(--mm-green);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -1029,6 +1152,35 @@
         </form>
     </section>
 
+    <section id="training-match" class="view-section">
+      <a href="#employee" class="back-link">← Back to options</a>
+      <h2 class="view-title">Training & Courses Match</h2>
+      <p class="intro" style="margin-bottom: 1.5rem;">Based on your resume and job matches, we've identified skill gaps and found courses to help you close them. Sort by skill, cost, or difficulty.</p>
+
+      <div id="training-no-data" class="intro-block" style="display:none;">
+        <p style="margin:0;">Upload your resume and get job matches first to see personalized training recommendations.</p>
+      </div>
+
+      <div id="training-content" style="display:none;">
+        <div id="matched-jobs-section" style="margin-bottom: 2rem;"></div>
+        
+        <div class="intro-block" style="margin-bottom: 1.5rem;">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <label style="font-weight:600;color:var(--mm-green);">Sort by:</label>
+            <select id="course-sort" style="padding:0.5rem 1rem;border:2px solid var(--mm-green);border-radius:var(--radius-sm);background:#e8f0e4;font-weight:600;cursor:pointer;">
+              <option value="skill">Skill name</option>
+              <option value="cost">Cost (low to high)</option>
+              <option value="cost-desc">Cost (high to low)</option>
+              <option value="difficulty">Difficulty (easy to hard)</option>
+              <option value="difficulty-desc">Difficulty (hard to easy)</option>
+            </select>
+          </div>
+          <div id="skill-gaps-summary" style="font-size:0.9rem;color:var(--mm-muted);"></div>
+        </div>
+        <div id="courses-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;"></div>
+      </div>
+    </section>
+
     <section id="employer" class="view-section">
       <h2 class="view-title">Employer</h2>
       <div class="employer-placeholder">
@@ -1056,7 +1208,7 @@
     </div>
   </div>
   <script>
-    const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'training-match', 'job-dashboard', 'my-progress'];
+    const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'job-dashboard'];
     function setView() {
       const hash = location.hash.slice(1) || 'home';
       let activeView;
@@ -1066,6 +1218,8 @@
         activeView = 'my-progress';
       } else if (hash === 'upload-resume') {
         activeView = 'upload-resume';
+      } else if (hash === 'training-match') {
+        activeView = 'training-match';
       } else if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
         activeView = 'employee';
       } else if (hash === 'employer' || hash === 'home' || hash === 'employee') {
@@ -1088,6 +1242,9 @@
 
       if (activeView === 'my-progress') {
         try { renderSavedProfile(); } catch (e) {}
+      }
+      if (hash === 'training-match') {
+        try { renderTrainingCourses(); } catch (e) {}
       }
     }
     window.addEventListener('hashchange', setView);
@@ -1174,6 +1331,261 @@
         });
       }
     }
+
+    (function trainingCourses() {
+      var COURSE_CATALOG = [
+        { title: 'Foundations of Project Management', provider: 'Coursera', skill: 'project management', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/project-management-foundations', hours: 12 },
+        { title: 'Agile Crash Course', provider: 'Udemy', skill: 'agile', cost: 19, difficulty: 'beginner', url: 'https://www.udemy.com/course/agile-crash-course', hours: 6 },
+        { title: 'Scrum: The Basics', provider: 'LinkedIn Learning', skill: 'scrum', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/scrum-the-basics', hours: 2 },
+        { title: 'Customer Service Fundamentals', provider: 'Coursera', skill: 'customer service', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/customer-service-fundamentals', hours: 10 },
+        { title: 'Salesforce CRM - A Complete Introduction', provider: 'Udemy', skill: 'CRM', cost: 24, difficulty: 'beginner', url: 'https://www.udemy.com/course/salesforce-crm-complete-introduction', hours: 5 },
+        { title: 'Sales Training', provider: 'LinkedIn Learning', skill: 'sales', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/sales-training', hours: 7 },
+        { title: 'Sales Strategies', provider: 'Coursera', skill: 'sales', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/sales-strategies', hours: 15 },
+        { title: 'Successful Negotiation', provider: 'Coursera', skill: 'negotiation', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/negotiation-skills', hours: 9 },
+        { title: 'JavaScript Algorithms and Data Structures', provider: 'freeCodeCamp', skill: 'javascript', cost: 0, difficulty: 'beginner', url: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures', hours: 40 },
+        { title: 'Complete Python Bootcamp', provider: 'Udemy', skill: 'python', cost: 29, difficulty: 'beginner', url: 'https://www.udemy.com/course/complete-python-bootcamp', hours: 22 },
+        { title: 'Python for Everybody', provider: 'Coursera', skill: 'python', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/specializations/python', hours: 30 },
+        { title: 'The Complete Web Development Bootcamp', provider: 'Udemy', skill: 'web', cost: 39, difficulty: 'intermediate', url: 'https://www.udemy.com/course/the-complete-web-development-bootcamp', hours: 50 },
+        { title: 'REST APIs with Flask and Python', provider: 'Udemy', skill: 'API', cost: 24, difficulty: 'intermediate', url: 'https://www.udemy.com/course/rest-api-flask-and-python', hours: 6 },
+        { title: 'Git and GitHub', provider: 'freeCodeCamp', skill: 'git', cost: 0, difficulty: 'beginner', url: 'https://www.freecodecamp.org/learn', hours: 4 },
+        { title: 'Learning JavaScript Debugging', provider: 'LinkedIn Learning', skill: 'debugging', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/learning-javascript-debugging-2', hours: 5 },
+        { title: 'Debugging: Hunting and Squashing Bugs', provider: 'Coursera', skill: 'debugging', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/debugging-hunting-and-squashing-bugs', hours: 6 },
+        { title: 'Operations Management', provider: 'Coursera', skill: 'operations', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/wharton-operations', hours: 12 },
+        { title: 'Supply Chain Fundamentals', provider: 'Coursera', skill: 'logistics', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/supply-chain-fundamentals', hours: 8 },
+        { title: 'Inventory Management', provider: 'Udemy', skill: 'inventory', cost: 24, difficulty: 'beginner', url: 'https://www.udemy.com/course/inventory-management-basics', hours: 6 },
+        { title: 'OSHA Safety Training', provider: 'Udemy', skill: 'safety compliance', cost: 29, difficulty: 'beginner', url: 'https://www.udemy.com/course/osha-safety-training', hours: 10 },
+        { title: 'Human Resources', provider: 'Coursera', skill: 'HR', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/human-resources', hours: 7 },
+        { title: 'Recruiting, Hiring, and Onboarding Employees', provider: 'Coursera', skill: 'recruiting', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/recruiting-hiring-onboarding-employees', hours: 11 },
+        { title: 'Employee Training and Development', provider: 'LinkedIn Learning', skill: 'training', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/employee-training-and-development', hours: 9 },
+        { title: 'Onboarding New Hires', provider: 'LinkedIn Learning', skill: 'onboarding', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/onboarding-new-hires', hours: 5 },
+        { title: 'Inspiring and Motivating Individuals', provider: 'Coursera', skill: 'team leadership', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/inspiring-and-motivating-individuals', hours: 10 },
+        { title: 'Leading Teams', provider: 'Coursera', skill: 'team leadership', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/leading-teams', hours: 15 },
+        { title: 'Process Improvement', provider: 'LinkedIn Learning', skill: 'process improvement', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/process-improvement-foundations', hours: 8 },
+        { title: 'Budgeting and Scheduling Projects', provider: 'Coursera', skill: 'budget', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/schedule-projects', hours: 12 },
+        { title: 'Key Performance Indicators', provider: 'LinkedIn Learning', skill: 'KPIs', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/key-performance-indicators-kpis', hours: 6 },
+        { title: 'Community Engagement', provider: 'Coursera', skill: 'community', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/community-engagement', hours: 7 },
+        { title: 'Event Planning', provider: 'LinkedIn Learning', skill: 'events', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/event-planning-foundations', hours: 10 },
+        { title: 'Volunteer Management', provider: 'LinkedIn Learning', skill: 'volunteer', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/volunteer-management', hours: 5 },
+        { title: 'Strategic Partnerships', provider: 'LinkedIn Learning', skill: 'partnerships', cost: 0, difficulty: 'intermediate', url: 'https://www.linkedin.com/learning/strategic-partnerships', hours: 8 },
+        { title: 'Communication Strategies', provider: 'Coursera', skill: 'outreach', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/communication-strategies', hours: 9 },
+        { title: 'Customer Relationship Management', provider: 'Coursera', skill: 'client', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/customer-relationship-management', hours: 7 },
+        { title: 'Lead Generation', provider: 'LinkedIn Learning', skill: 'lead generation', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/lead-generation-foundations', hours: 6 },
+        { title: 'Presentation Skills', provider: 'Coursera', skill: 'presentation', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/presentation-skills', hours: 8 },
+        { title: 'Troubleshooting and Debugging Techniques', provider: 'Coursera', skill: 'troubleshooting', cost: 0, difficulty: 'intermediate', url: 'https://www.coursera.org/learn/troubleshooting-debugging-techniques', hours: 5 },
+        { title: 'Technical Writing', provider: 'Coursera', skill: 'documentation', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/technical-writing', hours: 4 },
+        { title: 'Work Smarter, Not Harder', provider: 'Coursera', skill: 'scheduling', cost: 0, difficulty: 'beginner', url: 'https://www.coursera.org/learn/work-smarter-not-harder', hours: 7 },
+        { title: 'Coordination', provider: 'LinkedIn Learning', skill: 'coordination', cost: 0, difficulty: 'beginner', url: 'https://www.linkedin.com/learning/coordination', hours: 5 }
+      ];
+
+      function extractResumeSkills(resumeText) {
+        if (!resumeText) return [];
+        var text = '\n' + resumeText.toLowerCase();
+        var skillKeywords = [
+          'javascript', 'python', 'java', 'html', 'css', 'react', 'node', 'sql', 'git', 'api', 'web', 'programming', 'coding', 'software', 'development',
+          'project management', 'agile', 'scrum', 'stakeholder', 'timeline', 'budget',
+          'customer service', 'customer support', 'crm', 'phone', 'email', 'troubleshooting', 'onboarding',
+          'sales', 'outreach', 'lead generation', 'client', 'pipeline', 'negotiation', 'presentation', 'relationship',
+          'operations', 'logistics', 'scheduling', 'coordination', 'inventory', 'documentation', 'safety compliance',
+          'training', 'onboarding', 'recruiting', 'hr', 'human resources', 'policies',
+          'management', 'team leadership', 'process improvement', 'kpis', 'efficiency',
+          'community', 'engagement', 'events', 'volunteer', 'partnerships'
+        ];
+        var found = [];
+        for (var i = 0; i < skillKeywords.length; i++) {
+          var kw = skillKeywords[i].toLowerCase();
+          if (text.indexOf(kw) !== -1) found.push(kw);
+        }
+        return found;
+      }
+
+      function findSkillGapsForJob(resumeSkills, jobTitle) {
+        var jobCatalog = window.MOULTRIE_JOBS || [];
+        var jobData = jobCatalog.find(function(j) { return j.title === jobTitle; });
+        if (!jobData || !jobData.skills) return [];
+        var gaps = [];
+        for (var i = 0; i < jobData.skills.length; i++) {
+          var reqSkill = jobData.skills[i].toLowerCase();
+          var hasIt = resumeSkills.some(function(rs) {
+            return rs.indexOf(reqSkill) !== -1 || reqSkill.indexOf(rs) !== -1;
+          });
+          if (!hasIt) gaps.push(reqSkill);
+        }
+        return gaps;
+      }
+
+      function findSkillGaps(resumeSkills, jobMatches) {
+        if (!jobMatches || !jobMatches.length) return [];
+        var jobCatalog = window.MOULTRIE_JOBS || [];
+        var allRequiredSkills = [];
+        for (var i = 0; i < jobMatches.length; i++) {
+          var job = jobMatches[i];
+          var jobData = jobCatalog.find(function(j) { return j.title === job.title; });
+          if (jobData && jobData.skills) {
+            for (var j = 0; j < jobData.skills.length; j++) {
+              var skill = jobData.skills[j].toLowerCase();
+              if (allRequiredSkills.indexOf(skill) === -1) allRequiredSkills.push(skill);
+            }
+          }
+        }
+        var gaps = [];
+        for (var k = 0; k < allRequiredSkills.length; k++) {
+          var reqSkill = allRequiredSkills[k];
+          var hasIt = resumeSkills.some(function(rs) {
+            return rs.indexOf(reqSkill) !== -1 || reqSkill.indexOf(rs) !== -1;
+          });
+          if (!hasIt) gaps.push(reqSkill);
+        }
+        return gaps;
+      }
+
+      function matchCoursesToGaps(gaps) {
+        if (!gaps || !gaps.length) return [];
+        var matched = [];
+        for (var i = 0; i < COURSE_CATALOG.length; i++) {
+          var course = COURSE_CATALOG[i];
+          var courseSkill = course.skill.toLowerCase();
+          for (var j = 0; j < gaps.length; j++) {
+            var gap = gaps[j];
+            if (courseSkill.indexOf(gap) !== -1 || gap.indexOf(courseSkill) !== -1) {
+              matched.push(Object.assign({}, course, { gapSkill: gap }));
+              break;
+            }
+          }
+        }
+        return matched;
+      }
+
+      function sortCourses(courses, sortBy) {
+        var sorted = courses.slice();
+        if (sortBy === 'skill') {
+          sorted.sort(function(a, b) { return a.skill.localeCompare(b.skill); });
+        } else if (sortBy === 'cost') {
+          sorted.sort(function(a, b) { return a.cost - b.cost; });
+        } else if (sortBy === 'cost-desc') {
+          sorted.sort(function(a, b) { return b.cost - a.cost; });
+        } else if (sortBy === 'difficulty') {
+          var order = { beginner: 1, intermediate: 2, advanced: 3 };
+          sorted.sort(function(a, b) { return (order[a.difficulty] || 0) - (order[b.difficulty] || 0); });
+        } else if (sortBy === 'difficulty-desc') {
+          var order = { beginner: 1, intermediate: 2, advanced: 3 };
+          sorted.sort(function(a, b) { return (order[b.difficulty] || 0) - (order[a.difficulty] || 0); });
+        }
+        return sorted;
+      }
+
+      function renderTrainingCourses() {
+        var noDataEl = document.getElementById('training-no-data');
+        var contentEl = document.getElementById('training-content');
+        var coursesListEl = document.getElementById('courses-list');
+        var summaryEl = document.getElementById('skill-gaps-summary');
+        var sortEl = document.getElementById('course-sort');
+        var matchedJobsEl = document.getElementById('matched-jobs-section');
+
+        if (!noDataEl || !contentEl || !coursesListEl) return;
+
+        var resumeText = null;
+        try {
+          resumeText = localStorage.getItem('moultrie_resume_sanitized') || sessionStorage.getItem('mmResumeText');
+        } catch (e) {}
+
+        var jobMatches = [];
+        try {
+          var stored = sessionStorage.getItem('mmJobMatches');
+          if (stored) {
+            var parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+              jobMatches = parsed;
+            } else if (parsed.best || parsed.other) {
+              jobMatches = (parsed.best || []).concat(parsed.other || []);
+            }
+          }
+        } catch (e) {}
+
+        if (!resumeText || !jobMatches || !jobMatches.length) {
+          noDataEl.style.display = 'block';
+          contentEl.style.display = 'none';
+          return;
+        }
+
+        noDataEl.style.display = 'none';
+        contentEl.style.display = 'block';
+
+        var resumeSkills = extractResumeSkills(resumeText);
+        var gaps = findSkillGaps(resumeSkills, jobMatches);
+        var courses = matchCoursesToGaps(gaps);
+
+        // Render matched jobs with skill gaps
+        if (matchedJobsEl) {
+          var jobsHtml = '<h3 style="font-size:1.3rem;font-weight:700;color:var(--mm-green);margin-bottom:1rem;">Your Matched Jobs & Skill Gaps</h3>';
+          var jobCatalog = window.MOULTRIE_JOBS || [];
+          for (var i = 0; i < jobMatches.length; i++) {
+            var job = jobMatches[i];
+            var jobData = jobCatalog.find(function(j) { return j.title === job.title; });
+            var jobGaps = findSkillGapsForJob(resumeSkills, job.title);
+            var matchPct = job.matchPct || 0;
+            var location = job.location || (jobData ? jobData.location : '');
+            var department = job.department || (jobData ? jobData.department : '');
+            
+            jobsHtml += '<div class="job-gap-card">';
+            jobsHtml += '<h3>' + job.title + '</h3>';
+            jobsHtml += '<div class="job-meta-info">';
+            if (department) jobsHtml += department + ' • ';
+            if (location) jobsHtml += location + ' • ';
+            jobsHtml += matchPct + '% match</div>';
+            
+            if (jobGaps.length > 0) {
+              jobsHtml += '<div class="gap-label">Skills you need to develop:</div>';
+              jobsHtml += '<div class="gap-skills">';
+              for (var j = 0; j < jobGaps.length; j++) {
+                var gapSkill = jobGaps[j];
+                var displaySkill = gapSkill.split(' ').map(function(w) {
+                  return w.charAt(0).toUpperCase() + w.slice(1);
+                }).join(' ');
+                jobsHtml += '<span class="gap-skill-tag">' + displaySkill + '</span>';
+              }
+              jobsHtml += '</div>';
+            } else {
+              jobsHtml += '<div class="no-gaps">✓ You have all the required skills for this role!</div>';
+            }
+            jobsHtml += '</div>';
+          }
+          matchedJobsEl.innerHTML = jobsHtml;
+        }
+
+        if (courses.length === 0) {
+          summaryEl.textContent = 'No skill gaps found — your resume matches the required skills well!';
+          coursesListEl.innerHTML = '<p style="color:var(--mm-muted);">Keep building your skills to stay competitive.</p>';
+          return;
+        }
+
+        summaryEl.textContent = 'Found ' + gaps.length + ' skill gap' + (gaps.length !== 1 ? 's' : '') + ' across your top matches. Showing ' + courses.length + ' recommended course' + (courses.length !== 1 ? 's' : '') + '.';
+
+        function render() {
+          var sortBy = sortEl ? sortEl.value : 'skill';
+          var sorted = sortCourses(courses, sortBy);
+          coursesListEl.innerHTML = sorted.map(function(c) {
+            var costText = c.cost === 0 ? 'Free' : '$' + c.cost;
+            return '<div class="course-card">' +
+              '<div class="course-provider">' + c.provider + '</div>' +
+              '<h3 class="course-title">' + c.title + '</h3>' +
+              '<div><span class="course-skill">' + c.skill + '</span></div>' +
+              '<div class="course-meta">' +
+                '<span><span class="difficulty-badge ' + c.difficulty + '">' + c.difficulty.charAt(0).toUpperCase() + c.difficulty.slice(1) + '</span></span>' +
+                '<span>💰 ' + costText + '</span>' +
+                '<span>⏱ ' + c.hours + ' hours</span>' +
+              '</div>' +
+              '<a href="' + c.url + '" target="_blank" rel="noopener" class="course-link">View course →</a>' +
+            '</div>';
+          }).join('');
+        }
+
+        if (sortEl) {
+          sortEl.addEventListener('change', render);
+        }
+        render();
+      }
+      window.renderTrainingCourses = renderTrainingCourses;
+    })();
 
     (function likedJobs() {
       var LIKED_KEY = 'moultrie_liked_jobs';
@@ -1312,6 +1724,7 @@
         { title: 'Junior Developer', department: 'Product & Technology', location: 'Remote', skills: ['programming', 'coding', 'software development', 'javascript', 'python', 'web', 'API', 'git', 'debugging'], qualifications: ['problem solving', 'projects', 'computer science', 'technical', 'learning', 'collaboration', 'code'], interests: ['technology', 'building things', 'problem solving', 'learning', 'coding', 'projects', 'creativity'] },
         { title: 'Community Engagement Coordinator', department: 'Community', location: 'Moultrie, GA', skills: ['community', 'engagement', 'outreach', 'events', 'volunteer', 'partnerships', 'social', 'programs'], qualifications: ['communication', 'organization', 'volunteer experience', 'leadership', 'involvement', 'relationship building'], interests: ['community', 'volunteer', 'events', 'helping others', 'partnerships', 'social impact', 'involvement'] }
       ];
+      window.MOULTRIE_JOBS = MOULTRIE_JOBS;
 
       function computeJobMatches(resumeText, matchMode) {
         var normalizedResume = '\n' + (resumeText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
