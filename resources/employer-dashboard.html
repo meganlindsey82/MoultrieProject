@@ -361,7 +361,7 @@
 
       function showResumeModal(text) {
         if (!resumeModalContent || !resumeModal) return;
-        resumeModalContent.textContent = text || 'No resume text available.';
+        resumeModalContent.textContent = (text && text.trim()) ? text : 'This candidate has not attached a resume to their profile.';
         resumeModal.classList.add('open');
         resumeModal.setAttribute('aria-hidden', 'false');
       }
@@ -385,35 +385,53 @@
       }
       fillJobFilter();
 
-      function getMatchForJob(c, jobTitle) {
-        if (!jobTitle) return c.match;
+      function normalizeTitle(t) { return (t || '').trim(); }
+
+      function getPct(entry) {
+        if (!entry) return 0;
+        var p = entry.matchPct != null ? entry.matchPct : (entry.match != null ? entry.match : (entry.overall != null ? entry.overall : 0));
+        return typeof p === 'number' && !isNaN(p) ? p : 0;
+      }
+
+      function jobTitleMatchesCandidate(c, jobTitle) {
+        var jt = normalizeTitle(jobTitle);
+        if (!jt) return false;
         var list = c.jobMatches || [];
-        if (list.length) {
-          var entry = list.filter(function (j) { return (j.title || '') === jobTitle; })[0];
-          return entry && entry.matchPct != null ? entry.matchPct : 0;
+        if (list && list.length) {
+          var entry = list.filter(function (j) { return normalizeTitle(j.title) === jt; })[0];
+          return entry && getPct(entry) > 0;
         }
-        return (c.bestJobTitle || '') === jobTitle ? (c.match || 0) : 0;
+        var best = normalizeTitle(c.bestJobTitle);
+        var role = normalizeTitle(c.role);
+        var roleJob = role.replace(/\s*candidate\s*$/i, '').trim();
+        return best === jt || role === jt || roleJob === jt;
+      }
+
+      function getMatchForJob(c, jobTitle) {
+        var jt = normalizeTitle(jobTitle);
+        if (!jt) return getPct({ matchPct: c.match });
+        var list = c.jobMatches || [];
+        if (list && list.length) {
+          var entry = list.filter(function (j) { return normalizeTitle(j.title) === jt; })[0];
+          if (entry) return getPct(entry);
+        }
+        if (jobTitleMatchesCandidate(c, jobTitle)) return c.match || 0;
+        return 0;
       }
 
       function hasMatchForJob(c, jobTitle) {
         if (!jobTitle) return true;
-        var list = c.jobMatches || [];
-        if (list.length) {
-          var entry = list.filter(function (j) { return (j.title || '') === jobTitle; })[0];
-          return entry && (entry.matchPct == null ? false : entry.matchPct > 0);
-        }
-        return (c.bestJobTitle || '') === jobTitle;
+        return jobTitleMatchesCandidate(c, jobTitle);
       }
 
       function render() {
-        var selectedJob = filterEl.value;
+        var selectedJob = (filterEl.value || '').trim();
         var candidates = getCandidates();
         listEl.innerHTML = '';
 
         var visible = candidates.filter(function (c) {
-          if (!c.public) return false;
-          if (!selectedJob || selectedJob === '') return true;
-          return hasMatchForJob(c, selectedJob);
+          if (c.public !== true && c.public !== 'true') return false;
+          return true;
         });
 
         if (selectedJob) {
@@ -470,7 +488,7 @@
               '<span class="candidate-match-label">' + matchLabel + '</span>' +
             '</div>' +
             (diagHtml || '') +
-            (c.resumeText ? ('<div class="resume-link-wrap"><a href="#" class="view-resume-link" data-idx="' + idx + '">View resume</a></div>') : '') +
+            '<div class="resume-link-wrap"><a href="#" class="view-resume-link" data-idx="' + idx + '">View resume</a></div>' +
             '<div class="candidate-contact">' +
               (c.email ? ('Email: <a href="mailto:' + c.email + '">' + c.email + '</a>') : '') +
               (c.email && c.phone ? '<br />' : '') +
@@ -487,7 +505,7 @@
         e.preventDefault();
         var idx = parseInt(link.getAttribute('data-idx'), 10);
         var cand = currentVisible[idx];
-        if (cand && cand.resumeText) showResumeModal(cand.resumeText);
+        if (cand) showResumeModal(cand.resumeText);
       });
 
       filterEl.addEventListener('change', render);

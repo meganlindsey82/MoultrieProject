@@ -537,10 +537,13 @@
 
       updateGraphs();
       try {
-        var stored = sessionStorage.getItem('mmJobMatches');
+        var stored = sessionStorage.getItem('mmJobMatches') || localStorage.getItem('moultrie_resume_job_matches');
         if (stored) {
           var parsed = JSON.parse(stored);
-          if (parsed && parsed.length) { fillTopJobs(parsed); }
+          if (parsed && parsed.length) {
+            fillTopJobs(parsed);
+            try { sessionStorage.setItem('mmJobMatches', stored); localStorage.setItem('moultrie_resume_job_matches', stored); } catch (e2) {}
+          }
         }
       } catch (e) {}
     })();
