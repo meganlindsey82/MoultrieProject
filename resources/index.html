@@ -1165,6 +1165,8 @@
             localStorage.removeItem('moultrie_personalized_at');
             localStorage.removeItem('moultrie_resume_sanitized');
             localStorage.removeItem('moultrie_resume_at');
+            localStorage.removeItem('moultrie_resume_text');
+            localStorage.removeItem('moultrie_resume_job_matches');
             localStorage.removeItem('moultrie_liked_jobs');
             localStorage.removeItem('moultrie_visible_to_employers');
             sessionStorage.removeItem('mmJobMatches');
@@ -1221,11 +1223,13 @@
         if (!lastResumeText) return;
         var matches = computeJobMatches(lastResumeText, getMatchBy());
         renderJobMatches(jobMatchesEl, matches);
-        var all = (matches.best || []).concat(matches.other || []);
-        var top3 = all.slice(0, 3).map(function (j) {
+        var all = (matches.best || []).concat(matches.other || []).map(function (j) {
           return { id: j.id, title: j.title, department: j.department, location: j.location, matchPct: j.matchPct };
         });
-        try { sessionStorage.setItem('mmJobMatches', JSON.stringify(top3)); } catch (e) {}
+        try {
+          sessionStorage.setItem('mmJobMatches', JSON.stringify(all));
+          localStorage.setItem('moultrie_resume_job_matches', JSON.stringify(all));
+        } catch (e) {}
       }
       window.refreshJobMatches = refreshJobMatches;
 
@@ -1249,6 +1253,10 @@
           }
           lastResumeText = text;
           try { sessionStorage.setItem('mmResumeText', text); } catch (e) {}
+          try {
+            var capped = text.length > 80000 ? text.slice(0, 80000) : text;
+            localStorage.setItem('moultrie_resume_text', capped);
+          } catch (e2) {}
 
           var found = scanResumeSections(text);
           statusEl.textContent = 'Scan complete. Key sections detected:';
@@ -1688,7 +1696,56 @@
         localStorage.setItem('moultrie_personalized', JSON.stringify(out));
         localStorage.setItem('moultrie_personalized_at', new Date().toISOString());
       } catch (err) { console.warn('Could not save to localStorage:', err); }
-      alert('Thanks! Your answers have been saved. They\'ll be used when we analyze which roles suit you best.');
+
+      var OPTED_IN_KEY = 'moultrie_opted_in_candidates';
+      var profileName = (out['profile_name'] || '').toString().trim();
+      var profileEmail = (out['profile_email'] || '').toString().trim();
+      var role = 'General candidate';
+      var match = 0;
+      var sectors = [].concat(out.sectors || []).filter(Boolean);
+      if (sectors.length) {
+        var labels = { tech: 'Tech & IT', operations: 'Operations', hr: 'HR & People', finance: 'Finance', sales: 'Sales & Marketing', engineering: 'Engineering' };
+        role = (labels[sectors[0]] || sectors[0]) + ' candidate';
+      }
+      var bestJobTitle = '';
+      var jobMatches = [];
+      try {
+        var matches = sessionStorage.getItem('mmJobMatches') || localStorage.getItem('moultrie_resume_job_matches');
+        if (matches) {
+          var arr = JSON.parse(matches);
+          if (arr && arr.length) {
+            if (arr[0].matchPct != null) { match = arr[0].matchPct; }
+            if (arr[0].title) { bestJobTitle = arr[0].title; }
+            jobMatches = arr.map(function (j) { return { title: j.title, matchPct: j.matchPct }; });
+          }
+        }
+      } catch (err) {}
+      var resumeText = '';
+      try {
+        var raw = sessionStorage.getItem('mmResumeText') || localStorage.getItem('moultrie_resume_text') || '';
+        resumeText = (raw && raw.length) ? (raw.length > 80000 ? raw.slice(0, 80000) : raw) : '';
+      } catch (e) {}
+      try {
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem(OPTED_IN_KEY) || '[]'); } catch (e) {}
+        list = list.filter(function (c) { return (c.email || '').toLowerCase() !== profileEmail.toLowerCase(); });
+        list.push({
+          name: profileName,
+          email: profileEmail,
+          phone: '',
+          role: role,
+          match: match,
+          bestJobTitle: bestJobTitle,
+          jobMatches: jobMatches,
+          resumeText: resumeText,
+          jobKey: 'general',
+          public: true,
+          diagnostic: { sectors: out.sectors, workMode: out['work-mode'], traits: out.traits, priorities: out.priorities }
+        });
+        localStorage.setItem(OPTED_IN_KEY, JSON.stringify(list));
+      } catch (err) { console.warn('Could not add to employer list:', err); }
+
+      alert('Thanks! Your answers have been saved. They\'ll be used when we analyze which roles suit you best. Your profile will appear for employers when they view the dashboard.');
     });
 
     // (Removed) Extra bias-free resume upload flow used by #upload-resume-paste

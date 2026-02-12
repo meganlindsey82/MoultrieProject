@@ -214,6 +214,16 @@
       color: var(--mm-green);
       margin-top: 0.25rem;
     }
+    .candidate-diagnostic {
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--mm-border);
+      line-height: 1.5;
+    }
+    .candidate-diagnostic strong { color: var(--mm-green); }
+    .candidate-diagnostic .profile-heading { display: block; margin-bottom: 0.35rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
     .empty {
       margin-top: 1.5rem;
       padding: 2rem;
@@ -224,6 +234,58 @@
       border: 1px dashed var(--mm-border);
       border-radius: var(--radius);
     }
+    .resume-link-wrap { margin-top: 0.5rem; }
+    .view-resume-link {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--mm-green);
+      text-decoration: none;
+    }
+    .view-resume-link:hover { text-decoration: underline; }
+    .resume-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-sizing: border-box;
+    }
+    .resume-modal-overlay.open { display: flex; }
+    .resume-modal {
+      background: var(--mm-card);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .resume-modal h3 { margin: 0; padding: 1rem 1.25rem; border-bottom: 1px solid var(--mm-border); font-size: 1.1rem; color: var(--mm-green); }
+    .resume-modal-content {
+      padding: 1.25rem;
+      overflow: auto;
+      flex: 1;
+      white-space: pre-wrap;
+      font-family: system-ui, sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--mm-text);
+    }
+    .resume-modal-close {
+      margin: 0 1.25rem 1rem;
+      padding: 0.6rem 1rem;
+      background: var(--mm-green);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .resume-modal-close:hover { background: var(--mm-green-block); }
   </style>
 </head>
 <body>
@@ -248,9 +310,6 @@
       <label for="job-filter">Filter by job</label>
       <select id="job-filter">
         <option value="">All jobs</option>
-        <option value="field-ops">Field Operations Lead</option>
-        <option value="support">Customer Support Specialist</option>
-        <option value="product">Product Manager</option>
       </select>
     </div>
 
@@ -258,10 +317,28 @@
     <p class="empty" id="empty-state" style="display:none;">
       No public candidates match this job yet. Candidates must opt in on their side before you can view their details.
     </p>
+
+    <div class="resume-modal-overlay" id="resume-modal" aria-hidden="true">
+      <div class="resume-modal">
+        <h3>Resume</h3>
+        <div class="resume-modal-content" id="resume-modal-content"></div>
+        <button type="button" class="resume-modal-close" id="resume-modal-close">Close</button>
+      </div>
+    </div>
   </main>
   <script>
     (function () {
       var STORAGE_KEY = 'moultrie_opted_in_candidates';
+      var MOULTRIE_JOB_TITLES = [
+        'Field Operations Coordinator',
+        'Customer Success Representative',
+        'Technical Project Lead',
+        'HR & Training Specialist',
+        'Sales & Outreach Associate',
+        'Operations Manager',
+        'Junior Developer',
+        'Community Engagement Coordinator'
+      ];
 
       function getOptedInCandidates() {
         try {
@@ -277,27 +354,108 @@
       var listEl = document.getElementById('candidate-list');
       var emptyEl = document.getElementById('empty-state');
       var filterEl = document.getElementById('job-filter');
+      var currentVisible = [];
+      var resumeModal = document.getElementById('resume-modal');
+      var resumeModalContent = document.getElementById('resume-modal-content');
+      var resumeModalClose = document.getElementById('resume-modal-close');
+
+      function showResumeModal(text) {
+        if (!resumeModalContent || !resumeModal) return;
+        resumeModalContent.textContent = text || 'No resume text available.';
+        resumeModal.classList.add('open');
+        resumeModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeResumeModal() {
+        if (resumeModal) {
+          resumeModal.classList.remove('open');
+          resumeModal.setAttribute('aria-hidden', 'true');
+        }
+      }
+      if (resumeModalClose) resumeModalClose.addEventListener('click', closeResumeModal);
+      if (resumeModal) resumeModal.addEventListener('click', function (e) { if (e.target === resumeModal) closeResumeModal(); });
+
+      function fillJobFilter() {
+        filterEl.innerHTML = '<option value="">All jobs</option>';
+        MOULTRIE_JOB_TITLES.forEach(function (title) {
+          var opt = document.createElement('option');
+          opt.value = title;
+          opt.textContent = title;
+          filterEl.appendChild(opt);
+        });
+      }
+      fillJobFilter();
+
+      function getMatchForJob(c, jobTitle) {
+        if (!jobTitle) return c.match;
+        var list = c.jobMatches || [];
+        if (list.length) {
+          var entry = list.filter(function (j) { return (j.title || '') === jobTitle; })[0];
+          return entry && entry.matchPct != null ? entry.matchPct : 0;
+        }
+        return (c.bestJobTitle || '') === jobTitle ? (c.match || 0) : 0;
+      }
+
+      function hasMatchForJob(c, jobTitle) {
+        if (!jobTitle) return true;
+        var list = c.jobMatches || [];
+        if (list.length) {
+          var entry = list.filter(function (j) { return (j.title || '') === jobTitle; })[0];
+          return entry && (entry.matchPct == null ? false : entry.matchPct > 0);
+        }
+        return (c.bestJobTitle || '') === jobTitle;
+      }
 
       function render() {
-        var jobKey = filterEl.value;
+        var selectedJob = filterEl.value;
         var candidates = getCandidates();
         listEl.innerHTML = '';
 
         var visible = candidates.filter(function (c) {
           if (!c.public) return false;
-          if (!jobKey || jobKey === '') return true;
-          return (c.jobKey || 'general') === jobKey;
+          if (!selectedJob || selectedJob === '') return true;
+          return hasMatchForJob(c, selectedJob);
         });
+
+        if (selectedJob) {
+          visible.sort(function (a, b) { return getMatchForJob(b, selectedJob) - getMatchForJob(a, selectedJob); });
+        }
 
         if (!visible.length) {
           emptyEl.style.display = 'block';
+          emptyEl.textContent = selectedJob
+            ? 'No candidates with a match for this job yet. Candidates who upload a resume and save their profile will appear here for every job they match.'
+            : 'No public candidates yet. Candidates must opt in on their side before you can view their details.';
           return;
         }
 
         emptyEl.style.display = 'none';
+        currentVisible = visible;
 
+        var sectorLabels = { tech: 'Tech & IT', operations: 'Operations', hr: 'HR & People', finance: 'Finance', sales: 'Sales & Marketing', engineering: 'Engineering' };
         visible.forEach(function (c, idx) {
           var label = 'Candidate ' + String.fromCharCode(65 + idx);
+          var diag = c.diagnostic || {};
+          var diagHtml = '<div><strong>Role:</strong> ' + (c.role || 'General candidate') + '</div>';
+          if (diag.sectors && diag.sectors.length) {
+            var sec = Array.isArray(diag.sectors) ? diag.sectors : [diag.sectors];
+            var secStr = sec.map(function (s) { return sectorLabels[s] || s; }).join(', ');
+            diagHtml += '<div><strong>Sectors:</strong> ' + secStr + '</div>';
+          }
+          if (diag.workMode) {
+            var workLabels = { 'remote': 'Remote', 'in-person': 'In person', 'hybrid': 'Hybrid' };
+            diagHtml += '<div><strong>Work preference:</strong> ' + (workLabels[diag.workMode] || diag.workMode) + '</div>';
+          }
+          if (diag.traits && diag.traits.length) {
+            diagHtml += '<div><strong>Work style:</strong> ' + (Array.isArray(diag.traits) ? diag.traits.join(', ') : diag.traits) + '</div>';
+          }
+          if (diag.priorities && diag.priorities.length) {
+            diagHtml += '<div><strong>Priorities:</strong> ' + (Array.isArray(diag.priorities) ? diag.priorities.join(', ') : diag.priorities) + '</div>';
+          }
+          diagHtml = '<div class="candidate-diagnostic"><strong class="profile-heading">Profile</strong>' + diagHtml + '</div>';
+          var displayPct = selectedJob ? getMatchForJob(c, selectedJob) : (c.match || 0);
+          var matchLabel = selectedJob
+            ? (displayPct + '% match for ' + selectedJob)
+            : (c.bestJobTitle ? ('Best fit: ' + c.bestJobTitle + ' (' + (c.match || 0) + '%)') : ((c.match || 0) + '% match (upload resume for job-specific match)'));
           var card = document.createElement('div');
           card.className = 'candidate-card';
           card.innerHTML =
@@ -306,11 +464,13 @@
               '<div><div class="candidate-name">' + label + '</div><div class="candidate-role">' + c.role + '</div></div>' +
             '</div>' +
             '<div class="candidate-match-row">' +
-              '<div class="match-ring" style="--pct: ' + c.match + '" aria-hidden="true">' +
-                '<div class="match-ring-inner">' + c.match + '%</div>' +
+              '<div class="match-ring" style="--pct: ' + displayPct + '" aria-hidden="true">' +
+                '<div class="match-ring-inner">' + displayPct + '%</div>' +
               '</div>' +
-              '<span class="candidate-match-label">Match score</span>' +
+              '<span class="candidate-match-label">' + matchLabel + '</span>' +
             '</div>' +
+            (diagHtml || '') +
+            (c.resumeText ? ('<div class="resume-link-wrap"><a href="#" class="view-resume-link" data-idx="' + idx + '">View resume</a></div>') : '') +
             '<div class="candidate-contact">' +
               (c.email ? ('Email: <a href="mailto:' + c.email + '">' + c.email + '</a>') : '') +
               (c.email && c.phone ? '<br />' : '') +
@@ -320,6 +480,15 @@
           listEl.appendChild(card);
         });
       }
+
+      listEl.addEventListener('click', function (e) {
+        var link = e.target.closest('.view-resume-link');
+        if (!link) return;
+        e.preventDefault();
+        var idx = parseInt(link.getAttribute('data-idx'), 10);
+        var cand = currentVisible[idx];
+        if (cand && cand.resumeText) showResumeModal(cand.resumeText);
+      });
 
       filterEl.addEventListener('change', render);
       render();
