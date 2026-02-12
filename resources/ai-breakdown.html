@@ -280,6 +280,8 @@
     <div class="page-block">
       <h2>How we use this</h2>
       <p>After you get job recommendations, you can open this page to see a clear, visual breakdown of how the AI weighed your resume, answers, and preferences. Every factor is explained in plain language so you understand the match.</p>
+      <p><strong>Bias-free resume analysis:</strong> When we analyze your resume, we remove name, location, graduation date, school, race, gender, and similar details. Only skills, experience, and qualifications are used — so every candidate is evaluated fairly.</p>
+      <p id="personalized-banner" style="display:none;margin-top:1rem;padding:1rem;background:rgba(245,208,24,0.2);border-left:4px solid var(--mm-yellow);"><strong>Your personalized answers are included.</strong> We use your sectors, work mode, personality, role type, employment preference, team size, priorities, and relocation willingness to rank roles and adjust your fit scores.</p>
     </div>
 
     <div class="page-block">
@@ -450,6 +452,19 @@
       var resumeWeight = 0.7;
       var prefsWeight = 0.3;
 
+      // Read personalized answers from localStorage (saved by index.html form)
+      function getPersonalizedAnswers() {
+        try {
+          var raw = localStorage.getItem('moultrie_personalized');
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
+      var personalized = getPersonalizedAnswers();
+      if (personalized) {
+        var banner = document.getElementById('personalized-banner');
+        if (banner) banner.style.display = 'block';
+      }
+
       function setMode(m) {
         mode = m;
         resumeWeight = m === 'resume' ? 0.7 : 0.3;
@@ -463,13 +478,14 @@
       }
 
       function updateGraphs() {
-        document.getElementById('g1-resume').style.flex = String(resumeWeight);
-        document.getElementById('g1-prefs').style.flex = String(prefsWeight);
-
+        var hasPrefs = !!personalized;
         var f1 = mode === 'resume' ? 40 : 15;
         var f2 = mode === 'resume' ? 30 : 15;
         var f3 = mode === 'resume' ? 15 : 35;
         var f4 = mode === 'resume' ? 15 : 35;
+        if (hasPrefs && mode === 'preferences') { f3 += 5; f4 += 5; f1 -= 5; f2 -= 5; }
+        document.getElementById('g1-resume').style.flex = String(resumeWeight);
+        document.getElementById('g1-prefs').style.flex = String(prefsWeight);
         document.getElementById('f1-pct').textContent = f1 + '%';
         document.getElementById('f2-pct').textContent = f2 + '%';
         document.getElementById('f3-pct').textContent = f3 + '%';
@@ -482,6 +498,7 @@
         var d1 = mode === 'resume' ? 50 : 20;
         var d2 = mode === 'resume' ? 30 : 40;
         var d3 = mode === 'resume' ? 20 : 40;
+        if (hasPrefs && mode === 'preferences') { d2 += 5; d3 += 5; d1 -= 10; }
         document.getElementById('d1-pct').textContent = d1 + '%';
         document.getElementById('d2-pct').textContent = d2 + '%';
         document.getElementById('d3-pct').textContent = d3 + '%';
@@ -496,10 +513,77 @@
         });
       });
 
-      // Top 3 jobs: call fillTopJobs(topThree) with real data when profile is matched.
-      // Example shape: [{ title, meta, overall, skills, experience, fit }, ...]
+      // Job catalog with sector, work mode, traits, career stage, role type, etc.
+      var JOB_CATALOG = [
+        { title: 'Senior Product Manager', meta: 'Product · Remote', sector: 'tech', workMode: 'remote', traits: ['collaborative','structured','independent'], careerStage: ['mid','senior'], roleType: ['lead','manager'], employmentType: 'fulltime', teamSize: 'large', priorities: ['growth','culture','flexibility'], skills: 90, experience: 85, fitBase: 85 },
+        { title: 'Operations Coordinator', meta: 'Operations · On-site', sector: 'operations', workMode: 'in-person', traits: ['structured','independent'], careerStage: ['entry','early'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['worklife','benefits'], skills: 78, experience: 85, fitBase: 82 },
+        { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', sector: 'sales', workMode: 'hybrid', traits: ['collaborative','extrovert'], careerStage: ['early','mid'], roleType: ['ic','lead'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['culture','growth','flexibility'], skills: 82, experience: 75, fitBase: 80 },
+        { title: 'HR Business Partner', meta: 'HR · Hybrid', sector: 'hr', workMode: 'hybrid', traits: ['collaborative','balanced','extrovert'], careerStage: ['mid'], roleType: ['ic','lead','manager'], employmentType: 'fulltime', teamSize: 'large', priorities: ['culture','benefits','worklife'], skills: 85, experience: 80, fitBase: 82 },
+        { title: 'Software Engineer', meta: 'Engineering · Remote', sector: 'engineering', workMode: 'remote', traits: ['independent','structured'], careerStage: ['early','mid','senior'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['growth','salary','flexibility'], skills: 92, experience: 88, fitBase: 84 },
+        { title: 'Finance Analyst', meta: 'Finance · On-site', sector: 'finance', workMode: 'in-person', traits: ['structured','independent'], careerStage: ['early','mid'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'large', priorities: ['benefits','salary','worklife'], skills: 88, experience: 82, fitBase: 80 },
+        { title: 'Sales Representative', meta: 'Sales · Hybrid', sector: 'sales', workMode: 'hybrid', traits: ['extrovert','collaborative'], careerStage: ['entry','early'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'small', priorities: ['salary','growth','flexibility'], skills: 80, experience: 70, fitBase: 78 },
+        { title: 'Part-Time Data Entry', meta: 'Operations · Remote', sector: 'operations', workMode: 'remote', traits: ['structured','independent'], careerStage: ['entry'], roleType: ['ic'], employmentType: 'parttime', teamSize: 'mid', priorities: ['worklife','flexibility'], skills: 72, experience: 65, fitBase: 75 },
+        { title: 'Contract UX Designer', meta: 'Tech · Hybrid', sector: 'tech', workMode: 'hybrid', traits: ['collaborative','adaptive'], careerStage: ['early','mid'], roleType: ['ic'], employmentType: 'contract', teamSize: 'small', priorities: ['flexibility','growth'], skills: 85, experience: 78, fitBase: 79 }
+      ];
+
+      function scoreJobFit(job) {
+        if (!personalized) return job.fitBase;
+        var fit = job.fitBase;
+        var workMode = [].concat(personalized['work-mode'] || personalized.work_mode || []).filter(Boolean)[0];
+        var sectors = [].concat(personalized.sectors || []).filter(Boolean);
+        var traits = [].concat(personalized.traits || []).filter(Boolean);
+        var roleTypes = [].concat(personalized['role-type'] || []).filter(Boolean);
+        var employmentType = [].concat(personalized['employment-type'] || []).filter(Boolean)[0];
+        var teamSize = [].concat(personalized['team-size'] || personalized['company-size'] || []).filter(Boolean)[0];
+        var relocate = [].concat(personalized.relocate || []).filter(Boolean)[0];
+        var priorities = [].concat(personalized.priorities || []).filter(Boolean);
+
+        if (workMode && job.workMode) {
+          if (workMode === job.workMode || (workMode === 'flexible')) fit += 8;
+          else if ((workMode === 'hybrid' && (job.workMode === 'remote' || job.workMode === 'in-person')) || (job.workMode === 'hybrid')) fit += 3;
+          else fit -= 5;
+        }
+        if (sectors.length && job.sector && sectors.indexOf(job.sector) >= 0) fit += 10;
+        if (traits.length && job.traits) {
+          var matchCount = job.traits.filter(function(t){ return traits.indexOf(t) >= 0; }).length;
+          if (matchCount > 0) fit += matchCount * 4;
+        }
+        if (roleTypes.length && job.roleType) {
+          var roleMatch = job.roleType.some(function(r){ return roleTypes.indexOf(r) >= 0; });
+          if (roleMatch) fit += 5;
+          else fit -= 3;
+        }
+        if (employmentType && job.employmentType && employmentType !== 'flexible') {
+          if (employmentType === job.employmentType) fit += 8;
+          else fit -= 6;
+        }
+        if (teamSize && job.teamSize && teamSize !== 'nopref') {
+          if (teamSize === job.teamSize) fit += 5;
+          else fit -= 2;
+        }
+        if (relocate && (job.workMode === 'in-person' || job.workMode === 'hybrid')) {
+          if (relocate === 'no') fit -= 8;
+          else if (relocate === 'yes' || relocate === 'open') fit += 3;
+        }
+        if (priorities.length && job.priorities) {
+          var priorityMatch = job.priorities.filter(function(p){ return priorities.indexOf(p) >= 0; }).length;
+          if (priorityMatch > 0) fit += priorityMatch * 2;
+        }
+        return Math.min(98, Math.max(60, Math.round(fit)));
+      }
+
+      function buildTopJobs() {
+        var jobs = JOB_CATALOG.map(function(j) {
+          var fit = scoreJobFit(j);
+          var overall = Math.round((j.skills * 0.35 + j.experience * 0.35 + fit * 0.3));
+          return { title: j.title, meta: j.meta, overall: overall, skills: j.skills, experience: j.experience, fit: fit };
+        });
+        jobs.sort(function(a,b){ return b.overall - a.overall; });
+        return jobs.slice(0, 3);
+      }
+
       window.fillTopJobs = function (jobs) {
-        if (!jobs || !jobs.length) return;
+        if (!jobs || !jobs.length) jobs = buildTopJobs();
         var list = document.getElementById('top-jobs-list');
         list.innerHTML = '';
         jobs.slice(0, 3).forEach(function (job, i) {
@@ -523,12 +607,9 @@
           list.appendChild(card);
         });
       };
-      // Demo with sample data; replace with real match data when profile is uploaded
-      fillTopJobs([
-        { title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 },
-        { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 },
-        { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }
-      ]);
+
+      fillTopJobs(buildTopJobs());
+      updateGraphs();
     })();
   </script>
 </body>

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Moultrie Mobile – Career Match</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     /* Yellow + blocky forest green */
     :root {
@@ -185,6 +186,93 @@
       display: block;
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+    /* Personalized Questions */
+    .personalized-section {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 3px solid var(--mm-green);
+    }
+    .personalized-section h3 {
+      color: var(--mm-green);
+      font-size: 1.2rem;
+      margin: 0 0 1.5rem;
+      font-weight: 800;
+    }
+    .question-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .question-block label {
+      display: block;
+      font-weight: 700;
+      color: var(--mm-text);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    .question-block .hint {
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+    .question-block input[type="text"],
+    .question-block input[type="email"],
+    .question-block select,
+    .question-block textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 2px solid var(--mm-green);
+      font-family: inherit;
+      font-size: 1rem;
+      background: var(--mm-bg);
+    }
+    .question-block textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .question-block input:focus,
+    .question-block select:focus,
+    .question-block textarea:focus {
+      outline: none;
+      border-color: var(--mm-yellow-dark);
+      box-shadow: 0 0 0 2px var(--mm-yellow);
+    }
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .choice-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .choice-row input[type="checkbox"],
+    .choice-row input[type="radio"] {
+      width: 1.1em;
+      height: 1.1em;
+      accent-color: var(--mm-green);
+    }
+    .personalized-submit {
+      margin-top: 1.5rem;
+      padding: 0.9rem 1.5rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .personalized-submit:hover {
+      background: var(--mm-green-block);
+    }
   </style>
 </head>
 <body>
@@ -240,6 +328,145 @@
         <a href="#job-dashboard" class="option-card">Job Recommendation Dashboard</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
       </div>
+
+      <div id="personalized-questions" class="personalized-section">
+        <h3>Personalized Questions</h3>
+        <p class="intro" style="margin-bottom: 1.5rem;">Help us match you with the right roles. Your answers stay private and shape your recommendations.</p>
+
+        <form id="personalized-form" class="personalized-form">
+          <div class="question-block">
+            <label for="sectors">What sectors are you interested in?</label>
+            <span class="hint">Select all that apply</span>
+            <div class="choice-row">
+              <label><input type="checkbox" name="sectors" value="tech"> Tech & IT</label>
+              <label><input type="checkbox" name="sectors" value="operations"> Operations</label>
+              <label><input type="checkbox" name="sectors" value="hr"> HR & People</label>
+              <label><input type="checkbox" name="sectors" value="finance"> Finance</label>
+              <label><input type="checkbox" name="sectors" value="sales"> Sales & Marketing</label>
+              <label><input type="checkbox" name="sectors" value="engineering"> Engineering</label>
+              <label><input type="checkbox" name="sectors" value="other-sector"> Other</label>
+            </div>
+            <input type="text" name="sectors-other" placeholder="Other sector(s)" style="margin-top: 0.75rem;" aria-label="Other sectors">
+          </div>
+
+          <div class="question-block">
+            <label>Remote, in person, or hybrid?</label>
+            <span class="hint">How do you prefer to work?</span>
+            <div class="choice-row">
+              <label><input type="radio" name="work-mode" value="remote"> Remote</label>
+              <label><input type="radio" name="work-mode" value="in-person"> In person</label>
+              <label><input type="radio" name="work-mode" value="hybrid"> Hybrid</label>
+              <label><input type="radio" name="work-mode" value="flexible"> Flexible / no preference</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>Personality & work style</label>
+            <span class="hint">Introvert / extrovert / workaholic / etc. — select what fits you</span>
+            <div class="choice-row">
+              <label><input type="checkbox" name="traits" value="introvert"> Introvert</label>
+              <label><input type="checkbox" name="traits" value="extrovert"> Extrovert</label>
+              <label><input type="checkbox" name="traits" value="workaholic"> Workaholic</label>
+              <label><input type="checkbox" name="traits" value="balanced"> Balanced boundaries</label>
+              <label><input type="checkbox" name="traits" value="collaborative"> Collaborative</label>
+              <label><input type="checkbox" name="traits" value="independent"> Independent</label>
+              <label><input type="checkbox" name="traits" value="structured"> Structured / process-driven</label>
+              <label><input type="checkbox" name="traits" value="adaptive"> Adaptive / flexible</label>
+            </div>
+            <input type="text" name="traits-other" placeholder="Other traits (e.g. morning person, night owl)" style="margin-top: 0.75rem;" aria-label="Other personality traits">
+          </div>
+
+          <div class="question-block">
+            <label>Preferred role type</label>
+            <span class="hint">Individual contributor vs. people leadership</span>
+            <div class="choice-row">
+              <label><input type="checkbox" name="role-type" value="ic"> Individual contributor</label>
+              <label><input type="checkbox" name="role-type" value="lead"> Team lead</label>
+              <label><input type="checkbox" name="role-type" value="manager"> Manager</label>
+              <label><input type="checkbox" name="role-type" value="director"> Director / Executive</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>Employment type</label>
+            <span class="hint">What are you looking for?</span>
+            <div class="choice-row">
+              <label><input type="radio" name="employment-type" value="fulltime"> Full-time</label>
+              <label><input type="radio" name="employment-type" value="parttime"> Part-time</label>
+              <label><input type="radio" name="employment-type" value="contract"> Contract / Freelance</label>
+              <label><input type="radio" name="employment-type" value="flexible"> Flexible / open</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>When can you start?</label>
+            <span class="hint">Earliest start date</span>
+            <div class="choice-row">
+              <label><input type="radio" name="start-date" value="immediate"> Immediately</label>
+              <label><input type="radio" name="start-date" value="2weeks"> Within 2 weeks</label>
+              <label><input type="radio" name="start-date" value="1month"> Within 1 month</label>
+              <label><input type="radio" name="start-date" value="2months"> 2+ months</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>What matters most to you?</label>
+            <span class="hint">Select your top priorities (we use this to rank fit)</span>
+            <div class="choice-row">
+              <label><input type="checkbox" name="priorities" value="salary"> Salary & compensation</label>
+              <label><input type="checkbox" name="priorities" value="benefits"> Benefits (health, 401k, etc.)</label>
+              <label><input type="checkbox" name="priorities" value="worklife"> Work-life balance</label>
+              <label><input type="checkbox" name="priorities" value="growth"> Growth & learning</label>
+              <label><input type="checkbox" name="priorities" value="culture"> Company culture</label>
+              <label><input type="checkbox" name="priorities" value="flexibility"> Flexibility (schedule, location)</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>Team size preference</label>
+            <span class="hint">Environment you thrive in</span>
+            <div class="choice-row">
+              <label><input type="radio" name="team-size" value="small"> Small (&lt;10)</label>
+              <label><input type="radio" name="team-size" value="mid"> Mid-size (10–50)</label>
+              <label><input type="radio" name="team-size" value="large"> Large (50+)</label>
+              <label><input type="radio" name="team-size" value="nopref"> No preference</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label>Willing to relocate?</label>
+            <span class="hint">For roles that require or prefer on-site</span>
+            <div class="choice-row">
+              <label><input type="radio" name="relocate" value="yes"> Yes</label>
+              <label><input type="radio" name="relocate" value="no"> No</label>
+              <label><input type="radio" name="relocate" value="open"> Open to it</label>
+            </div>
+          </div>
+
+          <div class="question-block">
+            <label for="anything-else">Anything else we should know?</label>
+            <span class="hint">Goals, constraints, preferences, or what matters most to you</span>
+            <textarea id="anything-else" name="anything_else" placeholder="e.g. career goals, schedule needs, must-haves in a team..."></textarea>
+          </div>
+
+          <button type="submit" class="personalized-submit">Save my answers</button>
+        </form>
+      </div>
+
+      <div id="upload-resume" class="personalized-section">
+        <h3>Upload Resume</h3>
+        <p class="intro" style="margin-bottom: 1.5rem;">Upload your resume or paste its text below. For fair, unbiased matching, we <strong>remove name, location, graduation date, school, race, gender</strong> and similar details before analysis. Only skills, experience, and qualifications are used.</p>
+        <div class="question-block">
+          <label>Resume (text or PDF)</label>
+          <input type="file" id="resume-file" accept=".txt,.pdf" aria-label="Choose resume file">
+        </div>
+        <div class="question-block">
+          <label for="resume-paste">Or paste resume text here</label>
+          <textarea id="resume-paste" placeholder="Paste your resume content..." rows="8" aria-label="Paste resume text"></textarea>
+        </div>
+        <button type="button" id="resume-submit" class="personalized-submit">Analyze resume</button>
+        <p id="resume-status" style="margin-top:1rem;font-size:0.9rem;color:var(--mm-muted);" aria-live="polite"></p>
+      </div>
     </section>
 
     <section id="employer" class="view-section">
@@ -250,17 +477,144 @@
     </section>
   </main>
   <script>
+    const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'training-match', 'job-dashboard'];
     function setView() {
       const hash = location.hash.slice(1) || 'home';
+      const activeView = EMPLOYEE_SUB_ANCHORS.includes(hash) ? 'employee' : (hash === 'employer' || hash === 'home' || hash === 'employee' ? hash : 'home');
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
-      const section = document.getElementById(hash);
-      const link = document.querySelector(`.main-nav a[data-view="${hash}"]`);
+      const section = document.getElementById(activeView);
+      const link = document.querySelector(`.main-nav a[data-view="${activeView}"]`);
       if (section) section.classList.add('active');
       if (link) link.classList.add('active');
+      if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
+        setTimeout(function() {
+          const el = document.getElementById(hash);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
     }
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
+
+    document.getElementById('personalized-form')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const data = new FormData(this);
+      const out = {};
+      for (const [k, v] of data.entries()) {
+        if (!v) continue;
+        if (out[k] === undefined) out[k] = v;
+        else out[k] = [].concat(out[k], v);
+      }
+      try {
+        localStorage.setItem('moultrie_personalized', JSON.stringify(out));
+        localStorage.setItem('moultrie_personalized_at', new Date().toISOString());
+      } catch (err) { console.warn('Could not save to localStorage:', err); }
+      alert('Thanks! Your answers have been saved. They\'ll be used when we analyze which roles suit you best.');
+    });
+
+    // Bias-free resume sanitization: remove name, location, dates, school, race, gender, etc.
+    function sanitizeResumeForAnalysis(text) {
+      if (!text || typeof text !== 'string') return '';
+      var t = text;
+      // Phone numbers (US/international patterns)
+      t = t.replace(/\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}/g, '[REDACTED]');
+      t = t.replace(/[0-9]{3}[-.\s][0-9]{3}[-.\s][0-9]{4}/g, '[REDACTED]');
+      // Email addresses
+      t = t.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED]');
+      // URLs (LinkedIn, personal sites, etc.)
+      t = t.replace(/https?:\/\/[^\s]+/g, '[REDACTED]');
+      // Street addresses (number + street name patterns)
+      t = t.replace(/\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl)[.,]?\s*(?:Apt|Suite|Ste|#)?\s*\d*/gi, '[REDACTED]');
+      // City, State ZIP (e.g. "Atlanta, GA 30301" or "New York, NY 10001")
+      t = t.replace(/[A-Za-z\s]+,\s*[A-Z]{2}\s+\d{5}(-\d{4})?/g, '[REDACTED]');
+      t = t.replace(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2}\b/g, '[REDACTED]');
+      // Graduation / education dates (May 2020, 2018-2022, Class of 2020, Expected 2024, etc.)
+      t = t.replace(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}\b/gi, '[DATE]');
+      t = t.replace(/\b\d{4}\s*[-–—]\s*\d{4}\b/g, '[DATE RANGE]');
+      t = t.replace(/\b(?:Class of|Graduated|Grad\.?|Expected)\s*\d{4}\b/gi, '[DATE]');
+      t = t.replace(/\b(?:Spring|Fall|Winter|Summer)\s+\d{4}\b/gi, '[DATE]');
+      // School / university names (common patterns)
+      t = t.replace(/\b(?:University|College|School|Institute|Academy)\s+of\s+[\w\s]+/gi, '[INSTITUTION]');
+      t = t.replace(/\b[\w\s]+(?:University|College|State University|Community College)\b/gi, '[INSTITUTION]');
+      t = t.replace(/\b(?:High School|High Sch\.?)\s*[:\-]?\s*[\w\s]+/gi, '[INSTITUTION]');
+      // Remove typical "name" header line (often first line: 2-4 capitalized words)
+      var lines = t.split(/\r?\n/);
+      if (lines.length > 1) {
+        var first = lines[0].trim();
+        if (/^[A-Z][a-z]+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?$/.test(first) && first.length < 50) lines[0] = '[NAME]';
+        t = lines.join('\n');
+      }
+      // Explicit race, gender, age, marital status (if ever listed)
+      t = t.replace(/\b(?:Male|Female|Non-binary|Man|Woman|M\/F|Gender:)\b/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Race|Ethnicity|Nationality)\s*:?\s*[^\n]+/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Age|DOB|Date of Birth|Born)\s*:?\s*[\d\-\/\.]+/gi, '[REDACTED]');
+      t = t.replace(/\b(?:Married|Single|Marital status)\s*:?\s*[^\n]+/gi, '[REDACTED]');
+      // Photos / headshots mention
+      t = t.replace(/\b(?:Photo|Headshot|Picture)\s*(?:attached|included)?/gi, '[REDACTED]');
+      return t.replace(/\s+/g, ' ').replace(/\s*\[REDACTED\]\s*/g, ' ').replace(/\s*\[DATE\]\s*/g, ' ').replace(/\s*\[DATE RANGE\]\s*/g, ' ').replace(/\s*\[INSTITUTION\]\s*/g, ' ').replace(/\s*\[NAME\]\s*/g, ' ').trim();
+    }
+
+    function handleResumeSubmit() {
+      var fileInput = document.getElementById('resume-file');
+      var pasteArea = document.getElementById('resume-paste');
+      var status = document.getElementById('resume-status');
+      var text = pasteArea?.value?.trim() || '';
+      if (!text && fileInput?.files?.length) {
+        var f = fileInput.files[0];
+        if (f.name.toLowerCase().endsWith('.pdf')) {
+          status.textContent = 'Extracting text from PDF…';
+          var reader = new FileReader();
+          reader.onload = function() {
+            var pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf'];
+            if (!pdfjsLib) { status.textContent = 'PDF library not loaded. Try again or paste your resume text.'; return; }
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            pdfjsLib.getDocument({ data: reader.result }).promise.then(function(doc) {
+              var pages = [];
+              function next(pageNum) {
+                if (pageNum > doc.numPages) {
+                  var fullText = pages.join('\n');
+                  processResume(fullText, status);
+                  return;
+                }
+                doc.getPage(pageNum).then(function(page) {
+                  return page.getTextContent();
+                }).then(function(content) {
+                  pages.push(content.items.map(function(i) { return i.str || ''; }).join(' '));
+                  next(pageNum + 1);
+                }).catch(function(err) {
+                  status.textContent = 'Could not read PDF. Try pasting your resume text instead.';
+                });
+              }
+              next(1);
+            }).catch(function(err) {
+              status.textContent = 'Could not open PDF. Try pasting your resume text instead.';
+            });
+          };
+          reader.readAsArrayBuffer(f);
+          return;
+        }
+        var r = new FileReader();
+        r.onload = function() { processResume(r.result || '', status); };
+        r.readAsText(f);
+        return;
+      }
+      if (!text) { status.textContent = 'Please upload a .txt or .pdf file or paste your resume text.'; return; }
+      processResume(text, status);
+    }
+
+    function processResume(rawText, statusEl) {
+      var sanitized = sanitizeResumeForAnalysis(rawText);
+      try {
+        localStorage.setItem('moultrie_resume_sanitized', sanitized);
+        localStorage.setItem('moultrie_resume_at', new Date().toISOString());
+      } catch (e) { console.warn(e); }
+      statusEl.textContent = 'Resume saved for bias-free analysis. PII and bias-inducing details have been removed; only skills and qualifications are used.';
+      document.getElementById('resume-file').value = '';
+      document.getElementById('resume-paste').value = '';
+    }
+
+    document.getElementById('resume-submit')?.addEventListener('click', handleResumeSubmit);
   </script>
 </body>
 </html>
