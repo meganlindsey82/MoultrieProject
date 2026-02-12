@@ -366,8 +366,8 @@
     </div>
 
     <div class="page-block">
-      <h2>Match breakdown for all available jobs</h2>
-      <p class="top-jobs-intro">Once your profile is uploaded and matched, all available jobs at Moultrie will appear here with a breakdown of how each match score was calculated.</p>
+      <h2>Match breakdown for your top 3 jobs</h2>
+      <p class="top-jobs-intro">Once your profile is uploaded and matched, your top three job recommendations will appear here with a breakdown of how each match score was calculated.</p>
       <div class="top-jobs-list" id="top-jobs-list">
         <!-- Sample placeholders; replace with real data when profile is matched -->
         <div class="job-match-card" data-job="1">
@@ -430,7 +430,6 @@
       var mode = 'resume';
       var resumeWeight = 0.7;
       var prefsWeight = 0.3;
-      var topJobs = [];
 
       // Read personalized answers from localStorage (saved by index.html form)
       function getPersonalizedAnswers() {
@@ -455,7 +454,6 @@
           btn.setAttribute('aria-pressed', isSelected);
         });
         updateGraphs();
-        renderTopJobs();
       }
 
       function updateGraphs() {
@@ -493,40 +491,21 @@
         });
       });
 
-      function renderTopJobs() {
+      // Top 3 jobs: only show when we have session data from resume upload.
+      // Accepts either: [{ title, meta, overall, skills, experience, fit }] or [{ id, title, department, location, matchPct }]
+      window.fillTopJobs = function (jobs) {
+        if (!jobs || !jobs.length) return;
         var list = document.getElementById('top-jobs-list');
-        if (!list) return;
         list.innerHTML = '';
-        if (!topJobs.length) return;
-
-        // Sort jobs differently depending on whether we're weighting resume vs preferences
-        var sorted = topJobs.slice().sort(function (a, b) {
-          var sr = a.resumePct || 0, pr = a.prefsPct != null ? a.prefsPct : sr;
-          var tr = b.resumePct || 0, pp = b.prefsPct != null ? b.prefsPct : tr;
-          var scoreA = mode === 'resume' ? sr : pr;
-          var scoreB = mode === 'resume' ? tr : pp;
-          return scoreB - scoreA;
+        var normalized = jobs.slice(0, 3).map(function (job) {
+          if (job.overall != null || job.meta != null) return job;
+          var pct = job.matchPct != null ? job.matchPct : 0;
+          var meta = (job.department || '') + (job.department && job.location ? ' · ' : '') + (job.location || '');
+          return { title: job.title, meta: meta || 'Department · Location', overall: pct, skills: pct, experience: Math.max(0, pct - 5), fit: Math.min(100, pct + 3) };
         });
-
-        sorted.forEach(function (job, i) {
+        normalized.forEach(function (job, i) {
           var idx = i + 1;
-          var baseResume = job.resumePct || 0;
-          var basePrefs = job.prefsPct != null ? job.prefsPct : baseResume;
-
-          // Derive skills / experience / fit buckets and overall based on mode.
-          var overall, s, e, f;
-          if (mode === 'resume') {
-            overall = baseResume;
-            s = baseResume;
-            e = Math.max(0, Math.round(baseResume * 0.8));
-            f = Math.max(0, Math.round(basePrefs * 0.5));
-          } else {
-            overall = basePrefs;
-            f = basePrefs;
-            s = Math.max(0, Math.round(baseResume * 0.6));
-            e = Math.max(0, Math.round(basePrefs * 0.5));
-          }
-
+          var s = job.skills || 0, e = job.experience || 0, f = job.fit || 0;
           var total = s + e + f;
           var p1 = total <= 0 ? 33.33 : (100 * s / total);
           var p2 = total <= 0 ? 33.33 : (100 * e / total);
@@ -541,61 +520,30 @@
             '<p class="job-meta">' + (job.meta || 'Department · Location') + '</p>' +
             '<div class="job-overall">' +
               '<span class="job-overall-label">Match</span>' +
-              '<div class="job-overall-bar"><div class="job-overall-fill" style="width:' + overall + '%"></div></div>' +
-              '<span class="job-overall-pct">' + overall + '%</span>' +
+              '<div class="job-overall-bar"><div class="job-overall-fill" style="width:' + (job.overall || 0) + '%"></div></div>' +
+              '<span class="job-overall-pct">' + (job.overall || 0) + '%</span>' +
             '</div>' +
             '<div class="job-pie-wrap">' +
               '<div class="job-pie" style="background:' + conic + '"></div>' +
               '<div class="job-pie-legend">' +
-                '<span><span class="job-pie-swatch" style="background:#1e3d12"></span>Skills ' + s + '%</span>' +
-                '<span><span class="job-pie-swatch" style="background:#2d5a1a"></span>Experience ' + e + '%</span>' +
-                '<span><span class="job-pie-swatch" style="background:#e8c547"></span>Fit & preferences ' + f + '%</span>' +
+                '<span><span class="job-pie-swatch" style="background:#1e3d12"></span>Skills ' + (job.skills || 0) + '%</span>' +
+                '<span><span class="job-pie-swatch" style="background:#2d5a1a"></span>Experience ' + (job.experience || 0) + '%</span>' +
+                '<span><span class="job-pie-swatch" style="background:#e8c547"></span>Fit & preferences ' + (job.fit || 0) + '%</span>' +
               '</div>' +
             '</div>';
           list.appendChild(card);
         });
-      }
-
-      // Jobs from resume upload: we keep per-job scores for resume vs preferences so
-      // this page can re-weight them when the user toggles.
-      // Accepts either: [{ title, meta, resumePct, prefsPct }] or legacy
-      // [{ id, title, department, location, matchPct }] (we'll treat that as resumePct).
-      window.fillTopJobs = function (jobs) {
-        if (!jobs || !jobs.length) return;
-        topJobs = jobs.map(function (job) {
-          // New shape from index: resumePct / prefsPct
-          if (job.resumePct != null || job.prefsPct != null) {
-            var metaNew = job.meta || ((job.department || '') + (job.department && job.location ? ' · ' : '') + (job.location || ''));
-            return {
-              title: job.title,
-              meta: metaNew || 'Department · Location',
-              resumePct: job.resumePct != null ? job.resumePct : (job.matchPct || 0),
-              prefsPct: job.prefsPct != null ? job.prefsPct : (job.matchPct || 0)
-            };
-          }
-          // Legacy fallback: treat matchPct as resume-based score
-          var pct = job.matchPct != null ? job.matchPct : 0;
-          var metaOld = (job.department || '') + (job.department && job.location ? ' · ' : '') + (job.location || '');
-          return {
-            title: job.title,
-            meta: metaOld || 'Department · Location',
-            resumePct: pct,
-            prefsPct: pct
-          };
-        });
-        renderTopJobs();
       };
 
       updateGraphs();
       try {
-        // Prefer session-scoped matches (fresh for this tab), but fall back to
-        // persisted matches from the upload page so users don’t have to re-upload
-        // their resume just to see the breakdown again.
-        var stored = sessionStorage.getItem('mmJobMatches') ||
-                     localStorage.getItem('moultrie_resume_job_matches');
+        var stored = sessionStorage.getItem('mmJobMatches') || localStorage.getItem('moultrie_resume_job_matches');
         if (stored) {
           var parsed = JSON.parse(stored);
-          if (parsed && parsed.length) { fillTopJobs(parsed); }
+          if (parsed && parsed.length) {
+            fillTopJobs(parsed);
+            try { sessionStorage.setItem('mmJobMatches', stored); localStorage.setItem('moultrie_resume_job_matches', stored); } catch (e2) {}
+          }
         }
       } catch (e) {}
     })();

@@ -260,25 +260,52 @@
 
         try { localStorage.setItem('moultrie_visible_to_employers', visibility); } catch (e) {}
         if (visibility === 'public') {
-          var topJob = null;
+          var bestJobTitle = '';
+          var match = 0;
+          var jobMatches = [];
           try {
-            var matches = sessionStorage.getItem('mmJobMatches');
+            var matches = sessionStorage.getItem('mmJobMatches') || localStorage.getItem('moultrie_resume_job_matches');
             if (matches) {
               var arr = JSON.parse(matches);
-              if (arr && arr[0]) topJob = arr[0];
+              if (arr && arr.length) {
+                var first = arr[0];
+                var pct0 = first.matchPct != null ? first.matchPct : (first.match != null ? first.match : (first.overall != null ? first.overall : 0));
+                if (typeof pct0 === 'number') match = pct0;
+                if (first.title) bestJobTitle = first.title;
+                jobMatches = arr.map(function (j) {
+                  var p = j.matchPct != null ? j.matchPct : (j.match != null ? j.match : (j.overall != null ? j.overall : 0));
+                  return { title: j.title, matchPct: typeof p === 'number' ? p : 0 };
+                });
+              }
             }
           } catch (err) {}
-          var role = (topJob && topJob.title) ? topJob.title : 'General candidate';
-          var match = (topJob && topJob.matchPct != null) ? topJob.matchPct : 0;
-          saveCandidate({
+          var role = bestJobTitle ? (bestJobTitle + ' candidate') : 'General candidate';
+          var resumeText = '';
+          try {
+            var raw = sessionStorage.getItem('mmResumeText') || localStorage.getItem('moultrie_resume_text') || '';
+            resumeText = (raw && raw.length) ? (raw.length > 80000 ? raw.slice(0, 80000) : raw) : '';
+          } catch (e) {}
+          var diagnostic = {};
+          try {
+            var out = JSON.parse(localStorage.getItem('moultrie_personalized') || '{}');
+            diagnostic = { sectors: out.sectors, workMode: out['work-mode'], traits: out.traits, priorities: out.priorities };
+          } catch (e) {}
+          var list = getStoredCandidates();
+          list = list.filter(function (c) { return (c.email || '').toLowerCase() !== (email || '').toLowerCase(); });
+          list.push({
             name: name || 'Candidate',
             email: email || '',
             phone: phone || '',
             role: role,
             match: match,
+            bestJobTitle: bestJobTitle,
+            jobMatches: jobMatches,
+            resumeText: resumeText,
             jobKey: 'general',
-            public: true
+            public: true,
+            diagnostic: diagnostic
           });
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
         }
 
         window.location.href = 'index.html#employee';
