@@ -1093,6 +1093,88 @@
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
 
+    function formatWhen(iso) {
+      if (!iso) return null;
+      try {
+        var d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return null;
+        return d.toLocaleString();
+      } catch (e) { return null; }
+    }
+
+    function renderSavedProfile() {
+      var wrap = document.getElementById('progress-status');
+      if (!wrap) return;
+
+      var hasResume = false, resumeAt = null;
+      var hasAnswers = false, answersAt = null;
+      var matchCount = 0, likedCount = 0;
+      var visibleToEmployers = null;
+
+      try {
+        var sanitized = localStorage.getItem('moultrie_resume_sanitized');
+        var at = localStorage.getItem('moultrie_resume_at');
+        hasResume = !!(sanitized && sanitized.trim());
+        resumeAt = formatWhen(at);
+      } catch (e) {}
+
+      try {
+        var raw = localStorage.getItem('moultrie_personalized');
+        var at = localStorage.getItem('moultrie_personalized_at');
+        hasAnswers = !!raw;
+        answersAt = formatWhen(at);
+      } catch (e) {}
+
+      try {
+        var raw = sessionStorage.getItem('mmJobMatches');
+        var parsed = raw ? JSON.parse(raw) : [];
+        matchCount = Array.isArray(parsed) ? parsed.length : 0;
+      } catch (e) { matchCount = 0; }
+
+      try {
+        var raw = localStorage.getItem('moultrie_liked_jobs');
+        var parsed = raw ? JSON.parse(raw) : [];
+        likedCount = Array.isArray(parsed) ? parsed.length : 0;
+      } catch (e) { likedCount = 0; }
+
+      try {
+        visibleToEmployers = localStorage.getItem('moultrie_visible_to_employers');
+      } catch (e) {}
+
+      var rows = [
+        { label: 'Resume uploaded', ok: hasResume, detail: hasResume ? ('Yes' + (resumeAt ? ' • ' + resumeAt : '')) : 'No' },
+        { label: 'Questions answered', ok: hasAnswers, detail: hasAnswers ? ('Yes' + (answersAt ? ' • ' + answersAt : '')) : 'No' },
+        { label: 'Liked jobs', ok: likedCount > 0, detail: likedCount > 0 ? likedCount + ' saved' : 'None yet' },
+        { label: 'Visible to employers', ok: visibleToEmployers === 'public', detail: visibleToEmployers === 'public' ? 'Yes (opted in)' : (visibleToEmployers === 'private' ? 'No (opted out)' : 'Not set') }
+      ];
+
+      wrap.innerHTML = rows.map(function(r) {
+        return '<div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;">' +
+          '<div style="font-weight:700;color:var(--mm-green);">' + r.label + '</div>' +
+          '<div style="text-align:right;color:' + (r.ok ? 'var(--mm-text)' : 'var(--mm-muted)') + ';">' +
+            (r.ok ? '✓ ' : '— ') + r.detail +
+          '</div></div>';
+      }).join('');
+
+      var clearBtn = document.getElementById('clear-saved-profile');
+      if (clearBtn && !clearBtn.__bound) {
+        clearBtn.__bound = true;
+        clearBtn.addEventListener('click', function() {
+          try {
+            localStorage.removeItem('moultrie_personalized');
+            localStorage.removeItem('moultrie_personalized_at');
+            localStorage.removeItem('moultrie_resume_sanitized');
+            localStorage.removeItem('moultrie_resume_at');
+            localStorage.removeItem('moultrie_liked_jobs');
+            localStorage.removeItem('moultrie_visible_to_employers');
+            sessionStorage.removeItem('mmJobMatches');
+            sessionStorage.removeItem('mmResumeText');
+          } catch (e) {}
+          renderSavedProfile();
+        });
+      }
+    }
+
     (function likedJobs() {
       var LIKED_KEY = 'moultrie_liked_jobs';
       function getLikedJobs() {

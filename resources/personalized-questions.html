@@ -258,6 +258,7 @@
         var phone = (document.getElementById('candidate-phone').value || '').trim();
         var visibility = (document.querySelector('input[name="visibility"]:checked') || {}).value;
 
+        try { localStorage.setItem('moultrie_visible_to_employers', visibility); } catch (e) {}
         if (visibility === 'public') {
           var topJob = null;
           try {
