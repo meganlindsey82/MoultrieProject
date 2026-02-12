@@ -1714,9 +1714,14 @@
         if (matches) {
           var arr = JSON.parse(matches);
           if (arr && arr.length) {
-            if (arr[0].matchPct != null) { match = arr[0].matchPct; }
-            if (arr[0].title) { bestJobTitle = arr[0].title; }
-            jobMatches = arr.map(function (j) { return { title: j.title, matchPct: j.matchPct }; });
+            var first = arr[0];
+            var pct0 = first.matchPct != null ? first.matchPct : (first.match != null ? first.match : (first.overall != null ? first.overall : 0));
+            if (typeof pct0 === 'number') match = pct0;
+            if (first.title) bestJobTitle = first.title;
+            jobMatches = arr.map(function (j) {
+              var p = j.matchPct != null ? j.matchPct : (j.match != null ? j.match : (j.overall != null ? j.overall : 0));
+              return { title: j.title, matchPct: typeof p === 'number' ? p : 0 };
+            });
           }
         }
       } catch (err) {}
