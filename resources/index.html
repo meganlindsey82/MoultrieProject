@@ -1014,9 +1014,6 @@
           <p class="upload-hint">PDF, Word (.docx, .doc), or plain text</p>
         </div>
         <p id="resume-file-name" class="resume-file-name"></p>
-        <button type="button" id="remove-resume-btn" class="upload-resume-btn" style="margin-top:0.75rem;padding:0.4rem 0.9rem;font-size:0.85rem;border-width:2px;background:transparent;color:var(--mm-green);">
-          Remove saved resume
-        </button>
         <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
         <div id="resume-scan-results" class="resume-scan-results" hidden></div>
         <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
@@ -1767,7 +1764,6 @@
       var statusEl = document.getElementById('resume-scan-status');
       var resultsEl = document.getElementById('resume-scan-results');
       var jobMatchesEl = document.getElementById('resume-job-matches');
-      var removeBtn = document.getElementById('remove-resume-btn');
       var lastResumeText = null;
 
       if (!fileInput || !uploadBtn || !fileNameEl || !statusEl || !resultsEl || !jobMatchesEl) return;
@@ -1819,11 +1815,7 @@
         var savedAt = localStorage.getItem('moultrie_resume_at');
         if (savedSanitized && savedSanitized.trim()) {
           lastResumeText = savedSanitized;
-          fileNameEl.textContent = 'Using saved resume';
-          var when = typeof formatWhen === 'function' ? formatWhen(savedAt) : null;
-          statusEl.textContent = when
-            ? 'Using your saved, bias-free resume from ' + when + '.'
-            : 'Using your saved, bias-free resume.';
+          statusEl.textContent = '';
           var foundSaved = scanResumeSections(savedSanitized);
           renderScanResults(resultsEl, foundSaved);
           resultsEl.hidden = false;
@@ -1831,24 +1823,6 @@
           jobMatchesEl.hidden = false;
         }
       } catch (e) {}
-
-      if (removeBtn) {
-        removeBtn.addEventListener('click', function () {
-          lastResumeText = null;
-          fileInput.value = '';
-          fileNameEl.textContent = '';
-          statusEl.textContent = 'Resume removed. Upload a new one to see matches.';
-          resultsEl.hidden = true;
-          jobMatchesEl.hidden = true;
-          try {
-            localStorage.removeItem('moultrie_resume_sanitized');
-            localStorage.removeItem('moultrie_resume_at');
-            sessionStorage.removeItem('mmResumeText');
-            sessionStorage.removeItem('mmJobMatches');
-          } catch (e) {}
-          try { renderSavedProfile(); } catch (e) {}
-        });
-      }
 
       uploadBtn.addEventListener('click', function () { fileInput.click(); });
       document.querySelectorAll('input[name="match-by"]').forEach(function (radio) {
