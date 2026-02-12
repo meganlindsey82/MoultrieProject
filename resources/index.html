@@ -279,6 +279,19 @@
     }
     .match-by-options input { accent-color: var(--mm-green); }
     .job-matches-list.other-jobs .job-pct { color: var(--mm-muted); }
+    .job-like-btn {
+      margin-left: auto;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      color: var(--mm-green);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .job-like-btn:hover { background: var(--mm-green); color: var(--mm-yellow); }
+    .job-like-btn.liked { background: var(--mm-green); color: var(--mm-yellow); }
   </style>
 </head>
 <body>
@@ -329,15 +342,15 @@
       <h2 class="view-title">Employee</h2>
       <div class="option-grid">
         <a href="#personalized-questions" class="option-card">Personalized Questions</a>
-        <a href="#upload-resume" class="option-card">Upload Resume</a>
+        <a href="#upload-resume" class="option-card">Upload Resume to Find Next Job</a>
         <a href="#training-match" class="option-card">Training & Courses Match</a>
-        <a href="#job-dashboard" class="option-card">Job Recommendation Dashboard</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
+        <a href="liked-jobs.html" class="option-card">Liked jobs</a>
       </div>
     </section>
 
     <section id="upload-resume" class="view-section">
-      <h2 class="view-title">Upload Resume</h2>
+      <h2 class="view-title">Upload Resume to Find Next Job</h2>
       <div class="intro">
         <p class="intro-lead">Upload your resume (PDF, Word, or plain text). Our AI will scan it for key sections so we can match you to the right roles.</p>
       </div>
@@ -351,7 +364,7 @@
           <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted)">Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
         </div>
         <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
-        <button type="button" id="upload-resume-btn" class="upload-resume-btn">Upload Resume</button>
+        <button type="button" id="upload-resume-btn" class="upload-resume-btn">Upload Resume to Find Next Job</button>
         <p id="resume-file-name" class="resume-file-name"></p>
         <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
         <div id="resume-scan-results" class="resume-scan-results" hidden></div>
@@ -382,6 +395,32 @@
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
 
+    (function likedJobs() {
+      var LIKED_KEY = 'moultrie_liked_jobs';
+      function getLikedJobs() {
+        try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); }
+        catch (e) { return []; }
+      }
+      function setLikedJobs(arr) { localStorage.setItem(LIKED_KEY, JSON.stringify(arr)); }
+      function jobKey(j) { return (j.title || '') + '|' + (j.department || '') + '|' + (j.location || ''); }
+      function isJobLiked(j) {
+        var key = jobKey(j);
+        return getLikedJobs().some(function (l) { return jobKey(l) === key; });
+      }
+      window.toggleJobLike = function (j) {
+        var list = getLikedJobs();
+        var key = jobKey(j);
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) { if (jobKey(list[i]) === key) { idx = i; break; } }
+        if (idx >= 0) list.splice(idx, 1);
+        else list.push({ title: j.title, department: j.department, location: j.location });
+        setLikedJobs(list);
+        if (window.refreshJobMatches) window.refreshJobMatches();
+      };
+      window.getLikedJobs = getLikedJobs;
+      window.isJobLiked = isJobLiked;
+    })();
+
     (function resumeUpload() {
       var fileInput = document.getElementById('resume-file');
       var uploadBtn = document.getElementById('upload-resume-btn');
@@ -398,6 +437,7 @@
         var matches = computeJobMatches(lastResumeText, null, getMatchBy());
         renderJobMatches(jobMatchesEl, matches);
       }
+      window.refreshJobMatches = refreshJobMatches;
 
       uploadBtn.addEventListener('click', function () { fileInput.click(); });
 
@@ -594,6 +634,15 @@
           matches.best.forEach(function (j) {
             var li = document.createElement('li');
             li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
+            likeBtn.addEventListener('click', function () {
+              if (window.toggleJobLike) window.toggleJobLike(j);
+            });
+            li.appendChild(likeBtn);
             var meta = document.createElement('div');
             meta.className = 'job-meta';
             meta.textContent = j.department + ' · ' + j.location;
@@ -612,6 +661,15 @@
           matches.other.forEach(function (j) {
             var li = document.createElement('li');
             li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
+            likeBtn.addEventListener('click', function () {
+              if (window.toggleJobLike) window.toggleJobLike(j);
+            });
+            li.appendChild(likeBtn);
             var meta = document.createElement('div');
             meta.className = 'job-meta';
             meta.textContent = j.department + ' · ' + j.location;

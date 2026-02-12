@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liked Jobs – Moultrie Mobile Career Match</title>
+  <style>
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo { font-weight: 800; font-size: 1.35rem; letter-spacing: 0.03em; }
+    .site-logo a { color: white; text-decoration: none; }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav { display: flex; gap: 0; flex-wrap: wrap; }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover { background: var(--mm-green-block); color: var(--mm-yellow); }
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .page-title { font-size: 1.75rem; font-weight: 800; color: var(--mm-green); margin: 0 0 0.5rem; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--mm-green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--mm-green-block); text-decoration: underline; }
+    .page-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .page-block h2 { font-size: 1.1rem; color: var(--mm-green); margin: 0 0 0.75rem; font-weight: 800; }
+    .liked-jobs-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .liked-job-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--mm-bg);
+      border-left: 4px solid var(--mm-green);
+      font-size: 0.95rem;
+    }
+    .liked-job-item .job-title { font-weight: 700; color: var(--mm-text); }
+    .liked-job-item .job-meta { font-size: 0.85rem; color: var(--mm-muted); width: 100%; }
+    .job-like-btn {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      color: var(--mm-green);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .job-like-btn:hover { background: var(--mm-green); color: var(--mm-yellow); }
+    .job-like-btn.liked { background: var(--mm-green); color: var(--mm-yellow); }
+    .liked-jobs-empty { font-size: 1rem; color: var(--mm-muted); margin: 0; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="index.html#employee">Employee</a>
+      <a href="index.html#employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <a href="index.html#employee" class="back-link">← Back to Employee options</a>
+    <h1 class="page-title">Liked jobs</h1>
+    <p style="color:var(--mm-muted);margin:0">Jobs you’ve liked from your resume matches.</p>
+
+    <div class="page-block">
+      <div id="liked-jobs-content"></div>
+      <p id="liked-jobs-empty" class="liked-jobs-empty" hidden>No liked jobs yet. Like jobs from your resume match results to see them here.</p>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var LIKED_KEY = 'moultrie_liked_jobs';
+      function getLikedJobs() {
+        try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); }
+        catch (e) { return []; }
+      }
+      function setLikedJobs(arr) { localStorage.setItem(LIKED_KEY, JSON.stringify(arr)); }
+      function jobKey(j) { return (j.title || '') + '|' + (j.department || '') + '|' + (j.location || ''); }
+
+      function removeLiked(job) {
+        var list = getLikedJobs();
+        var key = jobKey(job);
+        for (var i = 0; i < list.length; i++) {
+          if (jobKey(list[i]) === key) { list.splice(i, 1); break; }
+        }
+        setLikedJobs(list);
+        render();
+      }
+
+      function render() {
+        var content = document.getElementById('liked-jobs-content');
+        var emptyEl = document.getElementById('liked-jobs-empty');
+        if (!content) return;
+        var liked = getLikedJobs();
+        content.innerHTML = '';
+        if (liked.length === 0) {
+          content.hidden = true;
+          emptyEl.hidden = false;
+          return;
+        }
+        content.hidden = false;
+        emptyEl.hidden = true;
+        var list = document.createElement('div');
+        list.className = 'liked-jobs-list';
+        liked.forEach(function (j) {
+          var div = document.createElement('div');
+          div.className = 'liked-job-item';
+          var title = document.createElement('span');
+          title.className = 'job-title';
+          title.textContent = j.title;
+          var removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'job-like-btn liked';
+          removeBtn.textContent = 'Remove';
+          removeBtn.setAttribute('aria-label', 'Remove from liked jobs');
+          removeBtn.addEventListener('click', function () { removeLiked(j); });
+          div.appendChild(title);
+          div.appendChild(removeBtn);
+          var meta = document.createElement('div');
+          meta.className = 'job-meta';
+          meta.textContent = (j.department || '') + ' · ' + (j.location || '');
+          div.appendChild(meta);
+          list.appendChild(div);
+        });
+        content.appendChild(list);
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>
