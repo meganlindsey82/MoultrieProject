@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personalized Questions – Moultrie Mobile Career Match</title>
+  <style>
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
+    .site-logo a { color: white; text-decoration: none; }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem;
+    }
+    .page-intro {
+      margin: 0 0 1.5rem;
+      color: var(--mm-muted);
+      line-height: 1.6;
+    }
+    form {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.5rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+    .field {
+      display: grid;
+      gap: 0.35rem;
+    }
+    .field label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--mm-green);
+    }
+    .field small {
+      font-size: 0.8rem;
+      color: var(--mm-muted);
+    }
+    .field textarea,
+    .field select,
+    .field input[type="text"] {
+      padding: 0.5rem 0.6rem;
+      border-radius: 0;
+      border: 2px solid var(--mm-green);
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: var(--mm-bg);
+      color: var(--mm-text);
+    }
+    .field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .field-options {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+    }
+    .field-options label {
+      font-weight: 500;
+      color: var(--mm-text);
+    }
+    .field-options input {
+      margin-right: 0.35rem;
+    }
+    .actions {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+    .btn {
+      border: 0;
+      border-radius: 0;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: none;
+    }
+    .btn-primary {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .btn-primary:hover {
+      background: var(--mm-green-block);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--mm-green);
+      border: 2px solid var(--mm-green);
+    }
+    .btn-ghost:hover {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
+    <nav class="main-nav">
+      <a href="index.html#home">Home</a>
+      <a href="index.html#employee">Employee</a>
+      <a href="index.html#employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Personalized questions</h1>
+    <p class="page-intro">
+      Help the AI understand you beyond your resume. Your answers, plus your visibility choice below,
+      control what employers can see.
+    </p>
+
+    <form>
+      <div class="field">
+        <label for="energizes">What kind of work most energizes you?</label>
+        <small>For example: solving complex problems, being in the field, working with people, building systems.</small>
+        <textarea id="energizes" name="energizes"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="environment">What kind of work environment helps you do your best work?</label>
+        <select id="environment" name="environment">
+          <option value="">Select one</option>
+          <option value="independent">Mostly independent, clear goals</option>
+          <option value="collaborative">Highly collaborative, team-focused</option>
+          <option value="field">In the field / hands-on work</option>
+          <option value="office">Office-based / structured schedule</option>
+          <option value="hybrid">Mix of field and office</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="schedule">What does a sustainable schedule look like for you?</label>
+        <small>Share anything about hours, travel, seasonality, or flexibility that really matters.</small>
+        <textarea id="schedule" name="schedule"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Do you want your information and matches to be visible to potential employers?</label>
+        <small>
+          If you choose <strong>Yes</strong>, your name and contact details can be shown to hiring managers when you are a match for their jobs.
+          If you choose <strong>No</strong>, your data stays private and will not be shown on employer dashboards.
+        </small>
+        <div class="field-options">
+          <label>
+            <input type="radio" name="visibility" value="public" />
+            Yes — make my profile and matches visible to potential employers.
+          </label>
+          <label>
+            <input type="radio" name="visibility" value="private" />
+            No — keep my information and matches private unless I change this later.
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Save answers</button>
+        <button type="button" class="btn btn-ghost" onclick="history.back()">Cancel</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
+

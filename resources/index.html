@@ -185,115 +185,39 @@
       display: block;
     }
     .intro .warm { font-size: 1.05rem; line-height: 1.7; }
-    .upload-resume-block { margin-top: 1rem; }
-    .upload-resume-btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
+    .role-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .role-card {
+      display: block;
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: var(--mm-text);
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .role-card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--mm-green);
+    }
+    .role-card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .role-card:hover {
       background: var(--mm-green);
       color: var(--mm-yellow);
-      border: none;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transform: translateY(-2px);
     }
-    .upload-resume-btn:hover {
-      background: var(--mm-green-block);
+    .role-card:hover h2 {
       color: var(--mm-yellow);
     }
-    .resume-file-name {
-      margin: 0.75rem 0 0;
-      font-size: 0.9rem;
-      color: var(--mm-muted);
-    }
-    .resume-scan-status {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      color: var(--mm-text);
-    }
-    .resume-scan-results {
-      margin-top: 1.5rem;
-      border: 3px solid var(--mm-green);
-      background: var(--mm-card);
-      padding: 1.25rem;
-    }
-    .resume-scan-results h3 {
-      font-size: 1rem;
-      color: var(--mm-green);
-      margin: 0 0 1rem;
-      font-weight: 800;
-    }
-    .resume-section-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      gap: 0.5rem;
-    }
-    .resume-section-list li {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      background: var(--mm-bg);
-      border-left: 4px solid var(--mm-green);
-      font-size: 0.95rem;
-    }
-    .resume-section-list li.found { border-left-color: var(--mm-green); }
-    .resume-section-list li.missing { border-left-color: var(--mm-muted); opacity: 0.8; }
-    .resume-section-list .section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .resume-section-list li.found .section-dot { background: var(--mm-green); }
-    .resume-section-list li.missing .section-dot { background: var(--mm-muted); }
-    .job-matches-wrap { margin-top: 1.5rem; }
-    .job-matches-wrap h3 { font-size: 1rem; color: var(--mm-green); margin: 0 0 0.5rem; font-weight: 800; }
-    .job-matches-list { list-style: none; padding: 0; margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .job-matches-list li {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-      gap: 0.5rem; padding: 0.75rem 1rem; background: var(--mm-bg); border: 2px solid var(--mm-green);
-      font-size: 0.95rem;
-    }
-    .job-matches-list .job-title { font-weight: 700; color: var(--mm-text); }
-    .job-matches-list .job-title-link { color: var(--mm-green); text-decoration: none; }
-    .job-matches-list .job-title-link:hover { text-decoration: underline; }
-    .job-matches-list .job-meta { font-size: 0.85rem; color: var(--mm-muted); }
-    .job-matches-list .job-pct { font-weight: 800; color: var(--mm-green); min-width: 3em; text-align: right; }
-    .job-matches-list.best-matches .job-pct { color: var(--mm-green); }
-    .job-matches-list.partial-matches .job-pct { color: var(--mm-yellow-dark); }
-    .match-by-box {
-      margin-top: 1rem;
-      padding: 1rem 1.25rem;
-      background: var(--mm-bg);
-      border: 3px solid var(--mm-green);
-    }
-    .match-by-box h3 { font-size: 0.95rem; color: var(--mm-green); margin: 0 0 0.5rem; font-weight: 800; }
-    .match-by-options {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .match-by-options label {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .match-by-options input { accent-color: var(--mm-green); }
-    .job-matches-list.other-jobs .job-pct { color: var(--mm-muted); }
-    .job-like-btn {
-      margin-left: auto;
-      padding: 0.35rem 0.6rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      background: var(--mm-bg);
-      border: 2px solid var(--mm-green);
-      color: var(--mm-green);
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    .job-like-btn:hover { background: var(--mm-green); color: var(--mm-yellow); }
-    .job-like-btn.liked { background: var(--mm-green); color: var(--mm-yellow); }
   </style>
 </head>
 <body>
@@ -309,12 +233,25 @@
     <section class="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <h1>Career Match</h1>
-      <p>Find your place at Moultrie — we’re here to help.</p>
+      <p>Internal career assistant for Moultrie employees and hiring managers.</p>
     </section>
 
     <section id="home" class="view-section active">
       <div class="intro">
-        <p class="intro-lead warm">Hey, welcome. Really glad you’re here. This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
+        <p class="intro-lead warm">Welcome. This is Moultrie’s internal AI career dashboard, designed for employees and hiring managers — not the public web.</p>
+
+        <div class="role-selector">
+          <a href="#employee" class="role-card">
+            <h2>I’m an employee</h2>
+            <p>Get job matches, training suggestions, and a clear view of why each role fits you.</p>
+          </a>
+          <a href="#employer" class="role-card">
+            <h2>I’m an employer</h2>
+            <p>Review candidates, understand AI match scores, and explore internal talent.</p>
+          </a>
+        </div>
+
+        <p class="intro-lead warm">This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
 
         <div class="nature-strip">
           <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80" alt="Forest path" />
@@ -343,8 +280,8 @@
     <section id="employee" class="view-section">
       <h2 class="view-title">Employee</h2>
       <div class="option-grid">
-        <a href="#personalized-questions" class="option-card">Personalized Questions</a>
-        <a href="#upload-resume" class="option-card">Upload Resume to Find Next Job</a>
+        <a href="personalized-questions.html" class="option-card">Personalized Questions</a>
+        <a href="#upload-resume" class="option-card">Upload Resume</a>
         <a href="#training-match" class="option-card">Training & Courses Match</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
         <a href="liked-jobs.html" class="option-card">Liked jobs</a>
@@ -377,7 +314,11 @@
     <section id="employer" class="view-section">
       <h2 class="view-title">Employer</h2>
       <div class="employer-placeholder">
-        Employer options coming soon.
+        This area is for hiring managers. You can open the dedicated employer dashboard to see candidates
+        who have explicitly chosen to make their profiles visible.
+        <div style="margin-top:1rem;">
+          <a href="employer-dashboard.html" class="option-card" style="display:inline-block;">Open employer dashboard</a>
+        </div>
       </div>
     </section>
   </main>
