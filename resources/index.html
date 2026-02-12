@@ -324,6 +324,204 @@
       cursor: pointer;
     }
     .chat-input-wrap button:hover { background: var(--mm-green-block); }
+
+    /* Upload Resume section */
+    #upload-resume .intro { margin-bottom: 1.5rem; }
+    #upload-resume .upload-resume-block {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem 1.75rem;
+    }
+    .match-by-box {
+      padding: 1.25rem 1.5rem;
+      background: rgba(35, 67, 23, 0.06);
+      border: 2px dashed var(--mm-green);
+      border-radius: 8px;
+    }
+    .match-by-box h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .match-by-options {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .match-by-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--mm-text);
+    }
+    .match-by-options input[type="radio"] {
+      width: 1.1em;
+      height: 1.1em;
+      accent-color: var(--mm-green);
+    }
+    .match-by-box p {
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      line-height: 1.5;
+    }
+    .upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      padding: 2rem;
+      background: var(--mm-bg);
+      border: 2px dashed var(--mm-green);
+      border-radius: 8px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .upload-zone:hover, .upload-zone:focus-within {
+      background: rgba(35, 67, 23, 0.05);
+      border-color: var(--mm-green-block);
+    }
+    .upload-resume-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1.75rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+    .upload-resume-btn:hover {
+      background: var(--mm-green-block);
+      transform: translateY(-1px);
+    }
+    .upload-zone .upload-hint {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--mm-muted);
+    }
+    .resume-file-name {
+      margin: 0.75rem 0 0;
+      font-size: 0.9rem;
+      color: var(--mm-green);
+      font-weight: 600;
+    }
+    .resume-file-name:empty { display: none; }
+    .resume-scan-status {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--mm-muted);
+      min-height: 1.5em;
+    }
+    .resume-scan-results {
+      margin-top: 1rem;
+      padding: 1.25rem;
+      background: rgba(35, 67, 23, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(35, 67, 23, 0.2);
+    }
+    .resume-scan-results h3 {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .resume-section-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .resume-section-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .resume-section-list li .section-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .resume-section-list li.found .section-dot { background: var(--mm-green); }
+    .resume-section-list li.missing .section-dot { background: var(--mm-muted); opacity: 0.6; }
+    .job-matches-wrap {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid var(--mm-green);
+    }
+    .job-matches-wrap h3 {
+      margin: 0 0 1rem;
+      font-size: 1.1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .job-matches-list {
+      list-style: none;
+      margin: 0 0 1.25rem 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .job-matches-list:last-of-type { margin-bottom: 0; }
+    .job-matches-list li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      padding: 0.85rem 1rem;
+      background: var(--mm-bg);
+      border: 1px solid rgba(35, 67, 23, 0.2);
+      border-radius: 8px;
+    }
+    .job-matches-list li .job-title-link {
+      color: var(--mm-green);
+      font-weight: 700;
+      text-decoration: none;
+      flex: 1 1 auto;
+    }
+    .job-matches-list li .job-title-link:hover { text-decoration: underline; }
+    .job-matches-list li .job-pct {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--mm-green);
+    }
+    .job-matches-list li .job-like-btn {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 2px solid var(--mm-green);
+      background: transparent;
+      color: var(--mm-green);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .job-matches-list li .job-like-btn:hover { background: rgba(35, 67, 23, 0.1); }
+    .job-matches-list li .job-like-btn.liked {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .job-matches-list li .job-meta {
+      width: 100%;
+      font-size: 0.85rem;
+      color: var(--mm-muted);
+      margin-top: 0.15rem;
+    }
   </style>
 </head>
 <body>
@@ -408,10 +606,13 @@
             <label><input type="radio" name="match-by" value="experience" checked /> Experience</label>
             <label><input type="radio" name="match-by" value="interests" /> Interests</label>
           </div>
-          <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted)">Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
+          <p>Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
         </div>
-        <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
-        <button type="button" id="upload-resume-btn" class="upload-resume-btn">Upload Resume to Find Next Job</button>
+        <div class="upload-zone">
+          <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
+          <button type="button" id="upload-resume-btn" class="upload-resume-btn">Choose resume file</button>
+          <p class="upload-hint">PDF, Word (.docx, .doc), or plain text</p>
+        </div>
         <p id="resume-file-name" class="resume-file-name"></p>
         <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
         <div id="resume-scan-results" class="resume-scan-results" hidden></div>
