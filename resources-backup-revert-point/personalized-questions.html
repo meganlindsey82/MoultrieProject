@@ -6,19 +6,14 @@
   <title>Personalized Questions – Moultrie Mobile Career Match</title>
   <style>
     :root {
-      --mm-green: #1e3d12;
-      --mm-green-soft: #2d5a1a;
-      --mm-green-block: #274e16;
-      --mm-yellow: #e8c547;
-      --mm-yellow-bright: #f5d84d;
-      --mm-bg: #f6f4ee;
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
       --mm-card: #fff;
-      --mm-text: #1c1c1c;
-      --mm-muted: #5c5c5c;
-      --mm-border: rgba(30,61,18,0.12);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 2px 12px rgba(30,61,18,0.06);
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
     }
     * { box-sizing: border-box; }
     body {
@@ -26,36 +21,43 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--mm-text);
       background: var(--mm-bg);
-      line-height: 1.5;
     }
     .site-header {
       background: var(--mm-green);
       color: white;
-      padding: 0.875rem 1.5rem;
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 1rem;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
     }
-    .site-logo { font-weight: 700; font-size: 1.25rem; letter-spacing: 0.02em; }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
     .site-logo a { color: white; text-decoration: none; }
-    .site-logo span { color: var(--mm-yellow-bright); }
-    .main-nav { display: flex; gap: 0.25rem; flex-wrap: wrap; }
-    .main-nav a {
-      color: rgba(255,255,255,0.92);
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: background 0.2s, color 0.2s;
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
     }
-    .main-nav a:hover { background: rgba(255,255,255,0.12); color: white; }
-    .main-nav a.active { background: var(--mm-yellow-bright); color: var(--mm-green); }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
     main {
-      max-width: 1280px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
     }
@@ -72,12 +74,10 @@
     }
     form {
       background: var(--mm-card);
-      border: 1px solid var(--mm-border);
+      border: 3px solid var(--mm-green);
       padding: 1.5rem;
       display: grid;
       gap: 1.25rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
     }
     .field {
       display: grid;
@@ -135,12 +135,11 @@
       text-transform: none;
     }
     .btn-primary {
-      background: #e8f0e4;
-      color: var(--mm-green);
-      border: 3px solid var(--mm-green);
+      background: var(--mm-green);
+      color: var(--mm-yellow);
     }
     .btn-primary:hover {
-      background: #dcead8;
+      background: var(--mm-green-block);
     }
     .btn-ghost {
       background: transparent;
@@ -170,21 +169,7 @@
       control what employers can see.
     </p>
 
-    <form id="questions-form">
-      <div class="field">
-        <label for="candidate-name">Your name</label>
-        <small>Required if you choose to be visible to employers.</small>
-        <input type="text" id="candidate-name" name="name" placeholder="e.g. Jordan Smith" />
-      </div>
-      <div class="field">
-        <label for="candidate-email">Email</label>
-        <small>So employers can contact you.</small>
-        <input type="email" id="candidate-email" name="email" placeholder="you@example.com" />
-      </div>
-      <div class="field">
-        <label for="candidate-phone">Phone (optional)</label>
-        <input type="text" id="candidate-phone" name="phone" placeholder="(555) 000-0000" />
-      </div>
+    <form>
       <div class="field">
         <label for="energizes">What kind of work most energizes you?</label>
         <small>For example: solving complex problems, being in the field, working with people, building systems.</small>
@@ -233,57 +218,6 @@
       </div>
     </form>
   </main>
-  <script>
-    (function () {
-      var form = document.getElementById('questions-form');
-      var STORAGE_KEY = 'moultrie_opted_in_candidates';
-
-      function getStoredCandidates() {
-        try {
-          var raw = localStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : [];
-        } catch (e) { return []; }
-      }
-
-      function saveCandidate(profile) {
-        var list = getStoredCandidates();
-        list.push(profile);
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
-      }
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var name = (document.getElementById('candidate-name').value || '').trim();
-        var email = (document.getElementById('candidate-email').value || '').trim();
-        var phone = (document.getElementById('candidate-phone').value || '').trim();
-        var visibility = (document.querySelector('input[name="visibility"]:checked') || {}).value;
-
-        if (visibility === 'public') {
-          var topJob = null;
-          try {
-            var matches = sessionStorage.getItem('mmJobMatches');
-            if (matches) {
-              var arr = JSON.parse(matches);
-              if (arr && arr[0]) topJob = arr[0];
-            }
-          } catch (err) {}
-          var role = (topJob && topJob.title) ? topJob.title : 'General candidate';
-          var match = (topJob && topJob.matchPct != null) ? topJob.matchPct : 0;
-          saveCandidate({
-            name: name || 'Candidate',
-            email: email || '',
-            phone: phone || '',
-            role: role,
-            match: match,
-            jobKey: 'general',
-            public: true
-          });
-        }
-
-        window.location.href = 'index.html#employee';
-      });
-    })();
-  </script>
 </body>
 </html>
 

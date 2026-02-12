@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moultrie Mobile – Career Match</title>
+  <style>
+    /* Yellow + blocky forest green */
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    .main-nav a.active {
+      background: var(--mm-yellow);
+      color: var(--mm-green);
+    }
+    .main-nav a.active:hover {
+      background: var(--mm-yellow-dark);
+      color: var(--mm-green);
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .hero {
+      position: relative;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--mm-green) url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80') center/cover no-repeat;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(35,67,23,0.75) 0%, rgba(35,67,23,0.9) 100%);
+    }
+    .hero h1, .hero p { position: relative; z-index: 1; }
+    .hero h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--mm-yellow);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,0.95);
+      font-size: 1.1rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .option-card {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--mm-text);
+      font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+    .option-card:hover {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .view-title {
+      font-size: 1.25rem;
+      color: var(--mm-green);
+      margin: 0 0 0.5rem;
+      font-weight: 800;
+    }
+    .employer-placeholder {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 2rem;
+      color: var(--mm-muted);
+    }
+    .intro { margin-top: 0; }
+    .intro p { margin: 0 0 1rem; line-height: 1.6; color: var(--mm-text); }
+    .intro p:last-child { margin-bottom: 0; }
+    .intro-lead { font-size: 1.1rem; }
+    .intro-blocks {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .intro-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+    }
+    .intro-block h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: var(--mm-green);
+      font-weight: 800;
+    }
+    .intro-block p { margin: 0; font-size: 0.95rem; }
+    .intro-cta {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      font-weight: 700;
+      text-align: center;
+    }
+    .intro-cta,
+    .intro-cta * { color: var(--mm-yellow) !important; }
+    .nature-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+      border: 3px solid var(--mm-green);
+      overflow: hidden;
+    }
+    .nature-strip img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+    .intro .warm { font-size: 1.05rem; line-height: 1.7; }
+    .role-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .role-card {
+      display: block;
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      color: var(--mm-text);
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .role-card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--mm-green);
+    }
+    .role-card p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .role-card:hover {
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      transform: translateY(-2px);
+    }
+    .role-card:hover h2 {
+      color: var(--mm-yellow);
+    }
+
+    /* Chatbot (main page only) */
+    .chat-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--mm-green);
+      border: 3px solid var(--mm-yellow);
+      color: var(--mm-yellow);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .chat-toggle:hover {
+      background: var(--mm-green-block);
+      transform: scale(1.05);
+    }
+    .chat-panel {
+      display: none;
+      position: fixed;
+      bottom: 5rem;
+      right: 1.5rem;
+      width: 320px;
+      max-width: calc(100vw - 3rem);
+      height: 420px;
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      flex-direction: column;
+      z-index: 1001;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .chat-panel.open { display: flex; }
+    .chat-header {
+      padding: 0.75rem 1rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-close {
+      background: none;
+      border: none;
+      color: var(--mm-yellow);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      line-height: 1;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .chat-msg.bot {
+      align-self: flex-start;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      color: var(--mm-text);
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .chat-input-wrap {
+      padding: 0.75rem;
+      border-top: 2px solid var(--mm-green);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input-wrap input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid var(--mm-green);
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .chat-input-wrap button {
+      padding: 0.5rem 1rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .chat-input-wrap button:hover { background: var(--mm-green-block); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo">Moultrie <span>Mobile</span></div>
+    <nav class="main-nav">
+      <a href="about.html">About</a>
+      <a href="#home" data-view="home">Home</a>
+      <a href="#employee" data-view="employee">Prospective employee</a>
+      <a href="#employer" data-view="employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <h1>Career Match</h1>
+      <p>Internal career assistant for Moultrie Mobile employees and hiring managers.</p>
+    </section>
+
+    <section id="home" class="view-section active">
+      <div class="intro">
+        <p class="intro-lead warm">Welcome. This is Moultrie Mobile’s internal AI career dashboard, designed for employees and hiring managers — not the public web.</p>
+
+        <div class="role-selector">
+          <a href="#employee" class="role-card">
+            <h2>I’m a prospective employee</h2>
+            <p>Get job matches, training suggestions, and a clear view of why each role fits you.</p>
+          </a>
+          <a href="#employer" class="role-card">
+            <h2>I’m an employer</h2>
+            <p>Review candidates, understand AI match scores, and explore internal talent.</p>
+          </a>
+        </div>
+
+        <p class="intro-lead warm">This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie Mobile that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
+
+        <div class="nature-strip">
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80" alt="Forest path" />
+          <img src="images/deer.png" alt="Deer in golden field" />
+          <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80" alt="Misty forest" />
+        </div>
+
+        <p class="warm">We care about <strong>transparency</strong> and <strong>authenticity</strong>. No hidden scoring, no bias — we listen to what you share and match you honestly. Upload your resume and answer a few human-centered questions. Then you get to choose: should we lean more on your experience and hard skills, or more on the human stuff — how you work, what you value, the kind of team you want? Your call.</p>
+        <p class="warm">Every suggestion we make comes with a clear, visual breakdown so you see exactly why we recommended it. No black box. And <strong>your privacy is non-negotiable</strong>: by default we don’t keep your data. When you leave, we forget it. If you want to save your progress, you can choose to keep it.</p>
+
+        <div class="intro-blocks">
+          <div class="intro-block">
+            <h3>How it works</h3>
+            <p>Upload a resume, answer a few questions, and choose whether matches lean toward skills or fit. We’ll show you roles and explain every decision — in plain language.</p>
+          </div>
+          <div class="intro-block">
+            <h3>You’re in control</h3>
+            <p>Pick Prospective employee or Employer above whenever you’re ready. No pressure. We’re here.</p>
+          </div>
+        </div>
+
+        <p class="intro-cta">Choose <strong>Prospective employee</strong> or <strong>Employer</strong> above when you’re ready to start.</p>
+      </div>
+    </section>
+
+    <section id="employee" class="view-section">
+      <h2 class="view-title">Prospective employee</h2>
+      <div class="option-grid">
+        <a href="personalized-questions.html" class="option-card">Personalized Questions</a>
+        <a href="#upload-resume" class="option-card">Upload Resume</a>
+        <a href="#training-match" class="option-card">Training & Courses Match</a>
+        <a href="#upload-resume" class="option-card">Job Recommendation Dashboard</a>
+        <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
+        <a href="liked-jobs.html" class="option-card">Liked jobs</a>
+      </div>
+    </section>
+
+    <section id="upload-resume" class="view-section">
+      <h2 class="view-title">Upload Resume to Find Next Job</h2>
+      <div class="intro">
+        <p class="intro-lead">Upload your resume (PDF, Word, or plain text). Our AI will scan it for key sections so we can match you to the right roles.</p>
+      </div>
+      <div class="upload-resume-block intro-block">
+        <div class="match-by-box">
+          <h3>Match by</h3>
+          <div class="match-by-options" role="radiogroup" aria-label="Match by experience or interests">
+            <label><input type="radio" name="match-by" value="experience" checked /> Experience</label>
+            <label><input type="radio" name="match-by" value="interests" /> Interests</label>
+          </div>
+          <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--mm-muted)">Experience uses your skills and qualifications. Interests uses your activities, leadership, and what you care about.</p>
+        </div>
+        <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden />
+        <button type="button" id="upload-resume-btn" class="upload-resume-btn">Upload Resume to Find Next Job</button>
+        <p id="resume-file-name" class="resume-file-name"></p>
+        <div id="resume-scan-status" class="resume-scan-status" aria-live="polite"></div>
+        <div id="resume-scan-results" class="resume-scan-results" hidden></div>
+        <div id="resume-job-matches" class="job-matches-wrap" hidden></div>
+      </div>
+    </section>
+
+    <section id="employer" class="view-section">
+      <h2 class="view-title">Employer</h2>
+      <div class="employer-placeholder">
+        This area is for hiring managers. You can open the dedicated employer dashboard to see candidates
+        who have explicitly chosen to make their profiles visible.
+        <div style="margin-top:1rem;">
+          <a href="employer-dashboard.html" class="option-card" style="display:inline-block;">Open employer dashboard</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>if (typeof pdfjsLib !== 'undefined') { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; }</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <button type="button" class="chat-toggle" id="chat-toggle" aria-label="Open chat" title="Chat">💬</button>
+  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Chat">
+    <div class="chat-header">
+      <span>Hi! I'm here if you have questions.</span>
+      <button type="button" class="chat-close" id="chat-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-wrap">
+      <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off" />
+      <button type="button" id="chat-send">Send</button>
+    </div>
+  </div>
+  <script>
+    function setView() {
+      const hash = location.hash.slice(1) || 'home';
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
+      const section = document.getElementById(hash);
+      const link = document.querySelector(`.main-nav a[data-view="${hash}"]`);
+      if (section) section.classList.add('active');
+      if (link) link.classList.add('active');
+    }
+    window.addEventListener('hashchange', setView);
+    window.addEventListener('load', setView);
+
+    (function likedJobs() {
+      var LIKED_KEY = 'moultrie_liked_jobs';
+      function getLikedJobs() {
+        try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); }
+        catch (e) { return []; }
+      }
+      function setLikedJobs(arr) { localStorage.setItem(LIKED_KEY, JSON.stringify(arr)); }
+      function jobKey(j) { return (j.title || '') + '|' + (j.department || '') + '|' + (j.location || ''); }
+      function isJobLiked(j) {
+        var key = jobKey(j);
+        return getLikedJobs().some(function (l) { return jobKey(l) === key; });
+      }
+      window.toggleJobLike = function (j) {
+        var list = getLikedJobs();
+        var key = jobKey(j);
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) { if (jobKey(list[i]) === key) { idx = i; break; } }
+        if (idx >= 0) list.splice(idx, 1);
+        else list.push({ title: j.title, department: j.department, location: j.location });
+        setLikedJobs(list);
+        if (window.refreshJobMatches) window.refreshJobMatches();
+      };
+      window.getLikedJobs = getLikedJobs;
+      window.isJobLiked = isJobLiked;
+    })();
+
+    (function resumeUpload() {
+      var fileInput = document.getElementById('resume-file');
+      var uploadBtn = document.getElementById('upload-resume-btn');
+      var fileNameEl = document.getElementById('resume-file-name');
+      var statusEl = document.getElementById('resume-scan-status');
+      var resultsEl = document.getElementById('resume-scan-results');
+      var jobMatchesEl = document.getElementById('resume-job-matches');
+      var lastResumeText = null;
+
+      if (!fileInput || !uploadBtn) return;
+
+      function refreshJobMatches() {
+        if (!lastResumeText || !jobMatchesEl) return;
+        var matches = computeJobMatches(lastResumeText, null, getMatchBy());
+        renderJobMatches(jobMatchesEl, matches);
+        var all = (matches.best || []).concat(matches.other || []);
+        var top3 = all.slice(0, 3).map(function (j) {
+          return { id: j.id, title: j.title, department: j.department, location: j.location, matchPct: j.matchPct };
+        });
+        try { sessionStorage.setItem('mmJobMatches', JSON.stringify(top3)); } catch (e) {}
+      }
+      window.refreshJobMatches = refreshJobMatches;
+
+      uploadBtn.addEventListener('click', function () { fileInput.click(); });
+
+      document.querySelectorAll('input[name="match-by"]').forEach(function (radio) {
+        radio.addEventListener('change', refreshJobMatches);
+      });
+
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files[0];
+        if (!file) return;
+        fileNameEl.textContent = 'File: ' + file.name;
+        statusEl.textContent = 'Scanning resume…';
+        resultsEl.hidden = true;
+        if (jobMatchesEl) jobMatchesEl.hidden = true;
+
+        readResumeText(file).then(function (text) {
+          if (!text || !text.trim()) {
+            statusEl.textContent = 'Could not extract text from this file. Try a PDF or Word document.';
+            return;
+          }
+          lastResumeText = text;
+          try { sessionStorage.setItem('mmResumeText', text); } catch (e) {}
+          var found = scanResumeSections(text);
+          statusEl.textContent = 'Scan complete. Key sections detected:';
+          renderScanResults(resultsEl, found);
+          resultsEl.hidden = false;
+          refreshJobMatches();
+          jobMatchesEl.hidden = false;
+        }).catch(function (err) {
+          statusEl.textContent = 'Error: ' + (err.message || 'Could not read file.');
+        });
+      });
+
+      function readResumeText(file) {
+        var name = (file.name || '').toLowerCase();
+        if (name.endsWith('.txt')) {
+          return new Promise(function (resolve, reject) {
+            var r = new FileReader();
+            r.onload = function () { resolve(r.result || ''); };
+            r.onerror = function () { reject(new Error('Failed to read file')); };
+            r.readAsText(file);
+          });
+        }
+        if (name.endsWith('.pdf')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof pdfjsLib === 'undefined') return Promise.reject(new Error('PDF library not loaded'));
+            return pdfjsLib.getDocument(buf).promise.then(function (pdf) {
+              var pages = [];
+              for (var i = 1; i <= pdf.numPages; i++) {
+                pages.push(pdf.getPage(i).then(function (p) { return p.getTextContent(); }).then(function (c) {
+                  return c.items.map(function (it) { return it.str || ''; }).join(' ');
+                }));
+              }
+              return Promise.all(pages).then(function (arr) { return arr.join('\n'); });
+            });
+          });
+        }
+        if (name.endsWith('.docx') || name.endsWith('.doc')) {
+          return file.arrayBuffer().then(function (buf) {
+            if (typeof mammoth === 'undefined') return Promise.reject(new Error('Word library not loaded'));
+            return mammoth.extractRawText({ arrayBuffer: buf }).then(function (r) { return r.value; });
+          });
+        }
+        return Promise.reject(new Error('Unsupported format. Use .pdf, .docx, or .txt'));
+      }
+
+      var SECTION_DEFS = [
+        {
+          id: 'experience',
+          label: 'Job experience',
+          keywords: ['work experience', 'employment', 'professional experience', 'experience', 'career', 'job history', 'employment history', 'work history', 'positions held', 'employment experience', 'work experience', 'relevant experience', 'professional history']
+        },
+        {
+          id: 'projects',
+          label: 'Projects',
+          keywords: ['projects', 'project experience', 'key projects', 'selected projects', 'project work', 'project experience', 'notable projects', 'technical projects', 'personal projects']
+        },
+        {
+          id: 'leadership',
+          label: 'Leadership',
+          keywords: ['leadership', 'leadership experience', 'management', 'supervisory', 'led ', 'leading ', 'manager', 'supervised', 'team lead', 'lead experience', 'leadership roles']
+        },
+        {
+          id: 'activities',
+          label: 'Activities',
+          keywords: ['activities', 'extracurricular', 'volunteer', 'volunteering', 'community', 'involvement', 'campus involvement', 'clubs', 'organizations', 'membership', 'affiliations', 'community service', 'student organizations', 'professional associations']
+        }
+      ];
+
+      var MOULTRIE_JOBS = [
+        {
+          title: 'Field Operations Coordinator',
+          department: 'Operations',
+          location: 'Moultrie, GA',
+          skills: ['field operations', 'logistics', 'scheduling', 'coordination', 'inventory', 'documentation', 'safety compliance'],
+          qualifications: ['organization', 'communication', 'problem solving', 'experience in operations', 'teamwork', 'detail oriented'],
+          interests: ['organization', 'hands-on', 'logistics', 'safety', 'procedures', 'teamwork', 'outdoors', 'structure']
+        },
+        {
+          title: 'Customer Success Representative',
+          department: 'Customer Success',
+          location: 'Hybrid',
+          skills: ['customer service', 'customer support', 'phone', 'email', 'CRM', 'troubleshooting', 'onboarding'],
+          qualifications: ['communication', 'empathy', 'problem solving', 'experience with customers', 'listening', 'patience'],
+          interests: ['helping people', 'customer focus', 'listening', 'problem solving', 'teaching', 'relationship building']
+        },
+        {
+          title: 'Technical Project Lead',
+          department: 'Product & Technology',
+          location: 'Remote',
+          skills: ['project management', 'agile', 'scrum', 'technical', 'software', 'development', 'stakeholder', 'timeline', 'budget'],
+          qualifications: ['leadership', 'experience leading projects', 'cross-functional', 'communication', 'organization', 'problem solving'],
+          interests: ['technology', 'leading teams', 'building products', 'strategy', 'collaboration', 'problem solving']
+        },
+        {
+          title: 'HR & Training Specialist',
+          department: 'Human Resources',
+          location: 'Moultrie, GA',
+          skills: ['training', 'onboarding', 'recruiting', 'HR', 'human resources', 'policies', 'orientation', 'development programs'],
+          qualifications: ['communication', 'organization', 'experience in HR', 'facilitation', 'interpersonal', 'confidentiality'],
+          interests: ['teaching', 'helping people grow', 'organization', 'people', 'development', 'culture']
+        },
+        {
+          title: 'Sales & Outreach Associate',
+          department: 'Sales',
+          location: 'Hybrid',
+          skills: ['sales', 'outreach', 'lead generation', 'client', 'pipeline', 'negotiation', 'presentation', 'relationship'],
+          qualifications: ['communication', 'persuasion', 'goal oriented', 'experience in sales', 'networking', 'self motivated'],
+          interests: ['meeting people', 'persuasion', 'goals', 'networking', 'relationship building', 'growth']
+        },
+        {
+          title: 'Operations Manager',
+          department: 'Operations',
+          location: 'On-site',
+          skills: ['operations', 'management', 'process improvement', 'budget', 'planning', 'team leadership', 'KPIs', 'efficiency'],
+          qualifications: ['leadership', 'experience managing', 'analytical', 'decision making', 'organization', 'supervisory'],
+          interests: ['leading', 'efficiency', 'improvement', 'decision making', 'team leadership', 'results']
+        },
+        {
+          title: 'Junior Developer',
+          department: 'Product & Technology',
+          location: 'Remote',
+          skills: ['programming', 'coding', 'software development', 'javascript', 'python', 'web', 'API', 'git', 'debugging'],
+          qualifications: ['problem solving', 'projects', 'computer science', 'technical', 'learning', 'collaboration', 'code'],
+          interests: ['technology', 'building things', 'problem solving', 'learning', 'coding', 'projects', 'creativity']
+        },
+        {
+          title: 'Community Engagement Coordinator',
+          department: 'Community',
+          location: 'Moultrie, GA',
+          skills: ['community', 'engagement', 'outreach', 'events', 'volunteer', 'partnerships', 'social', 'programs'],
+          qualifications: ['communication', 'organization', 'volunteer experience', 'leadership', 'involvement', 'relationship building'],
+          interests: ['community', 'volunteer', 'events', 'helping others', 'partnerships', 'social impact', 'involvement']
+        }
+      ];
+
+      function getMatchBy() {
+        var r = document.querySelector('input[name="match-by"]:checked');
+        return (r && r.value) || 'experience';
+      }
+
+      function computeJobMatches(resumeText, sectionResults, matchMode) {
+        matchMode = matchMode || getMatchBy();
+        var normalizedResume = '\n' + (resumeText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        var scored = MOULTRIE_JOBS.map(function (job, idx) {
+          var allCriteria;
+          if (matchMode === 'interests') {
+            allCriteria = job.interests || [];
+          } else {
+            allCriteria = (job.skills || []).concat(job.qualifications || []);
+          }
+          if (allCriteria.length === 0) return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: 0 };
+          var matched = 0;
+          for (var i = 0; i < allCriteria.length; i++) {
+            var phrase = allCriteria[i].toLowerCase().trim();
+            if (phrase.length && normalizedResume.indexOf(phrase) !== -1) matched++;
+          }
+          var pct = Math.round((matched / allCriteria.length) * 100);
+          return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: pct };
+        });
+        scored.sort(function (a, b) { return b.matchPct - a.matchPct; });
+        var best = scored.filter(function (j) { return j.matchPct >= 70; });
+        var other = scored.filter(function (j) { return j.matchPct < 70; });
+        return { best: best, other: other };
+      }
+
+      function renderJobMatches(container, matches) {
+        container.innerHTML = '';
+        if (matches.best.length) {
+          var h3Best = document.createElement('h3');
+          h3Best.textContent = 'Best matches (70%+)';
+          container.appendChild(h3Best);
+          var ulBest = document.createElement('ul');
+          ulBest.className = 'job-matches-list best-matches';
+          matches.best.forEach(function (j) {
+            var li = document.createElement('li');
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
+            li.appendChild(likeBtn);
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = j.department + ' · ' + j.location;
+            meta.style.width = '100%';
+            li.appendChild(meta);
+            ulBest.appendChild(li);
+          });
+          container.appendChild(ulBest);
+        }
+        if (matches.other.length) {
+          var h3Other = document.createElement('h3');
+          h3Other.textContent = 'Listed jobs';
+          container.appendChild(h3Other);
+          var ulOther = document.createElement('ul');
+          ulOther.className = 'job-matches-list other-jobs';
+          matches.other.forEach(function (j) {
+            var li = document.createElement('li');
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
+            var likeBtn = document.createElement('button');
+            likeBtn.type = 'button';
+            likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
+            likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
+            likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
+            li.appendChild(likeBtn);
+            var meta = document.createElement('div');
+            meta.className = 'job-meta';
+            meta.textContent = j.department + ' · ' + j.location;
+            meta.style.width = '100%';
+            li.appendChild(meta);
+            ulOther.appendChild(li);
+          });
+          container.appendChild(ulOther);
+        }
+      }
+
+      function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function scanResumeSections(text) {
+        var normalized = '\n' + text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
+        return SECTION_DEFS.map(function (def) {
+          var found = false;
+          var matchedKeyword = null;
+          for (var k = 0; k < def.keywords.length; k++) {
+            var kw = def.keywords[k].toLowerCase();
+            var asHeader = '\n' + kw;
+            var withColon = '\n' + kw + ':';
+            if (normalized.indexOf(asHeader) !== -1 || normalized.indexOf(withColon) !== -1 || normalized.indexOf(kw) !== -1) {
+              found = true;
+              matchedKeyword = def.keywords[k];
+              break;
+            }
+          }
+          return { id: def.id, label: def.label, found: found, matchedKeyword: matchedKeyword };
+        });
+      }
+
+      function renderScanResults(container, found) {
+        container.innerHTML = '';
+        var h3 = document.createElement('h3');
+        h3.textContent = 'Sections detected by AI';
+        container.appendChild(h3);
+        var ul = document.createElement('ul');
+        ul.className = 'resume-section-list';
+        found.forEach(function (item) {
+          var li = document.createElement('li');
+          li.className = item.found ? 'found' : 'missing';
+          var dot = document.createElement('span');
+          dot.className = 'section-dot';
+          li.appendChild(dot);
+          var label = document.createElement('span');
+          label.textContent = item.found ? (item.label + (item.matchedKeyword ? ' (“' + item.matchedKeyword + '”)' : '')) : item.label + ' (not detected)';
+          li.appendChild(label);
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
+    })();
+
+    (function chat() {
+      var panel = document.getElementById('chat-panel');
+      var toggle = document.getElementById('chat-toggle');
+      var close = document.getElementById('chat-close');
+      var input = document.getElementById('chat-input');
+      var send = document.getElementById('chat-send');
+      var messages = document.getElementById('chat-messages');
+
+      function addMsg(text, isUser) {
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + (isUser ? 'user' : 'bot');
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function botReply(q) {
+        var lower = (q || '').toLowerCase().trim();
+        if (lower.length < 2) return 'Type a question and I\'ll do my best to answer! Try "What is Moultrie Mobile?" or "How do I find jobs here?"';
+
+        if (/^(hi|hey|hello|hey there|howdy|yo)\s*!*$/.test(lower) || lower === 'hi' || lower === 'hey' || lower === 'hello') {
+          return 'Hey! 😊 Ask me anything — like "What does Moultrie Mobile do?", "How do I get matched with jobs?", or "How does the AI matching work?"';
+        }
+        if (lower.includes('resume') || lower.includes('upload') || lower.includes('cv ') || lower.includes(' my resume')) {
+          return 'Go to "Prospective employee" in the nav, then click "Upload Resume." After you upload and answer the personalized questions, we\'ll match you with roles. You can also see the "AI Decision Breakdown" page to see how we weight your resume vs your preferences.';
+        }
+        if (lower.includes('employer') || lower.includes('hiring') || lower.includes('candidates') || lower.includes('recruit')) {
+          return 'If you\'re hiring, click "Employer" in the nav (or "Open employer dashboard"). You\'ll only see candidates who chose to make their profile visible to employers. You can filter by job and see their contact info and match scores.';
+        }
+        if (lower.includes('training') || lower.includes('course') || lower.includes('learn') || lower.includes('skill')) {
+          return 'We have a "Training & Courses Match" option under Prospective employee — it suggests training and courses that fit your goals and the roles you\'re matched with. Click "Prospective employee" then look for that card.';
+        }
+        if (lower.includes('privacy') || lower.includes(' data') || lower.includes('keep my') || lower.includes('save my') || lower.includes('forget')) {
+          return 'We don\'t keep your data by default. When you leave, we forget it. If you want to save your progress (resume, answers, matches), you can choose to keep it — that\'s optional and up to you.';
+        }
+        if (lower.includes('how does') || lower.includes('how do ') || lower.includes('matching work') || lower.includes('match work') || lower.includes('ai ') || lower.includes('transparency') || lower.includes('breakdown') || lower.includes('weight')) {
+          return 'The AI matches you to jobs using your resume and your answers. You choose whether we weight "resume & hard skills" more or "your answers & preferences" more. Every recommendation has a visual breakdown — open "AI Decision Breakdown" from the Prospective employee section to see the graphs and how we explain each decision.';
+        }
+        if (lower.includes('what is this') || lower.includes('what\'s this') || lower.includes('this site') || lower.includes('this page') || lower.includes('dashboard')) {
+          return 'This is Moultrie Mobile\'s internal career site. Employees and hiring managers use it: prospective employees get job matches (resume + questions + optional training), and employers see candidates who opted in. Everything is transparent — you can see how the AI weights and explains matches.';
+        }
+        if (lower.includes('get started') || lower.includes('start') || lower.includes('begin') || lower.includes('where do i')) {
+          return 'Pick one: "Prospective employee" if you\'re looking for a job (upload resume, answer questions, get matches), or "Employer" if you\'re hiring (see candidates who made their profile visible). The chatbot stays here if you have more questions!';
+        }
+        if (lower.includes('about') || lower.includes('what is moultrie') || lower.includes('who is moultrie') || lower.includes('company') || lower.includes('moultrie mobile') || lower.includes('what do you do')) {
+          return 'Moultrie Mobile makes trail cameras, feeders, and the hunt-planning app (maps, Game Plan, Buck List, etc.). We\'ve been around 40+ years and were first with cellular trail cameras. Click "About" at the top for the full story, stats, and community work.';
+        }
+        if (lower.includes('job') || lower.includes('career') || lower.includes('role') || lower.includes('position') || lower.includes('find work') || lower.includes('looking for')) {
+          return 'Click "Prospective employee" above. You\'ll upload your resume and answer some questions; we match you to roles and you can choose whether matches lean more on your resume/skills or on your preferences and fit. The "Job Recommendation Dashboard" and "AI Decision Breakdown" show your matches and why we suggested them.';
+        }
+        if (lower.includes('help') || lower.includes('what can you')) {
+          return 'I can answer: what Moultrie Mobile is, how to find jobs or upload your resume, how the AI matching works, what employers see, privacy, training, and how to get started. Just ask in your own words!';
+        }
+        return 'I\'m not sure I got that — try asking "What is Moultrie Mobile?", "How do I get matched with jobs?", or "How does the AI matching work?" and I\'ll give you a clear answer.';
+      }
+
+      function openChat() {
+        panel.classList.add('open');
+        if (messages.children.length === 0) {
+          addMsg('Hey there! 👋 I\'m here to help. Ask me about Moultrie Mobile, careers, or how this dashboard works — whatever\'s on your mind!', false);
+        }
+        input.focus();
+      }
+      toggle.addEventListener('click', openChat);
+      if (!sessionStorage.getItem('mmChatAutoOpened')) {
+        setTimeout(function () {
+          openChat();
+          sessionStorage.setItem('mmChatAutoOpened', '1');
+        }, 800);
+      }
+      close.addEventListener('click', function () { panel.classList.remove('open'); });
+      send.addEventListener('click', function () {
+        var text = (input.value || '').trim();
+        if (!text) return;
+        addMsg(text, true);
+        input.value = '';
+        setTimeout(function () { addMsg(botReply(text), false); }, 400);
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') send.click();
+      });
+    })();
+  </script>
+</body>
+</html>
