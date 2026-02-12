@@ -6,21 +6,14 @@
   <title>AI Decision Breakdown – Moultrie Mobile Career Match</title>
   <style>
     :root {
-      --mm-green: #1e3d12;
-      --mm-green-soft: #2d5a1a;
-      --mm-green-block: #274e16;
-      --mm-yellow: #e8c547;
-      --mm-yellow-bright: #f5d84d;
-      --mm-yellow-dark: #c9a83a;
-      --mm-bg: #f6f4ee;
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-yellow-dark: #d4b314;
+      --mm-bg: #f8f6f0;
       --mm-card: #fff;
-      --mm-text: #1c1c1c;
-      --mm-muted: #5c5c5c;
-      --mm-border: rgba(30,61,18,0.12);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 2px 12px rgba(30,61,18,0.06);
-      --shadow-hover: 0 8px 28px rgba(30,61,18,0.12);
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
     }
     * { box-sizing: border-box; }
     body {
@@ -28,39 +21,49 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--mm-text);
       background: var(--mm-bg);
-      line-height: 1.5;
     }
     .site-header {
       background: var(--mm-green);
       color: white;
-      padding: 0.875rem 1.5rem;
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 1rem;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
     }
-    .site-logo { font-weight: 700; font-size: 1.25rem; letter-spacing: 0.02em; }
+    .site-logo {
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: 0.03em;
+    }
     .site-logo a { color: white; text-decoration: none; }
-    .site-logo span { color: var(--mm-yellow-bright); }
-    .main-nav { display: flex; gap: 0.25rem; flex-wrap: wrap; }
-    .main-nav a {
-      color: rgba(255,255,255,0.92);
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: background 0.2s, color 0.2s;
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav {
+      display: flex;
+      gap: 0;
+      flex-wrap: wrap;
     }
-    .main-nav a:hover { background: rgba(255,255,255,0.12); color: white; }
-    .main-nav a.active { background: var(--mm-yellow-bright); color: var(--mm-green); }
-    main { max-width: 1280px; margin: 0 auto; padding: 2rem 2rem; }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover {
+      background: var(--mm-green-block);
+      color: var(--mm-yellow);
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
     .page-title {
       font-size: 1.75rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
       color: var(--mm-green);
       margin: 0 0 0.5rem;
     }
@@ -74,11 +77,9 @@
     .back-link:hover { color: var(--mm-green-block); text-decoration: underline; }
     .page-block {
       background: var(--mm-card);
-      border: 1px solid var(--mm-border);
+      border: 3px solid var(--mm-green);
       padding: 1.5rem;
       margin-top: 1rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
     }
     .page-block h2 {
       font-size: 1.1rem;
@@ -98,17 +99,14 @@
       margin-top: 1rem;
     }
     .weight-option {
-      border: 1px solid var(--mm-border);
+      border: 3px solid var(--mm-green);
       padding: 1.25rem;
       cursor: pointer;
       background: var(--mm-card);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow);
-      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
     .weight-option:hover {
       background: var(--mm-bg);
-      box-shadow: 0 4px 12px rgba(30,61,18,0.1);
     }
     .weight-option.selected {
       background: var(--mm-green);
@@ -207,11 +205,9 @@
     .top-jobs-intro { margin-bottom: 1rem; }
     .top-jobs-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
     .job-match-card {
-      border: 1px solid var(--mm-border);
+      border: 3px solid var(--mm-green);
       background: var(--mm-card);
       padding: 1.25rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
     }
     .job-match-card h4 {
       margin: 0 0 0.25rem;
