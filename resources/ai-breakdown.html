@@ -518,79 +518,10 @@
         });
       });
 
-      // Job catalog with sector, work mode, traits, career stage, role type, etc.
-      var JOB_CATALOG = [
-        { title: 'Senior Product Manager', meta: 'Product · Remote', sector: 'tech', workMode: 'remote', traits: ['collaborative','structured','independent'], careerStage: ['mid','senior'], roleType: ['lead','manager'], employmentType: 'fulltime', teamSize: 'large', priorities: ['growth','culture','flexibility'], skills: 90, experience: 85, fitBase: 85 },
-        { title: 'Operations Coordinator', meta: 'Operations · On-site', sector: 'operations', workMode: 'in-person', traits: ['structured','independent'], careerStage: ['entry','early'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['worklife','benefits'], skills: 78, experience: 85, fitBase: 82 },
-        { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', sector: 'sales', workMode: 'hybrid', traits: ['collaborative','extrovert'], careerStage: ['early','mid'], roleType: ['ic','lead'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['culture','growth','flexibility'], skills: 82, experience: 75, fitBase: 80 },
-        { title: 'HR Business Partner', meta: 'HR · Hybrid', sector: 'hr', workMode: 'hybrid', traits: ['collaborative','balanced','extrovert'], careerStage: ['mid'], roleType: ['ic','lead','manager'], employmentType: 'fulltime', teamSize: 'large', priorities: ['culture','benefits','worklife'], skills: 85, experience: 80, fitBase: 82 },
-        { title: 'Software Engineer', meta: 'Engineering · Remote', sector: 'engineering', workMode: 'remote', traits: ['independent','structured'], careerStage: ['early','mid','senior'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'mid', priorities: ['growth','salary','flexibility'], skills: 92, experience: 88, fitBase: 84 },
-        { title: 'Finance Analyst', meta: 'Finance · On-site', sector: 'finance', workMode: 'in-person', traits: ['structured','independent'], careerStage: ['early','mid'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'large', priorities: ['benefits','salary','worklife'], skills: 88, experience: 82, fitBase: 80 },
-        { title: 'Sales Representative', meta: 'Sales · Hybrid', sector: 'sales', workMode: 'hybrid', traits: ['extrovert','collaborative'], careerStage: ['entry','early'], roleType: ['ic'], employmentType: 'fulltime', teamSize: 'small', priorities: ['salary','growth','flexibility'], skills: 80, experience: 70, fitBase: 78 },
-        { title: 'Part-Time Data Entry', meta: 'Operations · Remote', sector: 'operations', workMode: 'remote', traits: ['structured','independent'], careerStage: ['entry'], roleType: ['ic'], employmentType: 'parttime', teamSize: 'mid', priorities: ['worklife','flexibility'], skills: 72, experience: 65, fitBase: 75 },
-        { title: 'Contract UX Designer', meta: 'Tech · Hybrid', sector: 'tech', workMode: 'hybrid', traits: ['collaborative','adaptive'], careerStage: ['early','mid'], roleType: ['ic'], employmentType: 'contract', teamSize: 'small', priorities: ['flexibility','growth'], skills: 85, experience: 78, fitBase: 79 }
-      ];
-
-      function scoreJobFit(job) {
-        if (!personalized) return job.fitBase;
-        var fit = job.fitBase;
-        var workMode = [].concat(personalized['work-mode'] || personalized.work_mode || []).filter(Boolean)[0];
-        var sectors = [].concat(personalized.sectors || []).filter(Boolean);
-        var traits = [].concat(personalized.traits || []).filter(Boolean);
-        var roleTypes = [].concat(personalized['role-type'] || []).filter(Boolean);
-        var employmentType = [].concat(personalized['employment-type'] || []).filter(Boolean)[0];
-        var teamSize = [].concat(personalized['team-size'] || personalized['company-size'] || []).filter(Boolean)[0];
-        var relocate = [].concat(personalized.relocate || []).filter(Boolean)[0];
-        var priorities = [].concat(personalized.priorities || []).filter(Boolean);
-
-        if (workMode && job.workMode) {
-          if (workMode === job.workMode || (workMode === 'flexible')) fit += 8;
-          else if ((workMode === 'hybrid' && (job.workMode === 'remote' || job.workMode === 'in-person')) || (job.workMode === 'hybrid')) fit += 3;
-          else fit -= 5;
-        }
-        if (sectors.length && job.sector && sectors.indexOf(job.sector) >= 0) fit += 10;
-        if (traits.length && job.traits) {
-          var matchCount = job.traits.filter(function(t){ return traits.indexOf(t) >= 0; }).length;
-          if (matchCount > 0) fit += matchCount * 4;
-        }
-        if (roleTypes.length && job.roleType) {
-          var roleMatch = job.roleType.some(function(r){ return roleTypes.indexOf(r) >= 0; });
-          if (roleMatch) fit += 5;
-          else fit -= 3;
-        }
-        if (employmentType && job.employmentType && employmentType !== 'flexible') {
-          if (employmentType === job.employmentType) fit += 8;
-          else fit -= 6;
-        }
-        if (teamSize && job.teamSize && teamSize !== 'nopref') {
-          if (teamSize === job.teamSize) fit += 5;
-          else fit -= 2;
-        }
-        if (relocate && (job.workMode === 'in-person' || job.workMode === 'hybrid')) {
-          if (relocate === 'no') fit -= 8;
-          else if (relocate === 'yes' || relocate === 'open') fit += 3;
-        }
-        if (priorities.length && job.priorities) {
-          var priorityMatch = job.priorities.filter(function(p){ return priorities.indexOf(p) >= 0; }).length;
-          if (priorityMatch > 0) fit += priorityMatch * 2;
-        }
-        return Math.min(98, Math.max(60, Math.round(fit)));
-      }
-
-      function buildTopJobs() {
-        var jobs = JOB_CATALOG.map(function(j) {
-          var fit = scoreJobFit(j);
-          var overall = Math.round((j.skills * 0.35 + j.experience * 0.35 + fit * 0.3));
-          return { title: j.title, meta: j.meta, overall: overall, skills: j.skills, experience: j.experience, fit: fit };
-        });
-        jobs.sort(function(a,b){ return b.overall - a.overall; });
-        return jobs.slice(0, 3);
-      }
-
-      // Top 3 jobs: use session data from resume upload when available.
+      // Top 3 jobs: only show when we have session data from resume upload.
       // Accepts either: [{ title, meta, overall, skills, experience, fit }] or [{ id, title, department, location, matchPct }]
       window.fillTopJobs = function (jobs) {
-        if (!jobs || !jobs.length) jobs = buildTopJobs();
+        if (!jobs || !jobs.length) return;
         var list = document.getElementById('top-jobs-list');
         list.innerHTML = '';
         var normalized = jobs.slice(0, 3).map(function (job) {
@@ -621,20 +552,14 @@
         });
       };
 
-      fillTopJobs(buildTopJobs());
       updateGraphs();
       try {
         var stored = sessionStorage.getItem('mmJobMatches');
         if (stored) {
           var parsed = JSON.parse(stored);
           if (parsed && parsed.length) { fillTopJobs(parsed); }
-          else { fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]); }
-        } else {
-          fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]);
         }
-      } catch (e) {
-        fillTopJobs([{ title: 'Senior Product Manager', meta: 'Product · Remote', overall: 88, skills: 90, experience: 85, fit: 88 }, { title: 'Operations Coordinator', meta: 'Operations · On-site', overall: 82, skills: 78, experience: 85, fit: 84 }, { title: 'Customer Success Lead', meta: 'Customer Success · Hybrid', overall: 79, skills: 82, experience: 75, fit: 80 }]);
-      }
+      } catch (e) {}
     })();
   </script>
 </body>
