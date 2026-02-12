@@ -333,7 +333,7 @@
       cursor: pointer;
     }
     .choice-row input[type="checkbox"],
-    .choice-row input[type="radio"] {
+    .choice-row input[type="radio"] 
     .role-selector {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -344,9 +344,10 @@
       display: block;
       background: #e8f0e4;
       border: 3px solid var(--mm-green);
-      padding: 1.5rem 1.75rem;
+      padding: 1.25rem 1.5rem;
       text-decoration: none;
       color: var(--mm-text);
+      font-weight: 600;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
@@ -365,12 +366,13 @@
     .role-card:hover {
       background: #dcead8;
       box-shadow: var(--shadow-hover);
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       border-color: var(--mm-green-block);
+      color: var(--mm-green);
     }
     .role-card:hover h2 { color: var(--mm-green-block); }
 
-    /* Chatbot (main page only) */
+    /* Chatbot */
     .chat-toggle {
       position: fixed;
       bottom: 1.5rem;
@@ -490,6 +492,7 @@
       transition: background 0.2s;
     }
     .chat-input-wrap button:hover { background: #dcead8; }
+
     .upload-resume-block { border-radius: var(--radius); }
     .upload-resume-btn {
       padding: 0.75rem 1.5rem;
@@ -509,7 +512,6 @@
       transform: translateY(-1px);
       box-shadow: var(--shadow-hover);
     }
-    .chat-input-wrap button:hover { background: var(--mm-green-block); }
 
     /* Upload Resume section */
     #upload-resume .intro { margin-bottom: 1.5rem; }
@@ -563,6 +565,7 @@
     }
     .personalized-submit:hover {
       background: var(--mm-green-block);
+    }
     .match-by-box p {
       margin: 0.5rem 0 0;
       font-size: 0.85rem;
@@ -790,7 +793,7 @@
         Here you can upload your resume, answer personalized questions, and see job matches tailored to you. Use the options below to get started: answer questions so we understand your preferences, upload your resume to match against open roles, explore training suggestions, view your top job recommendations, or see exactly how our AI weighed each match. You can also save jobs you like for later.
       </p>
       <div class="option-grid">
-        <a href="personalized-questions.html" class="option-card">Personalized Questions</a>
+        <a href="#personalized-questions" class="option-card">Personalized Questions</a>
         <a href="#upload-resume" class="option-card">Upload Resume</a>
         <a href="#training-match" class="option-card">Training & Courses Match</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
@@ -844,13 +847,12 @@
           </div>
 
           <div class="question-block">
-            <label>Remote, in person, or hybrid?</label>
+            <label>What type of job?</label>
             <span class="hint">How do you prefer to work?</span>
             <div class="choice-row">
               <label><input type="radio" name="work-mode" value="remote"> Remote</label>
               <label><input type="radio" name="work-mode" value="in-person"> In person</label>
               <label><input type="radio" name="work-mode" value="hybrid"> Hybrid</label>
-              <label><input type="radio" name="work-mode" value="flexible"> Flexible / no preference</label>
             </div>
           </div>
 
@@ -933,7 +935,7 @@
             <div class="choice-row">
               <label><input type="radio" name="relocate" value="yes"> Yes</label>
               <label><input type="radio" name="relocate" value="no"> No</label>
-              <label><input type="radio" name="relocate" value="open"> Open to it</label>
+              <label><input type="radio" name="relocate" value="prefer-not"> Prefer not to say</label>
             </div>
           </div>
 
@@ -993,11 +995,20 @@
     const EMPLOYEE_SUB_ANCHORS = ['personalized-questions', 'upload-resume', 'training-match', 'job-dashboard'];
     function setView() {
       const hash = location.hash.slice(1) || 'home';
-      const activeView = EMPLOYEE_SUB_ANCHORS.includes(hash) ? 'employee' : (hash === 'employer' || hash === 'home' || hash === 'employee' ? hash : 'home');
+      let activeView;
+      if (hash === 'personalized-questions' || hash === 'upload-resume') {
+        activeView = 'upload-resume';
+      } else if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
+        activeView = 'employee';
+      } else if (hash === 'employer' || hash === 'home' || hash === 'employee') {
+        activeView = hash;
+      } else {
+        activeView = 'home';
+      }
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.main-nav a').forEach(a => a.classList.remove('active'));
       const section = document.getElementById(activeView);
-      const link = document.querySelector(`.main-nav a[data-view="${activeView}"]`);
+      const link = document.querySelector(`.main-nav a[data-view="${activeView}"]`) || (activeView === 'upload-resume' ? document.querySelector('.main-nav a[data-view="employee"]') : null);
       if (section) section.classList.add('active');
       if (link) link.classList.add('active');
       if (EMPLOYEE_SUB_ANCHORS.includes(hash)) {
@@ -1009,6 +1020,87 @@
     }
     window.addEventListener('hashchange', setView);
     window.addEventListener('load', setView);
+
+    function initChat() {
+      var AUTO_OPEN_KEY = 'mmChatAutoOpened';
+      var panel = document.getElementById('chat-panel');
+      var toggle = document.getElementById('chat-toggle');
+      var closeBtn = document.getElementById('chat-close');
+      var messagesEl = document.getElementById('chat-messages');
+      var inputEl = document.getElementById('chat-input');
+      var sendBtn = document.getElementById('chat-send');
+      if (!panel || !toggle) return;
+
+      function openPanel() {
+        panel.classList.add('open');
+        if (inputEl) inputEl.focus();
+      }
+      function closePanel() {
+        panel.classList.remove('open');
+      }
+
+      toggle.addEventListener('click', function() {
+        if (panel.classList.contains('open')) closePanel();
+        else openPanel();
+      });
+      if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+      function addMsg(text, isBot) {
+        if (!messagesEl) return;
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + (isBot ? 'bot' : 'user');
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      function getBotReply(userText) {
+        var t = (userText || '').toLowerCase().trim();
+        if (!t) return "Type a question and I'll try to help.";
+        if (/hello|hi|hey|howdy/.test(t)) return "Hi! Ask me about this career site — resume upload, job matches, the employer dashboard, or how we use your data.";
+        if (/resume|upload|paste|pdf/.test(t)) return "You can upload your resume from the \"Upload Resume\" option in the Prospective employee section. We accept PDF or pasted text. We strip out PII and bias-related info and only use skills and experience for matching.";
+        if (/job|role|match|position|openings/.test(t)) return "After you upload a resume and answer the personalized questions, you'll see job recommendations. Use \"AI Decision Breakdown\" to see why each role was suggested. You can also browse \"Liked jobs\" if you've saved any.";
+        if (/employer|hire|hiring|manager|candidate/.test(t)) return "Employers and hiring managers can use the \"Employer\" path on the home page, then open the Employer dashboard. You'll only see candidates who chose to make their profile visible to employers.";
+        if (/personalized|questions|survey|form/.test(t)) return "The \"Personalized Questions\" step lets you share how you like to work and what you value. Your answers help us weight matches — more experience-based or more values-based. You can change this later.";
+        if (/privacy|data|keep|save|forget/.test(t)) return "By default we don't keep your data; when you leave we forget it. If you want to save progress, you can opt in. We're transparent about what we use and don't use for matching.";
+        if (/bias|fair|fairness|ai breakdown|why|recommend/.test(t)) return "We try to reduce bias by removing PII and demographic info from resumes before matching. The \"AI Decision Breakdown\" page shows why we recommended each role so it's not a black box.";
+        if (/about|moultrie|company|what is this/.test(t)) return "This is Moultrie Mobile's internal AI career dashboard — for employees and hiring managers, not the public. Check the About page for more on who we are and our products.";
+        if (/help|what can you|how do i/.test(t)) return "I can answer questions about: uploading your resume, job matches, the employer dashboard, personalized questions, privacy, and how we reduce bias. Just ask in plain language.";
+        return "I'm not sure about that. Try asking about resume upload, job matches, the employer dashboard, personalized questions, or privacy. You can also use the nav to jump to Upload Resume, AI Decision Breakdown, or About.";
+      }
+
+      function sendMessage() {
+        var text = (inputEl && inputEl.value || '').trim();
+        if (!text) return;
+        if (inputEl) inputEl.value = '';
+        addMsg(text, false);
+        var reply = getBotReply(text);
+        setTimeout(function() { addMsg(reply, true); }, 300);
+      }
+
+      if (sendBtn) sendBtn.addEventListener('click', function(e) { e.preventDefault(); sendMessage(); });
+      if (inputEl) {
+        inputEl.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+        });
+      }
+
+      function maybeAutoOpen() {
+        try {
+          if (!sessionStorage.getItem(AUTO_OPEN_KEY)) {
+            sessionStorage.setItem(AUTO_OPEN_KEY, '1');
+            openPanel();
+          }
+        } catch (err) {}
+      }
+      if (document.readyState === 'complete') setTimeout(maybeAutoOpen, 100);
+      else window.addEventListener('load', maybeAutoOpen);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initChat);
+    } else {
+      initChat();
+    }
 
     document.getElementById('personalized-form')?.addEventListener('submit', function(e) {
       e.preventDefault();
