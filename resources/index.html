@@ -218,14 +218,121 @@
     .role-card:hover h2 {
       color: var(--mm-yellow);
     }
+
+    /* Chatbot (main page only) */
+    .chat-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--mm-green);
+      border: 3px solid var(--mm-yellow);
+      color: var(--mm-yellow);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .chat-toggle:hover {
+      background: var(--mm-green-block);
+      transform: scale(1.05);
+    }
+    .chat-panel {
+      display: none;
+      position: fixed;
+      bottom: 5rem;
+      right: 1.5rem;
+      width: 320px;
+      max-width: calc(100vw - 3rem);
+      height: 420px;
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      flex-direction: column;
+      z-index: 1001;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .chat-panel.open { display: flex; }
+    .chat-header {
+      padding: 0.75rem 1rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-close {
+      background: none;
+      border: none;
+      color: var(--mm-yellow);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      line-height: 1;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .chat-msg.bot {
+      align-self: flex-start;
+      background: var(--mm-bg);
+      border: 2px solid var(--mm-green);
+      color: var(--mm-text);
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+    }
+    .chat-input-wrap {
+      padding: 0.75rem;
+      border-top: 2px solid var(--mm-green);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input-wrap input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid var(--mm-green);
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+    .chat-input-wrap button {
+      padding: 0.5rem 1rem;
+      background: var(--mm-green);
+      color: var(--mm-yellow);
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .chat-input-wrap button:hover { background: var(--mm-green-block); }
   </style>
 </head>
 <body>
   <header class="site-header">
     <div class="site-logo">Moultrie <span>Mobile</span></div>
     <nav class="main-nav">
+      <a href="about.html">About</a>
       <a href="#home" data-view="home">Home</a>
-      <a href="#employee" data-view="employee">Employee</a>
+      <a href="#employee" data-view="employee">Prospective employee</a>
       <a href="#employer" data-view="employer">Employer</a>
     </nav>
   </header>
@@ -233,16 +340,16 @@
     <section class="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <h1>Career Match</h1>
-      <p>Internal career assistant for Moultrie employees and hiring managers.</p>
+      <p>Internal career assistant for Moultrie Mobile employees and hiring managers.</p>
     </section>
 
     <section id="home" class="view-section active">
       <div class="intro">
-        <p class="intro-lead warm">Welcome. This is Moultrie’s internal AI career dashboard, designed for employees and hiring managers — not the public web.</p>
+        <p class="intro-lead warm">Welcome. This is Moultrie Mobile’s internal AI career dashboard, designed for employees and hiring managers — not the public web.</p>
 
         <div class="role-selector">
           <a href="#employee" class="role-card">
-            <h2>I’m an employee</h2>
+            <h2>I’m a prospective employee</h2>
             <p>Get job matches, training suggestions, and a clear view of why each role fits you.</p>
           </a>
           <a href="#employer" class="role-card">
@@ -251,12 +358,12 @@
           </a>
         </div>
 
-        <p class="intro-lead warm">This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
+        <p class="intro-lead warm">This isn’t a faceless form — it’s an AI that’s on your side. We want to help you find a role at Moultrie Mobile that actually fits <em>you</em>: your skills, how you like to work, and what you care about.</p>
 
         <div class="nature-strip">
-          <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=80" alt="Forest path" />
-          <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&q=80" alt="Mountain landscape" />
-          <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80" alt="Misty morning" />
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80" alt="Forest path" />
+          <img src="images/deer.png" alt="Deer in golden field" />
+          <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=80" alt="Misty forest" />
         </div>
 
         <p class="warm">We care about <strong>transparency</strong> and <strong>authenticity</strong>. No hidden scoring, no bias — we listen to what you share and match you honestly. Upload your resume and answer a few human-centered questions. Then you get to choose: should we lean more on your experience and hard skills, or more on the human stuff — how you work, what you value, the kind of team you want? Your call.</p>
@@ -269,20 +376,21 @@
           </div>
           <div class="intro-block">
             <h3>You’re in control</h3>
-            <p>Pick Employee or Employer above whenever you’re ready. No pressure. We’re here.</p>
+            <p>Pick Prospective employee or Employer above whenever you’re ready. No pressure. We’re here.</p>
           </div>
         </div>
 
-        <p class="intro-cta">Choose <strong>Employee</strong> or <strong>Employer</strong> above when you’re ready to start.</p>
+        <p class="intro-cta">Choose <strong>Prospective employee</strong> or <strong>Employer</strong> above when you’re ready to start.</p>
       </div>
     </section>
 
     <section id="employee" class="view-section">
-      <h2 class="view-title">Employee</h2>
+      <h2 class="view-title">Prospective employee</h2>
       <div class="option-grid">
         <a href="personalized-questions.html" class="option-card">Personalized Questions</a>
         <a href="#upload-resume" class="option-card">Upload Resume</a>
         <a href="#training-match" class="option-card">Training & Courses Match</a>
+        <a href="#upload-resume" class="option-card">Job Recommendation Dashboard</a>
         <a href="ai-breakdown.html" class="option-card">AI Decision Breakdown</a>
         <a href="liked-jobs.html" class="option-card">Liked jobs</a>
       </div>
@@ -325,6 +433,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script>if (typeof pdfjsLib !== 'undefined') { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'; }</script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <button type="button" class="chat-toggle" id="chat-toggle" aria-label="Open chat" title="Chat">💬</button>
+  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Chat">
+    <div class="chat-header">
+      <span>Hi! I'm here if you have questions.</span>
+      <button type="button" class="chat-close" id="chat-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-wrap">
+      <input type="text" id="chat-input" placeholder="Ask me anything..." autocomplete="off" />
+      <button type="button" id="chat-send">Send</button>
+    </div>
+  </div>
   <script>
     function setView() {
       const hash = location.hash.slice(1) || 'home';
@@ -379,6 +499,11 @@
         if (!lastResumeText || !jobMatchesEl) return;
         var matches = computeJobMatches(lastResumeText, null, getMatchBy());
         renderJobMatches(jobMatchesEl, matches);
+        var all = (matches.best || []).concat(matches.other || []);
+        var top3 = all.slice(0, 3).map(function (j) {
+          return { id: j.id, title: j.title, department: j.department, location: j.location, matchPct: j.matchPct };
+        });
+        try { sessionStorage.setItem('mmJobMatches', JSON.stringify(top3)); } catch (e) {}
       }
       window.refreshJobMatches = refreshJobMatches;
 
@@ -402,6 +527,7 @@
             return;
           }
           lastResumeText = text;
+          try { sessionStorage.setItem('mmResumeText', text); } catch (e) {}
           var found = scanResumeSections(text);
           statusEl.textContent = 'Scan complete. Key sections detected:';
           renderScanResults(resultsEl, found);
@@ -681,6 +807,89 @@
         });
         container.appendChild(ul);
       }
+    })();
+
+    (function chat() {
+      var panel = document.getElementById('chat-panel');
+      var toggle = document.getElementById('chat-toggle');
+      var close = document.getElementById('chat-close');
+      var input = document.getElementById('chat-input');
+      var send = document.getElementById('chat-send');
+      var messages = document.getElementById('chat-messages');
+
+      function addMsg(text, isUser) {
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + (isUser ? 'user' : 'bot');
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function botReply(q) {
+        var lower = (q || '').toLowerCase().trim();
+        if (lower.length < 2) return 'Type a question and I\'ll do my best to answer! Try "What is Moultrie Mobile?" or "How do I find jobs here?"';
+
+        if (/^(hi|hey|hello|hey there|howdy|yo)\s*!*$/.test(lower) || lower === 'hi' || lower === 'hey' || lower === 'hello') {
+          return 'Hey! 😊 Ask me anything — like "What does Moultrie Mobile do?", "How do I get matched with jobs?", or "How does the AI matching work?"';
+        }
+        if (lower.includes('resume') || lower.includes('upload') || lower.includes('cv ') || lower.includes(' my resume')) {
+          return 'Go to "Prospective employee" in the nav, then click "Upload Resume." After you upload and answer the personalized questions, we\'ll match you with roles. You can also see the "AI Decision Breakdown" page to see how we weight your resume vs your preferences.';
+        }
+        if (lower.includes('employer') || lower.includes('hiring') || lower.includes('candidates') || lower.includes('recruit')) {
+          return 'If you\'re hiring, click "Employer" in the nav (or "Open employer dashboard"). You\'ll only see candidates who chose to make their profile visible to employers. You can filter by job and see their contact info and match scores.';
+        }
+        if (lower.includes('training') || lower.includes('course') || lower.includes('learn') || lower.includes('skill')) {
+          return 'We have a "Training & Courses Match" option under Prospective employee — it suggests training and courses that fit your goals and the roles you\'re matched with. Click "Prospective employee" then look for that card.';
+        }
+        if (lower.includes('privacy') || lower.includes(' data') || lower.includes('keep my') || lower.includes('save my') || lower.includes('forget')) {
+          return 'We don\'t keep your data by default. When you leave, we forget it. If you want to save your progress (resume, answers, matches), you can choose to keep it — that\'s optional and up to you.';
+        }
+        if (lower.includes('how does') || lower.includes('how do ') || lower.includes('matching work') || lower.includes('match work') || lower.includes('ai ') || lower.includes('transparency') || lower.includes('breakdown') || lower.includes('weight')) {
+          return 'The AI matches you to jobs using your resume and your answers. You choose whether we weight "resume & hard skills" more or "your answers & preferences" more. Every recommendation has a visual breakdown — open "AI Decision Breakdown" from the Prospective employee section to see the graphs and how we explain each decision.';
+        }
+        if (lower.includes('what is this') || lower.includes('what\'s this') || lower.includes('this site') || lower.includes('this page') || lower.includes('dashboard')) {
+          return 'This is Moultrie Mobile\'s internal career site. Employees and hiring managers use it: prospective employees get job matches (resume + questions + optional training), and employers see candidates who opted in. Everything is transparent — you can see how the AI weights and explains matches.';
+        }
+        if (lower.includes('get started') || lower.includes('start') || lower.includes('begin') || lower.includes('where do i')) {
+          return 'Pick one: "Prospective employee" if you\'re looking for a job (upload resume, answer questions, get matches), or "Employer" if you\'re hiring (see candidates who made their profile visible). The chatbot stays here if you have more questions!';
+        }
+        if (lower.includes('about') || lower.includes('what is moultrie') || lower.includes('who is moultrie') || lower.includes('company') || lower.includes('moultrie mobile') || lower.includes('what do you do')) {
+          return 'Moultrie Mobile makes trail cameras, feeders, and the hunt-planning app (maps, Game Plan, Buck List, etc.). We\'ve been around 40+ years and were first with cellular trail cameras. Click "About" at the top for the full story, stats, and community work.';
+        }
+        if (lower.includes('job') || lower.includes('career') || lower.includes('role') || lower.includes('position') || lower.includes('find work') || lower.includes('looking for')) {
+          return 'Click "Prospective employee" above. You\'ll upload your resume and answer some questions; we match you to roles and you can choose whether matches lean more on your resume/skills or on your preferences and fit. The "Job Recommendation Dashboard" and "AI Decision Breakdown" show your matches and why we suggested them.';
+        }
+        if (lower.includes('help') || lower.includes('what can you')) {
+          return 'I can answer: what Moultrie Mobile is, how to find jobs or upload your resume, how the AI matching works, what employers see, privacy, training, and how to get started. Just ask in your own words!';
+        }
+        return 'I\'m not sure I got that — try asking "What is Moultrie Mobile?", "How do I get matched with jobs?", or "How does the AI matching work?" and I\'ll give you a clear answer.';
+      }
+
+      function openChat() {
+        panel.classList.add('open');
+        if (messages.children.length === 0) {
+          addMsg('Hey there! 👋 I\'m here to help. Ask me about Moultrie Mobile, careers, or how this dashboard works — whatever\'s on your mind!', false);
+        }
+        input.focus();
+      }
+      toggle.addEventListener('click', openChat);
+      if (!sessionStorage.getItem('mmChatAutoOpened')) {
+        setTimeout(function () {
+          openChat();
+          sessionStorage.setItem('mmChatAutoOpened', '1');
+        }, 800);
+      }
+      close.addEventListener('click', function () { panel.classList.remove('open'); });
+      send.addEventListener('click', function () {
+        var text = (input.value || '').trim();
+        if (!text) return;
+        addMsg(text, true);
+        input.value = '';
+        setTimeout(function () { addMsg(botReply(text), false); }, 400);
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') send.click();
+      });
     })();
   </script>
 </body>
