@@ -73,7 +73,8 @@
       border-left: 4px solid var(--mm-green);
       font-size: 0.95rem;
     }
-    .liked-job-item .job-title { font-weight: 700; color: var(--mm-text); }
+    .liked-job-item .job-title { font-weight: 700; color: var(--mm-green); text-decoration: none; }
+    .liked-job-item .job-title:hover { text-decoration: underline; }
     .liked-job-item .job-meta { font-size: 0.85rem; color: var(--mm-muted); width: 100%; }
     .job-like-btn {
       padding: 0.35rem 0.6rem;
@@ -147,16 +148,17 @@
         liked.forEach(function (j) {
           var div = document.createElement('div');
           div.className = 'liked-job-item';
-          var title = document.createElement('span');
-          title.className = 'job-title';
-          title.textContent = j.title;
+          var titleLink = document.createElement('a');
+          titleLink.href = 'job-detail.html?title=' + encodeURIComponent(j.title || '');
+          titleLink.className = 'job-title';
+          titleLink.textContent = j.title;
           var removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'job-like-btn liked';
           removeBtn.textContent = 'Remove';
           removeBtn.setAttribute('aria-label', 'Remove from liked jobs');
-          removeBtn.addEventListener('click', function () { removeLiked(j); });
-          div.appendChild(title);
+          removeBtn.addEventListener('click', function (e) { e.preventDefault(); removeLiked(j); });
+          div.appendChild(titleLink);
           div.appendChild(removeBtn);
           var meta = document.createElement('div');
           meta.className = 'job-meta';

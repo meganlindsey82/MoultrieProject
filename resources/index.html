@@ -253,6 +253,8 @@
       font-size: 0.95rem;
     }
     .job-matches-list .job-title { font-weight: 700; color: var(--mm-text); }
+    .job-matches-list .job-title-link { color: var(--mm-green); text-decoration: none; }
+    .job-matches-list .job-title-link:hover { text-decoration: underline; }
     .job-matches-list .job-meta { font-size: 0.85rem; color: var(--mm-muted); }
     .job-matches-list .job-pct { font-weight: 800; color: var(--mm-green); min-width: 3em; text-align: right; }
     .job-matches-list.best-matches .job-pct { color: var(--mm-green); }
@@ -601,21 +603,21 @@
       function computeJobMatches(resumeText, sectionResults, matchMode) {
         matchMode = matchMode || getMatchBy();
         var normalizedResume = '\n' + (resumeText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').toLowerCase();
-        var scored = MOULTRIE_JOBS.map(function (job) {
+        var scored = MOULTRIE_JOBS.map(function (job, idx) {
           var allCriteria;
           if (matchMode === 'interests') {
             allCriteria = job.interests || [];
           } else {
             allCriteria = (job.skills || []).concat(job.qualifications || []);
           }
-          if (allCriteria.length === 0) return { title: job.title, department: job.department, location: job.location, matchPct: 0 };
+          if (allCriteria.length === 0) return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: 0 };
           var matched = 0;
           for (var i = 0; i < allCriteria.length; i++) {
             var phrase = allCriteria[i].toLowerCase().trim();
             if (phrase.length && normalizedResume.indexOf(phrase) !== -1) matched++;
           }
           var pct = Math.round((matched / allCriteria.length) * 100);
-          return { title: job.title, department: job.department, location: job.location, matchPct: pct };
+          return { id: idx + 1, title: job.title, department: job.department, location: job.location, matchPct: pct };
         });
         scored.sort(function (a, b) { return b.matchPct - a.matchPct; });
         var best = scored.filter(function (j) { return j.matchPct >= 70; });
@@ -633,15 +635,21 @@
           ulBest.className = 'job-matches-list best-matches';
           matches.best.forEach(function (j) {
             var li = document.createElement('li');
-            li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
             var likeBtn = document.createElement('button');
             likeBtn.type = 'button';
             likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
             likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
             likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
-            likeBtn.addEventListener('click', function () {
-              if (window.toggleJobLike) window.toggleJobLike(j);
-            });
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
             li.appendChild(likeBtn);
             var meta = document.createElement('div');
             meta.className = 'job-meta';
@@ -660,15 +668,21 @@
           ulOther.className = 'job-matches-list other-jobs';
           matches.other.forEach(function (j) {
             var li = document.createElement('li');
-            li.innerHTML = '<span class="job-title">' + escapeHtml(j.title) + '</span><span class="job-pct">' + j.matchPct + '%</span>';
+            var titleLink = document.createElement('a');
+            titleLink.href = 'job-detail.html?id=' + (j.id || '');
+            titleLink.className = 'job-title job-title-link';
+            titleLink.textContent = j.title;
+            var pctSpan = document.createElement('span');
+            pctSpan.className = 'job-pct';
+            pctSpan.textContent = j.matchPct + '%';
+            li.appendChild(titleLink);
+            li.appendChild(pctSpan);
             var likeBtn = document.createElement('button');
             likeBtn.type = 'button';
             likeBtn.className = 'job-like-btn' + (window.isJobLiked && window.isJobLiked(j) ? ' liked' : '');
             likeBtn.textContent = window.isJobLiked && window.isJobLiked(j) ? 'Liked' : 'Like';
             likeBtn.setAttribute('aria-label', (window.isJobLiked && window.isJobLiked(j) ? 'Remove from liked jobs' : 'Like this job'));
-            likeBtn.addEventListener('click', function () {
-              if (window.toggleJobLike) window.toggleJobLike(j);
-            });
+            likeBtn.addEventListener('click', function (e) { e.preventDefault(); if (window.toggleJobLike) window.toggleJobLike(j); });
             li.appendChild(likeBtn);
             var meta = document.createElement('div');
             meta.className = 'job-meta';

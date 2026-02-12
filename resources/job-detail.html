@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job details – Moultrie Mobile Career Match</title>
+  <style>
+    :root {
+      --mm-green: #234317;
+      --mm-green-block: #2d5518;
+      --mm-yellow: #f5d018;
+      --mm-bg: #f8f6f0;
+      --mm-card: #fff;
+      --mm-text: #1a1a1a;
+      --mm-muted: #555;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--mm-text);
+      background: var(--mm-bg);
+    }
+    .site-header {
+      background: var(--mm-green);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-logo { font-weight: 800; font-size: 1.35rem; }
+    .site-logo a { color: white; text-decoration: none; }
+    .site-logo span { color: var(--mm-yellow); }
+    .main-nav { display: flex; gap: 0; flex-wrap: wrap; }
+    .main-nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .main-nav a:hover { background: var(--mm-green-block); color: var(--mm-yellow); }
+    main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .page-title { font-size: 1.75rem; font-weight: 800; color: var(--mm-green); margin: 0 0 0.25rem; }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--mm-green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--mm-green-block); text-decoration: underline; }
+    .job-meta { font-size: 1rem; color: var(--mm-muted); margin-bottom: 0.5rem; }
+    .job-summary { font-size: 1rem; line-height: 1.6; color: var(--mm-text); margin: 0 0 1.5rem; }
+    .page-block {
+      background: var(--mm-card);
+      border: 3px solid var(--mm-green);
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .page-block h2 { font-size: 1rem; color: var(--mm-green); margin: 0 0 0.5rem; font-weight: 800; }
+    .page-block ul { margin: 0; padding-left: 1.25rem; line-height: 1.6; }
+    .page-block p { margin: 0; line-height: 1.6; }
+    .job-not-found { color: var(--mm-muted); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-logo"><a href="index.html">Moultrie <span>Mobile</span></a></div>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="index.html#employee">Employee</a>
+      <a href="index.html#employer">Employer</a>
+    </nav>
+  </header>
+  <main>
+    <a href="index.html#employee" class="back-link">← Back to Employee options</a>
+    <div id="job-detail-content"></div>
+    <p id="job-not-found" class="job-not-found" hidden>Job not found.</p>
+  </main>
+  <script>
+    (function () {
+      var MOULTRIE_JOBS = [
+        { title: 'Field Operations Coordinator', department: 'Operations', location: 'Moultrie, GA', summary: 'Coordinate day-to-day field operations, logistics, and scheduling while keeping inventory, documentation, and safety standards on track. You’ll work with teams on the ground and support smooth operations across sites.', skills: ['field operations', 'logistics', 'scheduling', 'coordination', 'inventory', 'documentation', 'safety compliance'], qualifications: ['organization', 'communication', 'problem solving', 'experience in operations', 'teamwork', 'detail oriented'], interests: ['organization', 'hands-on', 'logistics', 'safety', 'procedures', 'teamwork', 'outdoors', 'structure'] },
+        { title: 'Customer Success Representative', department: 'Customer Success', location: 'Hybrid', summary: 'Help customers get the most out of our products and services through phone, email, and CRM tools. You’ll troubleshoot issues, onboard new customers, and build relationships that keep them successful.', skills: ['customer service', 'customer support', 'phone', 'email', 'CRM', 'troubleshooting', 'onboarding'], qualifications: ['communication', 'empathy', 'problem solving', 'experience with customers', 'listening', 'patience'], interests: ['helping people', 'customer focus', 'listening', 'problem solving', 'teaching', 'relationship building'] },
+        { title: 'Technical Project Lead', department: 'Product & Technology', location: 'Remote', summary: 'Lead technical projects from planning through delivery: manage timelines and budget, work with agile/scrum practices, and align engineering and stakeholders so we ship software that matters.', skills: ['project management', 'agile', 'scrum', 'technical', 'software', 'development', 'stakeholder', 'timeline', 'budget'], qualifications: ['leadership', 'experience leading projects', 'cross-functional', 'communication', 'organization', 'problem solving'], interests: ['technology', 'leading teams', 'building products', 'strategy', 'collaboration', 'problem solving'] },
+        { title: 'HR & Training Specialist', department: 'Human Resources', location: 'Moultrie, GA', summary: 'Support our people through onboarding, training, and development programs. You’ll help with recruiting, HR policies, and orientation so every employee has a strong start and path to grow.', skills: ['training', 'onboarding', 'recruiting', 'HR', 'human resources', 'policies', 'orientation', 'development programs'], qualifications: ['communication', 'organization', 'experience in HR', 'facilitation', 'interpersonal', 'confidentiality'], interests: ['teaching', 'helping people grow', 'organization', 'people', 'development', 'culture'] },
+        { title: 'Sales & Outreach Associate', department: 'Sales', location: 'Hybrid', summary: 'Grow our reach by building and nurturing client relationships. You’ll work the pipeline from lead generation through negotiation and presentation, helping new and existing customers see the value we offer.', skills: ['sales', 'outreach', 'lead generation', 'client', 'pipeline', 'negotiation', 'presentation', 'relationship'], qualifications: ['communication', 'persuasion', 'goal oriented', 'experience in sales', 'networking', 'self motivated'], interests: ['meeting people', 'persuasion', 'goals', 'networking', 'relationship building', 'growth'] },
+        { title: 'Operations Manager', department: 'Operations', location: 'On-site', summary: 'Own operations for your area: drive process improvement, manage budget and planning, and lead the team toward clear KPIs. You’ll make decisions that improve efficiency and results every day.', skills: ['operations', 'management', 'process improvement', 'budget', 'planning', 'team leadership', 'KPIs', 'efficiency'], qualifications: ['leadership', 'experience managing', 'analytical', 'decision making', 'organization', 'supervisory'], interests: ['leading', 'efficiency', 'improvement', 'decision making', 'team leadership', 'results'] },
+        { title: 'Junior Developer', department: 'Product & Technology', location: 'Remote', summary: 'Build and maintain software with the team: write and debug code, work with modern web tools and APIs, and learn best practices in a collaborative, product-focused environment.', skills: ['programming', 'coding', 'software development', 'javascript', 'python', 'web', 'API', 'git', 'debugging'], qualifications: ['problem solving', 'projects', 'computer science', 'technical', 'learning', 'collaboration', 'code'], interests: ['technology', 'building things', 'problem solving', 'learning', 'coding', 'projects', 'creativity'] },
+        { title: 'Community Engagement Coordinator', department: 'Community', location: 'Moultrie, GA', summary: 'Connect Moultrie with the community through events, volunteer work, and partnerships. You’ll run programs, build relationships with local groups, and help our social impact reach further.', skills: ['community', 'engagement', 'outreach', 'events', 'volunteer', 'partnerships', 'social', 'programs'], qualifications: ['communication', 'organization', 'volunteer experience', 'leadership', 'involvement', 'relationship building'], interests: ['community', 'volunteer', 'events', 'helping others', 'partnerships', 'social impact', 'involvement'] }
+      ];
+
+      function getJob() {
+        var params = new URLSearchParams(window.location.search);
+        var id = params.get('id');
+        if (id) {
+          var idx = parseInt(id, 10) - 1;
+          if (idx >= 0 && idx < MOULTRIE_JOBS.length) return MOULTRIE_JOBS[idx];
+        }
+        var title = params.get('title');
+        if (title) {
+          title = decodeURIComponent(title);
+          for (var i = 0; i < MOULTRIE_JOBS.length; i++) {
+            if (MOULTRIE_JOBS[i].title === title) return MOULTRIE_JOBS[i];
+          }
+        }
+        return null;
+      }
+
+      function escapeHtml(s) {
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      var job = getJob();
+      var content = document.getElementById('job-detail-content');
+      var notFound = document.getElementById('job-not-found');
+      if (!job) {
+        content.hidden = true;
+        notFound.hidden = false;
+      } else {
+        notFound.hidden = true;
+        var skills = job.skills || [];
+        var quals = job.qualifications || [];
+        var ints = job.interests || [];
+        var summary = job.summary ? '<p class="job-summary">' + escapeHtml(job.summary) + '</p>' : '';
+        content.innerHTML =
+          '<h1 class="page-title">' + escapeHtml(job.title) + '</h1>' +
+          '<p class="job-meta">' + escapeHtml(job.department) + ' · ' + escapeHtml(job.location) + '</p>' +
+          summary +
+          '<div class="page-block">' +
+            '<h2>Skills</h2>' +
+            (skills.length ? '<ul><li>' + skills.map(function (s) { return escapeHtml(s); }).join('</li><li>') + '</li></ul>' : '<p>—</p>') +
+          '</div>' +
+          '<div class="page-block">' +
+            '<h2>Qualifications</h2>' +
+            (quals.length ? '<ul><li>' + quals.map(function (q) { return escapeHtml(q); }).join('</li><li>') + '</li></ul>' : '<p>—</p>') +
+          '</div>' +
+          '<div class="page-block">' +
+            '<h2>Interests we look for</h2>' +
+            (ints.length ? '<ul><li>' + ints.map(function (i) { return escapeHtml(i); }).join('</li><li>') + '</li></ul>' : '<p>—</p>') +
+          '</div>';
+      }
+    })();
+  </script>
+</body>
+</html>
