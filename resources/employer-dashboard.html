@@ -262,11 +262,6 @@
   <script>
     (function () {
       var STORAGE_KEY = 'moultrie_opted_in_candidates';
-      var demoCandidates = [
-        { name: 'Alex Hunter', jobKey: 'field-ops', role: 'Field Operations Lead (South Region)', match: 92, email: 'alex.hunter@example.com', phone: '(555) 123-0192', public: true },
-        { name: 'Jordan Lee', jobKey: 'support', role: 'Customer Support Specialist', match: 88, email: 'jordan.lee@example.com', phone: '(555) 987-4421', public: true },
-        { name: 'Taylor Brooks', jobKey: 'product', role: 'Associate Product Manager', match: 81, email: 'taylor.brooks@example.com', phone: '(555) 445-2210', public: false }
-      ];
 
       function getOptedInCandidates() {
         try {
@@ -276,8 +271,7 @@
       }
 
       function getCandidates() {
-        var stored = getOptedInCandidates();
-        return stored.concat(demoCandidates);
+        return getOptedInCandidates();
       }
 
       var listEl = document.getElementById('candidate-list');
@@ -292,7 +286,7 @@
         var visible = candidates.filter(function (c) {
           if (!c.public) return false;
           if (!jobKey || jobKey === '') return true;
-          return c.jobKey === jobKey;
+          return (c.jobKey || 'general') === jobKey;
         });
 
         if (!visible.length) {
