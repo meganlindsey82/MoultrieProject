@@ -974,6 +974,21 @@
           </div>
 
           <div class="question-block">
+            <label>Can we use your name to save your profile?</label>
+            <span class="hint">If Yes, employers can see your name when reviewing potential candidates who match their roles. If No, your profile is saved without your name for anonymity.</span>
+            <div class="choice-row">
+              <label><input type="radio" name="save-name" value="yes" id="save-name-yes"> Yes — use my name so employers can review me</label>
+              <label><input type="radio" name="save-name" value="no" id="save-name-no"> No — save my profile without my name</label>
+            </div>
+            <div id="save-name-contact" class="question-block" style="display:none; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--mm-border);">
+              <label for="profile-name">Your name</label>
+              <input type="text" id="profile-name" name="profile_name" placeholder="e.g. Jordan Smith" aria-label="Your name">
+              <label for="profile-email" style="margin-top:0.75rem; display:block;">Email</label>
+              <input type="email" id="profile-email" name="profile_email" placeholder="you@example.com" aria-label="Email">
+            </div>
+          </div>
+
+          <div class="question-block">
             <label for="anything-else">Anything else we should know?</label>
             <span class="hint">Goals, constraints, preferences, or what matters most to you</span>
             <textarea id="anything-else" name="anything_else" placeholder="e.g. career goals, schedule needs, must-haves in a team..."></textarea>
@@ -1412,6 +1427,19 @@
       initChat();
     }
 
+    (function () {
+      var contactBlock = document.getElementById('save-name-contact');
+      var yesRadio = document.getElementById('save-name-yes');
+      var noRadio = document.getElementById('save-name-no');
+      function toggleContact() {
+        if (!contactBlock) return;
+        contactBlock.style.display = (yesRadio && yesRadio.checked) ? 'block' : 'none';
+      }
+      if (yesRadio) yesRadio.addEventListener('change', toggleContact);
+      if (noRadio) noRadio.addEventListener('change', toggleContact);
+      toggleContact();
+    })();
+
     document.getElementById('personalized-form')?.addEventListener('submit', function(e) {
       e.preventDefault();
       const data = new FormData(this);
@@ -1420,6 +1448,27 @@
         if (!v) continue;
         if (out[k] === undefined) out[k] = v;
         else out[k] = [].concat(out[k], v);
+      }
+      var saveName = [].concat(out['save-name'] || []).filter(Boolean)[0];
+      if (saveName === 'yes') {
+        var profileName = (out['profile_name'] || '').toString().trim();
+        var profileEmail = (out['profile_email'] || '').toString().trim();
+        if (!profileName || !profileEmail) {
+          alert('Please enter your name and email so we can save your profile for employers.');
+          return;
+        }
+      }
+      if (saveName !== 'yes') {
+        try {
+          localStorage.removeItem('moultrie_personalized');
+          localStorage.removeItem('moultrie_personalized_at');
+        } catch (err) { console.warn(err); }
+        if (saveName === 'no') {
+          alert('Your profile was not saved. Your answers will not be stored or shared with employers. You can change your answer above and save again if you\'d like your preferences used for matching.');
+        } else {
+          alert('Please choose whether we may use your name to save your profile (Yes or No) before saving.');
+        }
+        return;
       }
       try {
         localStorage.setItem('moultrie_personalized', JSON.stringify(out));
